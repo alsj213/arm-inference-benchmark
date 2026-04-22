@@ -55,7 +55,11 @@ bool TNNBackend::init(const BenchmarkConfig& config) {
     input_shapes_[input_name] = config.input_shape;
 
     TNN_NS::NetworkConfig net_config;
+#ifdef __ANDROID__
+    net_config.device_type = TNN_NS::DEVICE_ARM;
+#else
     net_config.device_type = TNN_NS::DEVICE_NAIVE;
+#endif
     net_config.precision = TNN_NS::PRECISION_NORMAL;
 
     instance_ = tnn_->CreateInst(net_config, status, input_shapes_);

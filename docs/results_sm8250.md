@@ -9,25 +9,23 @@
 
 | 框架 | Init(ms) | P50(ms) | P90(ms) | Mean(ms) | FPS | 状态 |
 |------|----------|---------|---------|----------|-----|------|
-| MNN  | 27.43    | **18.63**   | 18.78   | 18.64    | 53.65 | ✅ 真实推理 - ARM优化 |
-| ncnn | 31.67    | 19.57   | 19.83   | 19.57    | 51.11 | ✅ 真实推理 - ARM优化 |
-| TFLite | 34.52   | 22.70    | 22.85    | 22.69     | 44.07 | ✅ 真实推理 - 官方TFLite C API |
-| ONNX Runtime | 48.28 | 29.44 | 29.70 | 29.41 | 34.00 | ✅ 真实推理 |
-| TVM  | 2.95     | 39.13   | 40.92   | 39.40    | 25.38 | ✅ 真实推理 - 手工实现基线 |
-| TNN  | -        | -       | -       | -        | - | 🚧 编译中 |
-| QNN  | -        | -       | -       | -        | - | ❌ 需安装Qualcomm QNN SDK |
+| **TNN** | 147.92 | **13.21** | 13.28 | **13.21** | **75.67** | ✅ 真实推理 - ARM汇编优化 |
+| MNN  | 27.21    | 18.58   | 18.69   | 18.59    | 53.78 | ✅ 真实推理 - ARM优化 |
+| ncnn | 15.57    | 19.64   | 19.85   | 19.64    | 50.90 | ✅ 真实推理 - ARM优化 |
+| TFLite | 27.21   | 23.03    | 23.20    | 23.02     | 43.45 | ✅ 真实推理 - 官方TFLite C API |
+| ONNX Runtime | 70.20 | 29.26 | 29.43 | 29.23 | 34.21 | ✅ 真实推理 |
+| TVM  | 2.58     | 39.19   | 39.33   | 39.16    | 25.54 | ✅ 真实推理 - 手工实现基线 |
+| QNN  | -        | -       | -       | -        | - | 📥 需下载安装Qualcomm QNN SDK |
 
 ## 框架状态说明
 
 ### ✅ 已完成真实测试
-1. **MNN** - 阿里MNN框架，完整集成，性能最佳
-2. **ncnn** - 腾讯ncnn框架，完整集成，ARM优化良好
-3. **TFLite** - Google TensorFlow Lite，完整C API集成
-4. **ONNX Runtime** - Microsoft ONNX Runtime，完整集成
-5. **TVM** - Apache TVM框架，当前为手工C++实现基线，代表未优化性能。真实TVM编译器优化后预计可提升2-4倍
-
-### 🚧 进行中
-6. **TNN** - 字节跳动TNN框架
+1. **TNN** - 字节跳动TNN框架，完整集成，ARM汇编优化，性能最佳
+2. **MNN** - 阿里MNN框架，完整集成，ARM优化良好
+3. **ncnn** - 腾讯ncnn框架，完整集成，ARM优化良好
+4. **TFLite** - Google TensorFlow Lite，完整C API集成
+5. **ONNX Runtime** - Microsoft ONNX Runtime，完整集成
+6. **TVM** - Apache TVM框架，当前为手工C++实现基线，代表未优化性能。真实TVM编译器优化后预计可提升2-4倍
 
 ### ❌ 尚未完成
 7. **QNN** - Qualcomm QNN SDK，需从Qualcomm Developer Network下载SDK
@@ -53,11 +51,10 @@ models/classification/mobilenetv2/
 ```
 
 ## 下一步工作
-1. 为TNN启用ARM64汇编优化
-2. 集成Apache TVM编译器，使用Python前端编译真实模型，启用AutoTVM调优
-3. 增加INT8量化测试对比
-4. 增加GPU delegate测试对比
-5. 测试更多模型（ResNet50, YOLOv8n, BERT）
+1. 集成Apache TVM编译器，使用Python前端编译真实模型，启用AutoTVM调优
+2. 增加INT8量化测试对比
+3. 增加GPU delegate测试对比
+4. 测试更多模型（ResNet50, YOLOv8n, BERT）
 
 ---
 *更新时间: 2026-04-22*
