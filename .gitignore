@@ -1,0 +1,119 @@
+# ==============================================
+# Build & CMake
+# ==============================================
+build/
+build*/
+cmake-build-*/
+out/
+dist/
+*.egg-info/
+
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+Makefile
+
+# ==============================================
+# IDE & OS
+# ==============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# ==============================================
+# Third-Party Libraries (Git Submodules)
+# ==============================================
+# Ignore all contents except configuration files
+third_party/*
+
+# Keep essential files
+!third_party/README.md
+!third_party/CMakeLists.txt
+
+# Allow submodule marker files (required for git submodules)
+!third_party/ncnn/
+!third_party/MNN/
+!third_party/TNN/
+!third_party/tvm/
+!third_party/onnxruntime/
+!third_party/tflite_extracted/
+!third_party/QNN/
+
+# But ignore build artifacts inside submodules
+third_party/*/build/
+third_party/*/build*/
+third_party/*/*.so
+third_party/*/*.a
+third_party/*/*.lib
+third_party/*/CMakeCache.txt
+third_party/*/CMakeFiles/
+
+# ==============================================
+# Model files (large binary files)
+# ==============================================
+*.onnx
+*.bin
+*.param
+*.mnn
+*.tflite
+*.qnn
+*.so
+*.dll
+*.dylib
+*.a
+*.lib
+*.aar
+
+# Model directories
+models/classification/*.onnx
+models/classification/*.mnn
+models/classification/*.tflite
+models/classification/*.param
+models/classification/*.bin
+models/detection/*
+models/nlp/*
+
+# ==============================================
+# Results
+# ==============================================
+results/*
+!results/.gitkeep
+
+# ==============================================
+# Python
+# ==============================================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv/
+*.egg
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.log
+*.tmp
+
+# Documentation build
+docs/_build/
+docs/build/
