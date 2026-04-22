@@ -3,8 +3,8 @@
 
 #include "../common/benchmark.h"
 
-// Forward declaration of internal state
-struct QnnBackendState;
+// QNN implementation is in cpp file only
+class QNNBackendImpl;
 
 class QNNBackend : public BenchmarkBackend {
 public:
@@ -17,7 +17,7 @@ public:
     std::string name() const override { return "QNN"; }
 
 private:
-    QnnBackendState* state_;
+    QNNBackendImpl* impl_ = nullptr;
 };
 
 #endif // BENCHMARK_BACKENDS_QNN_BACKEND_H_
