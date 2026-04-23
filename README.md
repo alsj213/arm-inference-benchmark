@@ -22,9 +22,9 @@
 | **MNN** | ✅ | 阿里 MNN，移动端深度优化 |
 | **TFLite** | ✅ | Google TensorFlow Lite |
 | **ONNX Runtime** | ✅ | Microsoft ONNX Runtime Mobile |
-| **TVM** | ✅ | Apache TVM - 基线版本（手工 C++ 实现） |
-| **TNN** | 🚧 | 字节跳动 TNN |
-| **QNN** | ❌ | Qualcomm QNN SDK |
+| **TNN** | ✅ | 字节跳动 TNN，ARM NEON 汇编优化 |
+| **TVM** | ⚙️ | Apache TVM - 可选（默认关闭） |
+| **QNN** | ⚙️ | Qualcomm QNN SDK - 可选（默认关闭） |
 
 ## 📱 测试平台
 
@@ -33,16 +33,17 @@
 - **GPU**: Adreno 650
 - **ISA**: ARMv8.2-A, FP16
 
-## 📊 基准测试结果 (MobileNetV2 FP32, 1 线程)
+## 📊 基准测试结果 (MobileNetV2 FP32, 1 线程, 骁龙 865)
 
 | 框架 | Init (ms) | P50 (ms) | P90 (ms) | Mean (ms) | FPS |
 |------|-----------|----------|----------|-----------|-----|
-| **MNN** | 27.43 | **18.63** | 18.78 | **18.64** | **53.65** |
-| **ncnn** | 31.67 | 19.57 | 19.83 | 19.57 | 51.11 |
-| **TFLite** | 34.52 | 22.70 | 22.85 | 22.69 | 44.07 |
-| **ONNX Runtime** | 48.28 | 29.44 | 29.70 | 29.41 | 34.00 |
-| **TVM (基线)** | 2.95 | 39.13 | 40.92 | 39.40 | 25.38 |
+| **TNN** | 151.29 | **13.14** | 13.22 | **13.15** | **76.07** |
+| **MNN** | 26.82 | 18.54 | 18.68 | 18.55 | 53.90 |
+| **ncnn** | 15.55 | 19.39 | 19.68 | 19.38 | 51.61 |
+| **TFLite** | 15.07 | 22.70 | 22.80 | 22.67 | 44.11 |
+| **ONNX Runtime** | 47.82 | 29.27 | 29.40 | 29.26 | 34.18 |
 
+> TNN 使用 ARM NEON 汇编优化，性能显著领先；TVM 和 QNN 为可选框架，默认关闭
 > 完整测试结果参见 [docs/results_sm8250.md](docs/results_sm8250.md)
 
 ## 🚀 快速开始
@@ -90,21 +91,27 @@ arm-inference-benchmark/
 ├── 📄 README.md                    # 项目说明
 ├── 📄 CMakeLists.txt              # 顶层 CMake 配置
 ├── 📄 .gitignore                  # Git 忽略配置
+├── 📄 requirements.txt            # Python 依赖
 ├── 📁 cmake/                      # CMake 工具链
 │   └── android.toolchain.cmake    # Android 交叉编译工具链
 ├── 📁 docs/                       # 文档
 │   ├── results_sm8250.md          # 骁龙 865 测试结果
 │   └── figures/                   # 性能图表
 ├── 📁 models/                     # 模型
-│   ├── classification/            # 分类模型
-│   ├── detection/                 # 检测模型
-│   ├── nlp/                       # NLP 模型
-│   └── download_pretrained.py     # 模型下载脚本
+│   ├── classification/            # 分类模型 (MobileNetV2, ResNet50)
+│   ├── detection/                 # 检测模型 (YOLOv8n)
+│   └── nlp/                       # NLP 模型 (BERT)
 ├── 📁 scripts/                    # 脚本
 │   ├── build_android.sh           # Android 编译脚本
+│   ├── build_host_tools.sh        # 主机构建转换工具脚本
+│   ├── download_pretrained.py     # 下载预训练 ONNX 模型
+│   ├── convert_models.sh          # 模型转换脚本 (所有框架)
+│   ├── convert_tflite.py          # TFLite 转换脚本
 │   ├── adb_run.sh                 # ADB 运行脚本
-│   ├── convert_models.sh          # 模型转换脚本
 │   └── run_benchmark.sh           # 自动测试脚本
+├── 📁 tools/                      # 转换工具
+│   ├── bin/                       # 编译好的转换工具 (onnx2ncnn, onnx2mnn, onnx2tnn)
+│   └── README.md                  # 工具使用说明
 ├── 📁 src/                        # 源代码
 │   ├── main.cpp                   # 主程序入口
 │   ├── CMakeLists.txt             # 源代码 CMake 配置

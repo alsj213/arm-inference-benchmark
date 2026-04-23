@@ -1,0 +1,18 @@
+# Python dependencies for model conversion
+
+# ONNX model handling
+onnx>=1.14.0
+onnx-tf>=1.10.0
+
+# TFLite conversion
+tensorflow>=2.13.0
+
+# Model downloading
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.30.0
+ultralytics>=8.0.0
+
+# Utility
+numpy>=1.24.0
+protobuf>=3.20.0

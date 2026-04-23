@@ -1,6 +1,7 @@
 #!/bin/bash
 # Convert ONNX models to each framework format
 # This script must be run after download_pretrained.py
+# Run ./scripts/build_host_tools.sh first to build conversion tools
 
 set -e
 
@@ -8,28 +9,38 @@ SCRIPT_DIR=$(cd $(dirname $0); pwd)
 PROJECT_ROOT=$(dirname $SCRIPT_DIR)
 MODELS_ROOT=$PROJECT_ROOT/models
 
-# Paths to conversion tools
-NCNN_ONNX2NCNN=$PROJECT_ROOT/build/third_party/ncnn/tools/onnx/onnx2ncnn
-MNN_ONNX2MNN=$PROJECT_ROOT/third_party/MNN/build/onnx2mnn
+# Paths to conversion tools (use host tools)
+NCNN_ONNX2NCNN=$PROJECT_ROOT/tools/bin/onnx2ncnn
+MNN_ONNX2MNN=$PROJECT_ROOT/tools/bin/onnx2mnn
+TNN_ONNX2TNN=$PROJECT_ROOT/tools/bin/onnx2tnn
 
 echo "=== Model Conversion Script ==="
 echo "Project root: $PROJECT_ROOT"
 echo "Models root: $MODELS_ROOT"
 echo ""
 
-# Check if ncnn onnx2ncnn is built
+# Check tools availability
+echo "Checking conversion tools..."
 if [ ! -f "$NCNN_ONNX2NCNN" ]; then
-    echo "WARNING: onnx2ncnn not found at $NCNN_ONNX2NCNN"
-    echo "Please build the project first to build ncnn tools"
-    echo ""
+    echo "WARNING: onnx2ncnn not found"
+    echo "  Run: ./scripts/build_host_tools.sh"
 fi
-
-# Check if MNN onnx2mnn is built
 if [ ! -f "$MNN_ONNX2MNN" ]; then
-    echo "WARNING: onnx2mnn not found at $MNN_ONNX2MNN"
-    echo "Please build MNN tools first"
-    echo ""
+    echo "WARNING: onnx2mnn not found"
+    echo "  Run: ./scripts/build_host_tools.sh"
 fi
+if [ ! -f "$TNN_ONNX2TNN" ]; then
+    echo "WARNING: onnx2tnn not found"
+    echo "  Run: ./scripts/build_host_tools.sh"
+fi
+echo ""
+
+# Check for tensorflow (TFLite converter)
+python3 -c "import tensorflow as tf" 2>/dev/null || {
+    echo "WARNING: tensorflow not installed (for TFLite conversion)"
+    echo "  Run: pip install tensorflow"
+    echo ""
+}
 
 # Function to convert mobilenetv2
 convert_mobilenetv2() {
@@ -53,8 +64,26 @@ convert_mobilenetv2() {
         echo "MNN output: $OUT_DIR/mobilenetv2_MNN.mnn"
     fi
 
-    # TVM - export via relay, this needs to be done offline with TVM
-    echo "For TVM: Please compile model separately using TVM Relay"
+    # TNN
+    if [ -f "$TNN_ONNX2TNN" ]; then
+        echo "Converting to TNN..."
+        cd $OUT_DIR
+        $TNN_ONNX2TNN -onnx $ONNX -version v1.0
+        mv model.tnnproto mobilenetv2_TNN.tnnproto
+        mv model.tnnmodel mobilenetv2_TNN.tnnmodel
+        cd - > /dev/null
+        echo "TNN output: $OUT_DIR/mobilenetv2_TNN.tnnproto + .tnnmodel"
+    fi
+
+    # TFLite (via tensorflow + onnx-tf)
+    if python3 -c "import onnx; import tensorflow as tf; from onnx_tf.backend import prepare" 2>/dev/null; then
+        echo "Converting to TFLite..."
+        python3 $PROJECT_ROOT/scripts/convert_tflite.py $ONNX $OUT_DIR/mobilenetv2.tflite
+    fi
+
+    # ONNX Runtime - use original ONNX file directly
+    echo "ONNX Runtime: using original ONNX file"
+
     echo ""
 }
 
@@ -79,6 +108,26 @@ convert_resnet50() {
         $MNN_ONNX2MNN $ONNX $OUT_DIR/resnet50_MNN.mnn
         echo "MNN output: $OUT_DIR/resnet50_MNN.mnn"
     fi
+
+    # TNN
+    if [ -f "$TNN_ONNX2TNN" ]; then
+        echo "Converting to TNN..."
+        cd $OUT_DIR
+        $TNN_ONNX2TNN -onnx $ONNX -version v1.0
+        mv model.tnnproto resnet50_TNN.tnnproto
+        mv model.tnnmodel resnet50_TNN.tnnmodel
+        cd - > /dev/null
+        echo "TNN output: $OUT_DIR/resnet50_TNN.tnnproto + .tnnmodel"
+    fi
+
+    # TFLite
+    if python3 -c "import onnx; import tensorflow as tf; from onnx_tf.backend import prepare" 2>/dev/null; then
+        echo "Converting to TFLite..."
+        python3 $PROJECT_ROOT/scripts/convert_tflite.py $ONNX $OUT_DIR/resnet50.tflite
+    fi
+
+    # ONNX Runtime - use original ONNX file directly
+    echo "ONNX Runtime: using original ONNX file"
 
     echo ""
 }
@@ -105,6 +154,26 @@ convert_yolov8n() {
         echo "MNN output: $OUT_DIR/yolov8n_MNN.mnn"
     fi
 
+    # TNN
+    if [ -f "$TNN_ONNX2TNN" ]; then
+        echo "Converting to TNN..."
+        cd $OUT_DIR
+        $TNN_ONNX2TNN -onnx $ONNX -version v1.0
+        mv model.tnnproto yolov8n_TNN.tnnproto
+        mv model.tnnmodel yolov8n_TNN.tnnmodel
+        cd - > /dev/null
+        echo "TNN output: $OUT_DIR/yolov8n_TNN.tnnproto + .tnnmodel"
+    fi
+
+    # TFLite
+    if python3 -c "import onnx; import tensorflow as tf; from onnx_tf.backend import prepare" 2>/dev/null; then
+        echo "Converting to TFLite..."
+        python3 $PROJECT_ROOT/scripts/convert_tflite.py $ONNX $OUT_DIR/yolov8n.tflite
+    fi
+
+    # ONNX Runtime - use original ONNX file directly
+    echo "ONNX Runtime: using original ONNX file"
+
     echo ""
 }
 
@@ -129,6 +198,26 @@ convert_bert() {
         $MNN_ONNX2MNN $ONNX $OUT_DIR/bert_MNN.mnn
         echo "MNN output: $OUT_DIR/bert_MNN.mnn"
     fi
+
+    # TNN
+    if [ -f "$TNN_ONNX2TNN" ]; then
+        echo "Converting to TNN..."
+        cd $OUT_DIR
+        $TNN_ONNX2TNN -onnx $ONNX -version v1.0
+        mv model.tnnproto bert_TNN.tnnproto
+        mv model.tnnmodel bert_TNN.tnnmodel
+        cd - > /dev/null
+        echo "TNN output: $OUT_DIR/bert_TNN.tnnproto + .tnnmodel"
+    fi
+
+    # TFLite
+    if python3 -c "import onnx; import tensorflow as tf; from onnx_tf.backend import prepare" 2>/dev/null; then
+        echo "Converting to TFLite..."
+        python3 $PROJECT_ROOT/scripts/convert_tflite.py $ONNX $OUT_DIR/bert.tflite
+    fi
+
+    # ONNX Runtime - use original ONNX file directly
+    echo "ONNX Runtime: using original ONNX file"
 
     echo ""
 }
@@ -161,16 +250,16 @@ else
     echo "bert.onnx not found, run download_pretrained.py first"
 fi
 
-# Add TVM to run_benchmark.sh
-echo "Updating run_benchmark.sh to include TVM..."
-sed -i 's/BACKENDS=("ncnn" "mnn" "tnn" "tflite" "qnn")/BACKENDS=("ncnn" "mnn" "tnn" "tflite" "qnn" "tvm")/' $PROJECT_ROOT/scripts/run_benchmark.sh
-
 echo ""
 echo "=== Conversion Complete ==="
 echo ""
-echo "Notes:"
-echo "  1. For TNN: Use onnx2tnn from TNN project"
-echo "  2. For TFLite: Use TensorFlow lite converter"
-echo "  3. For QNN: Use qnn-onnx-converter from Qualcomm QNN SDK"
-echo "  4. For ONNX Runtime: Use original ONNX file directly"
-echo "  5. For TVM: Compile model ahead-of-time via TVM Relay"
+echo "Summary of default-enabled frameworks:"
+echo "  ncnn:  .model + .bin  (via onnx2ncnn)"
+echo "  MNN:   .mnn           (via onnx2mnn)"
+echo "  TNN:   .tnnproto + .tnnmodel  (via onnx2tnn)"
+echo "  TFLite: .tflite       (via tensorflow + onnx-tf)"
+echo "  ONNX Runtime: .onnx   (use original ONNX file)"
+echo ""
+echo "For optional frameworks:"
+echo "  QNN: Use qnn-onnx-converter from Qualcomm QNN SDK"
+echo "  TVM: Compile model ahead-of-time via TVM Relay"
