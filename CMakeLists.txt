@@ -20,7 +20,7 @@ option(BENCHMARK_TNN "Enable TNN benchmark" ON)
 option(BENCHMARK_TFLITE "Enable TensorFlow Lite benchmark" ON)
 option(BENCHMARK_QNN "Enable Qualcomm QNN benchmark" OFF)
 option(BENCHMARK_ORT "Enable ONNX Runtime benchmark" ON)
-option(BENCHMARK_TVM "Enable Apache TVM benchmark" ON)
+option(BENCHMARK_TVM "Enable Apache TVM benchmark" OFF)
 
 # Enable position independent code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

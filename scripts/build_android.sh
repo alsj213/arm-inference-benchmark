@@ -39,9 +39,9 @@ cmake .. \
     -DBENCHMARK_MNN=ON \
     -DBENCHMARK_TNN=ON \
     -DBENCHMARK_TFLITE=ON \
-    -DBENCHMARK_QNN=ON \
+    -DBENCHMARK_QNN=OFF \
     -DBENCHMARK_ORT=ON \
-    -DBENCHMARK_TVM=ON
+    -DBENCHMARK_TVM=OFF
 
 # Build
 make -j$(nproc)
