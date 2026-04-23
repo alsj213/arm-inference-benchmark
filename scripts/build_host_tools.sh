@@ -67,7 +67,7 @@ cd $PROJECT_ROOT
 mkdir -p tools/bin
 
 ln -sf $BUILD_DIR/ncnn/tools/onnx/onnx2ncnn tools/bin/onnx2ncnn
-ln -sf $BUILD_DIR/MNN/onnx2mnn tools/bin/onnx2mnn
+ln -sf $BUILD_DIR/MNN/MNNConvert tools/bin/MNNConvert
 ln -sf $BUILD_DIR/TNN/tools/onnx2tnn/onnx2tnn tools/bin/onnx2tnn
 
 echo "=== Build Complete ==="
@@ -75,7 +75,12 @@ echo ""
 echo "Tools available in $PROJECT_ROOT/tools/bin:"
 ls -la $PROJECT_ROOT/tools/bin/
 echo ""
-echo "For TFLite conversion, install tensorflow:"
-echo "  pip install tensorflow"
+echo "Available converters:"
+echo "  - onnx2ncnn: ONNX to ncnn format"
+echo "  - MNNConvert: ONNX/TF/TFLite to MNN format"
+echo "  - onnx2tnn: ONNX to TNN format (when built)"
+echo ""
+echo "For TFLite conversion, install tensorflow and onnx-tf:"
+echo "  pip install tensorflow onnx onnx-tf"
 echo ""
 echo "Then run: ./scripts/convert_models.sh"

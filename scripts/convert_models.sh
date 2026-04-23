@@ -11,8 +11,9 @@ MODELS_ROOT=$PROJECT_ROOT/models
 
 # Paths to conversion tools (use host tools)
 NCNN_ONNX2NCNN=$PROJECT_ROOT/tools/bin/onnx2ncnn
-MNN_ONNX2MNN=$PROJECT_ROOT/tools/bin/onnx2mnn
-TNN_ONNX2TNN=$PROJECT_ROOT/tools/bin/onnx2tnn
+MNN_ONNX2MNN=$PROJECT_ROOT/tools/bin/MNNConvert
+# TNN converter is pure Python in third_party (no compilation needed)
+TNN_CONVERTER=$PROJECT_ROOT/third_party/TNN/tools/convert2tnn/converter.py
 
 echo "=== Model Conversion Script ==="
 echo "Project root: $PROJECT_ROOT"
@@ -60,19 +61,33 @@ convert_mobilenetv2() {
     # MNN
     if [ -f "$MNN_ONNX2MNN" ]; then
         echo "Converting to MNN..."
-        $MNN_ONNX2MNN $ONNX $OUT_DIR/mobilenetv2_MNN.mnn
+        $MNN_ONNX2MNN -f ONNX --modelFile $ONNX --MNNModel $OUT_DIR/mobilenetv2_MNN.mnn
         echo "MNN output: $OUT_DIR/mobilenetv2_MNN.mnn"
     fi
 
     # TNN
-    if [ -f "$TNN_ONNX2TNN" ]; then
+    if [ -f "$TNN_CONVERTER" ]; then
         echo "Converting to TNN..."
-        cd $OUT_DIR
-        $TNN_ONNX2TNN -onnx $ONNX -version v1.0
-        mv model.tnnproto mobilenetv2_TNN.tnnproto
-        mv model.tnnmodel mobilenetv2_TNN.tnnmodel
-        cd - > /dev/null
-        echo "TNN output: $OUT_DIR/mobilenetv2_TNN.tnnproto + .tnnmodel"
+        MODEL_NAME=$(basename $ONNX .onnx)
+        # Note: TNN converter requires isolated conda environment
+        # Use: conda activate tnn_converter and ensure onnx2tnn C++ module built
+        if python3 -c "import onnx2tnn" 2>/dev/null; then
+            python3 $TNN_CONVERTER onnx2tnn $ONNX \
+                -in input:1,3,224,224 \
+                -optimize \
+                -v v1.0 \
+                -o $OUT_DIR 2>&1 | tail -3
+
+            # Rename output files
+            if [ -f "$OUT_DIR/input.tnnproto" ]; then
+                mv "$OUT_DIR/input.tnnproto" "$OUT_DIR/${MODEL_NAME}_TNN.tnnproto"
+                mv "$OUT_DIR/input.tnnmodel" "$OUT_DIR/${MODEL_NAME}_TNN.tnnmodel"
+            fi
+            echo "TNN output: $OUT_DIR/${MODEL_NAME}_TNN.tnnproto + .tnnmodel"
+        else
+            echo "⚠️  TNN converter not available (requires conda env + compiled C++ module)"
+            echo "    Skipping TNN conversion (model file may already exist)"
+        fi
     fi
 
     # TFLite (via tensorflow + onnx-tf)
@@ -105,7 +120,7 @@ convert_resnet50() {
     # MNN
     if [ -f "$MNN_ONNX2MNN" ]; then
         echo "Converting to MNN..."
-        $MNN_ONNX2MNN $ONNX $OUT_DIR/resnet50_MNN.mnn
+        $MNN_ONNX2MNN -f ONNX --modelFile $ONNX --MNNModel $OUT_DIR/resnet50_MNN.mnn
         echo "MNN output: $OUT_DIR/resnet50_MNN.mnn"
     fi
 
@@ -150,7 +165,7 @@ convert_yolov8n() {
     # MNN
     if [ -f "$MNN_ONNX2MNN" ]; then
         echo "Converting to MNN..."
-        $MNN_ONNX2MNN $ONNX $OUT_DIR/yolov8n_MNN.mnn
+        $MNN_ONNX2MNN -f ONNX --modelFile $ONNX --MNNModel $OUT_DIR/yolov8n_MNN.mnn
         echo "MNN output: $OUT_DIR/yolov8n_MNN.mnn"
     fi
 
@@ -195,7 +210,7 @@ convert_bert() {
     # MNN
     if [ -f "$MNN_ONNX2MNN" ]; then
         echo "Converting to MNN..."
-        $MNN_ONNX2MNN $ONNX $OUT_DIR/bert_MNN.mnn
+        $MNN_ONNX2MNN -f ONNX --modelFile $ONNX --MNNModel $OUT_DIR/bert_MNN.mnn
         echo "MNN output: $OUT_DIR/bert_MNN.mnn"
     fi
 
