@@ -30,3 +30,6 @@
     path = third_party/tvm
     url = https://github.com/apache/tvm.git
     branch = main
+[submodule "third_party/llama.cpp"]
+	path = third_party/llama.cpp
+	url = https://github.com/ggerganov/llama.cpp.git

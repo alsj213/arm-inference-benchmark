@@ -31,6 +31,10 @@ target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/.
 target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/tvm/3rdparty/tvm-ffi/include)
 target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/tvm/3rdparty/tvm-ffi/3rdparty/dlpack/include)
 endif()
+if(BENCHMARK_LLAMACPP)
+target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/llama.cpp/include)
+target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/llama.cpp/src)
+endif()
 
 # Add compile definitions for enabled backends
 if(BENCHMARK_NCNN)
@@ -47,6 +51,9 @@ if(BENCHMARK_ORT)
 endif()
 if(BENCHMARK_TVM)
     target_compile_definitions(benchmark_common PUBLIC BENCHMARK_TVM)
+endif()
+if(BENCHMARK_LLAMACPP)
+    target_compile_definitions(benchmark_common PUBLIC BENCHMARK_LLAMACPP)
 endif()
 
 # Backend sources
@@ -77,10 +84,16 @@ if(BENCHMARK_TVM)
     list(APPEND BACKEND_SRCS backends/tvm_backend.cpp)
 endif()
 
+if(BENCHMARK_LLAMACPP)
+    list(APPEND BACKEND_SRCS backends/llamacpp_backend.cpp)
+    list(APPEND BACKEND_LIBS llama)
+endif()
+
 # Model wrappers
 set(MODEL_SRCS
     models/mobilenet.cpp
     models/resnet.cpp
+    models/shufflenet_v2.cpp
     models/yolov8.cpp
     models/bert.cpp
 )
@@ -140,3 +153,18 @@ target_link_libraries(single_op_benchmark
     benchmark_common
     ${BACKEND_LIBS}
 )
+
+# LLM benchmark executable for llama.cpp
+if(BENCHMARK_LLAMACPP)
+    add_executable(llm_benchmark
+        llm_benchmark.cpp
+        backends/llamacpp_backend.cpp
+    )
+    target_compile_options(llm_benchmark PRIVATE -fexceptions)
+    target_compile_definitions(llm_benchmark PRIVATE BENCHMARK_LLAMACPP)
+    target_link_libraries(llm_benchmark
+        PRIVATE
+        benchmark_common
+        llama
+    )
+endif()

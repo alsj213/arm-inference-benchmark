@@ -42,6 +42,7 @@ struct ModelInfo {
 // Declaration of model info getters
 ModelInfo get_mobilenetv2_info();
 ModelInfo get_resnet50_info();
+ModelInfo get_shufflenet_v2_info();
 ModelInfo get_yolov8n_info();
 ModelInfo get_bert_info();
 
