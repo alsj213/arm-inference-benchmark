@@ -1,109 +1,194 @@
 7767517
-107 123
-Input                    in0                      0 1 in0
-Convolution              convrelu_0               1 1 in0 1 0=64 1=7 11=7 12=1 13=2 14=3 2=1 3=2 4=3 5=1 6=9408 9=1
-Pooling                  maxpool2d_55             1 1 1 2 0=0 1=3 11=3 12=2 13=1 2=2 3=1 5=1
-Split                    splitncnn_0              1 2 2 3 4
-Convolution              convrelu_1               1 1 4 5 0=64 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=4096 9=1
-Convolution              convrelu_2               1 1 5 6 0=64 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=36864 9=1
-Convolution              conv_4                   1 1 6 7 0=256 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=16384
-Convolution              conv_5                   1 1 3 8 0=256 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=16384
-BinaryOp                 add_0                    2 1 7 8 9 0=0
-ReLU                     relu_59                  1 1 9 10
-Split                    splitncnn_1              1 2 10 11 12
-Convolution              convrelu_3               1 1 12 13 0=64 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=16384 9=1
-Convolution              convrelu_4               1 1 13 14 0=64 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=36864 9=1
-Convolution              conv_8                   1 1 14 15 0=256 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=16384
-BinaryOp                 add_1                    2 1 15 11 16 0=0
-ReLU                     relu_62                  1 1 16 17
-Split                    splitncnn_2              1 2 17 18 19
-Convolution              convrelu_5               1 1 19 20 0=64 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=16384 9=1
-Convolution              convrelu_6               1 1 20 21 0=64 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=36864 9=1
-Convolution              conv_11                  1 1 21 22 0=256 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=16384
-BinaryOp                 add_2                    2 1 22 18 23 0=0
-ReLU                     relu_65                  1 1 23 24
-Split                    splitncnn_3              1 2 24 25 26
-Convolution              convrelu_7               1 1 26 27 0=128 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=32768 9=1
-Convolution              convrelu_8               1 1 27 28 0=128 1=3 11=3 12=1 13=2 14=1 2=1 3=2 4=1 5=1 6=147456 9=1
-Convolution              conv_14                  1 1 28 29 0=512 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=65536
-Convolution              conv_15                  1 1 25 30 0=512 1=1 11=1 12=1 13=2 14=0 2=1 3=2 4=0 5=1 6=131072
-BinaryOp                 add_3                    2 1 29 30 31 0=0
-ReLU                     relu_68                  1 1 31 32
-Split                    splitncnn_4              1 2 32 33 34
-Convolution              convrelu_9               1 1 34 35 0=128 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=65536 9=1
-Convolution              convrelu_10              1 1 35 36 0=128 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=147456 9=1
-Convolution              conv_18                  1 1 36 37 0=512 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=65536
-BinaryOp                 add_4                    2 1 37 33 38 0=0
-ReLU                     relu_71                  1 1 38 39
-Split                    splitncnn_5              1 2 39 40 41
-Convolution              convrelu_11              1 1 41 42 0=128 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=65536 9=1
-Convolution              convrelu_12              1 1 42 43 0=128 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=147456 9=1
-Convolution              conv_21                  1 1 43 44 0=512 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=65536
-BinaryOp                 add_5                    2 1 44 40 45 0=0
-ReLU                     relu_74                  1 1 45 46
-Split                    splitncnn_6              1 2 46 47 48
-Convolution              convrelu_13              1 1 48 49 0=128 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=65536 9=1
-Convolution              convrelu_14              1 1 49 50 0=128 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=147456 9=1
-Convolution              conv_24                  1 1 50 51 0=512 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=65536
-BinaryOp                 add_6                    2 1 51 47 52 0=0
-ReLU                     relu_77                  1 1 52 53
-Split                    splitncnn_7              1 2 53 54 55
-Convolution              convrelu_15              1 1 55 56 0=256 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=131072 9=1
-Convolution              convrelu_16              1 1 56 57 0=256 1=3 11=3 12=1 13=2 14=1 2=1 3=2 4=1 5=1 6=589824 9=1
-Convolution              conv_27                  1 1 57 58 0=1024 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144
-Convolution              conv_28                  1 1 54 59 0=1024 1=1 11=1 12=1 13=2 14=0 2=1 3=2 4=0 5=1 6=524288
-BinaryOp                 add_7                    2 1 58 59 60 0=0
-ReLU                     relu_80                  1 1 60 61
-Split                    splitncnn_8              1 2 61 62 63
-Convolution              convrelu_17              1 1 63 64 0=256 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144 9=1
-Convolution              convrelu_18              1 1 64 65 0=256 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=589824 9=1
-Convolution              conv_31                  1 1 65 66 0=1024 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144
-BinaryOp                 add_8                    2 1 66 62 67 0=0
-ReLU                     relu_83                  1 1 67 68
-Split                    splitncnn_9              1 2 68 69 70
-Convolution              convrelu_19              1 1 70 71 0=256 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144 9=1
-Convolution              convrelu_20              1 1 71 72 0=256 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=589824 9=1
-Convolution              conv_34                  1 1 72 73 0=1024 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144
-BinaryOp                 add_9                    2 1 73 69 74 0=0
-ReLU                     relu_86                  1 1 74 75
-Split                    splitncnn_10             1 2 75 76 77
-Convolution              convrelu_21              1 1 77 78 0=256 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144 9=1
-Convolution              convrelu_22              1 1 78 79 0=256 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=589824 9=1
-Convolution              conv_37                  1 1 79 80 0=1024 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144
-BinaryOp                 add_10                   2 1 80 76 81 0=0
-ReLU                     relu_89                  1 1 81 82
-Split                    splitncnn_11             1 2 82 83 84
-Convolution              convrelu_23              1 1 84 85 0=256 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144 9=1
-Convolution              convrelu_24              1 1 85 86 0=256 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=589824 9=1
-Convolution              conv_40                  1 1 86 87 0=1024 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144
-BinaryOp                 add_11                   2 1 87 83 88 0=0
-ReLU                     relu_92                  1 1 88 89
-Split                    splitncnn_12             1 2 89 90 91
-Convolution              convrelu_25              1 1 91 92 0=256 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144 9=1
-Convolution              convrelu_26              1 1 92 93 0=256 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=589824 9=1
-Convolution              conv_43                  1 1 93 94 0=1024 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=262144
-BinaryOp                 add_12                   2 1 94 90 95 0=0
-ReLU                     relu_95                  1 1 95 96
-Split                    splitncnn_13             1 2 96 97 98
-Convolution              convrelu_27              1 1 98 99 0=512 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=524288 9=1
-Convolution              convrelu_28              1 1 99 100 0=512 1=3 11=3 12=1 13=2 14=1 2=1 3=2 4=1 5=1 6=2359296 9=1
-Convolution              conv_46                  1 1 100 101 0=2048 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=1048576
-Convolution              conv_47                  1 1 97 102 0=2048 1=1 11=1 12=1 13=2 14=0 2=1 3=2 4=0 5=1 6=2097152
-BinaryOp                 add_13                   2 1 101 102 103 0=0
-ReLU                     relu_98                  1 1 103 104
-Split                    splitncnn_14             1 2 104 105 106
-Convolution              convrelu_29              1 1 106 107 0=512 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=1048576 9=1
-Convolution              convrelu_30              1 1 107 108 0=512 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=2359296 9=1
-Convolution              conv_50                  1 1 108 109 0=2048 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=1048576
-BinaryOp                 add_14                   2 1 109 105 110 0=0
-ReLU                     relu_101                 1 1 110 111
-Split                    splitncnn_15             1 2 111 112 113
-Convolution              convrelu_31              1 1 113 114 0=512 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=1048576 9=1
-Convolution              convrelu_32              1 1 114 115 0=512 1=3 11=3 12=1 13=1 14=1 2=1 3=1 4=1 5=1 6=2359296 9=1
-Convolution              conv_53                  1 1 115 116 0=2048 1=1 11=1 12=1 13=1 14=0 2=1 3=1 4=0 5=1 6=1048576
-BinaryOp                 add_15                   2 1 116 112 117 0=0
-ReLU                     relu_104                 1 1 117 118
-Pooling                  gap_0                    1 1 118 119 0=1 4=1
-Reshape                  reshape_105              1 1 119 120 0=1 1=1 2=-1
-Flatten                  flatten_106              1 1 120 121
-InnerProduct             linear_54                1 1 121 out0 0=1000 1=1 2=2048000
+192 208
+Input            data                     0 1 data
+Convolution      resnetv17_conv0_fwd      1 1 data resnetv17_conv0_fwd 0=64 1=7 11=7 2=1 12=1 3=2 13=2 4=3 14=3 15=3 16=3 5=0 6=9408
+BatchNorm        resnetv17_batchnorm0_fwd 1 1 resnetv17_conv0_fwd resnetv17_batchnorm0_fwd 0=64
+ReLU             resnetv17_relu0_fwd      1 1 resnetv17_batchnorm0_fwd resnetv17_relu0_fwd
+Pooling          resnetv17_pool0_fwd      1 1 resnetv17_relu0_fwd resnetv17_pool0_fwd 0=0 1=3 11=3 2=2 12=2 3=1 13=1 14=1 15=1 5=1
+Split            splitncnn_0              1 2 resnetv17_pool0_fwd resnetv17_pool0_fwd_splitncnn_0 resnetv17_pool0_fwd_splitncnn_1
+Convolution      resnetv17_stage1_conv0_fwd 1 1 resnetv17_pool0_fwd_splitncnn_1 resnetv17_stage1_conv0_fwd 0=64 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=4096
+BatchNorm        resnetv17_stage1_batchnorm0_fwd 1 1 resnetv17_stage1_conv0_fwd resnetv17_stage1_batchnorm0_fwd 0=64
+ReLU             resnetv17_stage1_relu0_fwd 1 1 resnetv17_stage1_batchnorm0_fwd resnetv17_stage1_relu0_fwd
+Convolution      resnetv17_stage1_conv1_fwd 1 1 resnetv17_stage1_relu0_fwd resnetv17_stage1_conv1_fwd 0=64 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=36864
+BatchNorm        resnetv17_stage1_batchnorm1_fwd 1 1 resnetv17_stage1_conv1_fwd resnetv17_stage1_batchnorm1_fwd 0=64
+ReLU             resnetv17_stage1_relu1_fwd 1 1 resnetv17_stage1_batchnorm1_fwd resnetv17_stage1_relu1_fwd
+Convolution      resnetv17_stage1_conv2_fwd 1 1 resnetv17_stage1_relu1_fwd resnetv17_stage1_conv2_fwd 0=256 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=16384
+BatchNorm        resnetv17_stage1_batchnorm2_fwd 1 1 resnetv17_stage1_conv2_fwd resnetv17_stage1_batchnorm2_fwd 0=256
+Convolution      resnetv17_stage1_conv3_fwd 1 1 resnetv17_pool0_fwd_splitncnn_0 resnetv17_stage1_conv3_fwd 0=256 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=0 6=16384
+BatchNorm        resnetv17_stage1_batchnorm3_fwd 1 1 resnetv17_stage1_conv3_fwd resnetv17_stage1_batchnorm3_fwd 0=256
+BinaryOp         resnetv17_stage1__plus0  2 1 resnetv17_stage1_batchnorm2_fwd resnetv17_stage1_batchnorm3_fwd resnetv17_stage1__plus0 0=0
+ReLU             resnetv17_stage1_activation0 1 1 resnetv17_stage1__plus0 resnetv17_stage1_activation0
+Split            splitncnn_1              1 2 resnetv17_stage1_activation0 resnetv17_stage1_activation0_splitncnn_0 resnetv17_stage1_activation0_splitncnn_1
+Convolution      resnetv17_stage1_conv4_fwd 1 1 resnetv17_stage1_activation0_splitncnn_1 resnetv17_stage1_conv4_fwd 0=64 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=16384
+BatchNorm        resnetv17_stage1_batchnorm4_fwd 1 1 resnetv17_stage1_conv4_fwd resnetv17_stage1_batchnorm4_fwd 0=64
+ReLU             resnetv17_stage1_relu2_fwd 1 1 resnetv17_stage1_batchnorm4_fwd resnetv17_stage1_relu2_fwd
+Convolution      resnetv17_stage1_conv5_fwd 1 1 resnetv17_stage1_relu2_fwd resnetv17_stage1_conv5_fwd 0=64 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=36864
+BatchNorm        resnetv17_stage1_batchnorm5_fwd 1 1 resnetv17_stage1_conv5_fwd resnetv17_stage1_batchnorm5_fwd 0=64
+ReLU             resnetv17_stage1_relu3_fwd 1 1 resnetv17_stage1_batchnorm5_fwd resnetv17_stage1_relu3_fwd
+Convolution      resnetv17_stage1_conv6_fwd 1 1 resnetv17_stage1_relu3_fwd resnetv17_stage1_conv6_fwd 0=256 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=16384
+BatchNorm        resnetv17_stage1_batchnorm6_fwd 1 1 resnetv17_stage1_conv6_fwd resnetv17_stage1_batchnorm6_fwd 0=256
+BinaryOp         resnetv17_stage1__plus1  2 1 resnetv17_stage1_batchnorm6_fwd resnetv17_stage1_activation0_splitncnn_0 resnetv17_stage1__plus1 0=0
+ReLU             resnetv17_stage1_activation1 1 1 resnetv17_stage1__plus1 resnetv17_stage1_activation1
+Split            splitncnn_2              1 2 resnetv17_stage1_activation1 resnetv17_stage1_activation1_splitncnn_0 resnetv17_stage1_activation1_splitncnn_1
+Convolution      resnetv17_stage1_conv7_fwd 1 1 resnetv17_stage1_activation1_splitncnn_1 resnetv17_stage1_conv7_fwd 0=64 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=16384
+BatchNorm        resnetv17_stage1_batchnorm7_fwd 1 1 resnetv17_stage1_conv7_fwd resnetv17_stage1_batchnorm7_fwd 0=64
+ReLU             resnetv17_stage1_relu4_fwd 1 1 resnetv17_stage1_batchnorm7_fwd resnetv17_stage1_relu4_fwd
+Convolution      resnetv17_stage1_conv8_fwd 1 1 resnetv17_stage1_relu4_fwd resnetv17_stage1_conv8_fwd 0=64 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=36864
+BatchNorm        resnetv17_stage1_batchnorm8_fwd 1 1 resnetv17_stage1_conv8_fwd resnetv17_stage1_batchnorm8_fwd 0=64
+ReLU             resnetv17_stage1_relu5_fwd 1 1 resnetv17_stage1_batchnorm8_fwd resnetv17_stage1_relu5_fwd
+Convolution      resnetv17_stage1_conv9_fwd 1 1 resnetv17_stage1_relu5_fwd resnetv17_stage1_conv9_fwd 0=256 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=16384
+BatchNorm        resnetv17_stage1_batchnorm9_fwd 1 1 resnetv17_stage1_conv9_fwd resnetv17_stage1_batchnorm9_fwd 0=256
+BinaryOp         resnetv17_stage1__plus2  2 1 resnetv17_stage1_batchnorm9_fwd resnetv17_stage1_activation1_splitncnn_0 resnetv17_stage1__plus2 0=0
+ReLU             resnetv17_stage1_activation2 1 1 resnetv17_stage1__plus2 resnetv17_stage1_activation2
+Split            splitncnn_3              1 2 resnetv17_stage1_activation2 resnetv17_stage1_activation2_splitncnn_0 resnetv17_stage1_activation2_splitncnn_1
+Convolution      resnetv17_stage2_conv0_fwd 1 1 resnetv17_stage1_activation2_splitncnn_1 resnetv17_stage2_conv0_fwd 0=128 1=1 11=1 2=1 12=1 3=2 13=2 4=0 14=0 15=0 16=0 5=1 6=32768
+BatchNorm        resnetv17_stage2_batchnorm0_fwd 1 1 resnetv17_stage2_conv0_fwd resnetv17_stage2_batchnorm0_fwd 0=128
+ReLU             resnetv17_stage2_relu0_fwd 1 1 resnetv17_stage2_batchnorm0_fwd resnetv17_stage2_relu0_fwd
+Convolution      resnetv17_stage2_conv1_fwd 1 1 resnetv17_stage2_relu0_fwd resnetv17_stage2_conv1_fwd 0=128 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=147456
+BatchNorm        resnetv17_stage2_batchnorm1_fwd 1 1 resnetv17_stage2_conv1_fwd resnetv17_stage2_batchnorm1_fwd 0=128
+ReLU             resnetv17_stage2_relu1_fwd 1 1 resnetv17_stage2_batchnorm1_fwd resnetv17_stage2_relu1_fwd
+Convolution      resnetv17_stage2_conv2_fwd 1 1 resnetv17_stage2_relu1_fwd resnetv17_stage2_conv2_fwd 0=512 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=65536
+BatchNorm        resnetv17_stage2_batchnorm2_fwd 1 1 resnetv17_stage2_conv2_fwd resnetv17_stage2_batchnorm2_fwd 0=512
+Convolution      resnetv17_stage2_conv3_fwd 1 1 resnetv17_stage1_activation2_splitncnn_0 resnetv17_stage2_conv3_fwd 0=512 1=1 11=1 2=1 12=1 3=2 13=2 4=0 14=0 15=0 16=0 5=0 6=131072
+BatchNorm        resnetv17_stage2_batchnorm3_fwd 1 1 resnetv17_stage2_conv3_fwd resnetv17_stage2_batchnorm3_fwd 0=512
+BinaryOp         resnetv17_stage2__plus0  2 1 resnetv17_stage2_batchnorm2_fwd resnetv17_stage2_batchnorm3_fwd resnetv17_stage2__plus0 0=0
+ReLU             resnetv17_stage2_activation0 1 1 resnetv17_stage2__plus0 resnetv17_stage2_activation0
+Split            splitncnn_4              1 2 resnetv17_stage2_activation0 resnetv17_stage2_activation0_splitncnn_0 resnetv17_stage2_activation0_splitncnn_1
+Convolution      resnetv17_stage2_conv4_fwd 1 1 resnetv17_stage2_activation0_splitncnn_1 resnetv17_stage2_conv4_fwd 0=128 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=65536
+BatchNorm        resnetv17_stage2_batchnorm4_fwd 1 1 resnetv17_stage2_conv4_fwd resnetv17_stage2_batchnorm4_fwd 0=128
+ReLU             resnetv17_stage2_relu2_fwd 1 1 resnetv17_stage2_batchnorm4_fwd resnetv17_stage2_relu2_fwd
+Convolution      resnetv17_stage2_conv5_fwd 1 1 resnetv17_stage2_relu2_fwd resnetv17_stage2_conv5_fwd 0=128 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=147456
+BatchNorm        resnetv17_stage2_batchnorm5_fwd 1 1 resnetv17_stage2_conv5_fwd resnetv17_stage2_batchnorm5_fwd 0=128
+ReLU             resnetv17_stage2_relu3_fwd 1 1 resnetv17_stage2_batchnorm5_fwd resnetv17_stage2_relu3_fwd
+Convolution      resnetv17_stage2_conv6_fwd 1 1 resnetv17_stage2_relu3_fwd resnetv17_stage2_conv6_fwd 0=512 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=65536
+BatchNorm        resnetv17_stage2_batchnorm6_fwd 1 1 resnetv17_stage2_conv6_fwd resnetv17_stage2_batchnorm6_fwd 0=512
+BinaryOp         resnetv17_stage2__plus1  2 1 resnetv17_stage2_batchnorm6_fwd resnetv17_stage2_activation0_splitncnn_0 resnetv17_stage2__plus1 0=0
+ReLU             resnetv17_stage2_activation1 1 1 resnetv17_stage2__plus1 resnetv17_stage2_activation1
+Split            splitncnn_5              1 2 resnetv17_stage2_activation1 resnetv17_stage2_activation1_splitncnn_0 resnetv17_stage2_activation1_splitncnn_1
+Convolution      resnetv17_stage2_conv7_fwd 1 1 resnetv17_stage2_activation1_splitncnn_1 resnetv17_stage2_conv7_fwd 0=128 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=65536
+BatchNorm        resnetv17_stage2_batchnorm7_fwd 1 1 resnetv17_stage2_conv7_fwd resnetv17_stage2_batchnorm7_fwd 0=128
+ReLU             resnetv17_stage2_relu4_fwd 1 1 resnetv17_stage2_batchnorm7_fwd resnetv17_stage2_relu4_fwd
+Convolution      resnetv17_stage2_conv8_fwd 1 1 resnetv17_stage2_relu4_fwd resnetv17_stage2_conv8_fwd 0=128 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=147456
+BatchNorm        resnetv17_stage2_batchnorm8_fwd 1 1 resnetv17_stage2_conv8_fwd resnetv17_stage2_batchnorm8_fwd 0=128
+ReLU             resnetv17_stage2_relu5_fwd 1 1 resnetv17_stage2_batchnorm8_fwd resnetv17_stage2_relu5_fwd
+Convolution      resnetv17_stage2_conv9_fwd 1 1 resnetv17_stage2_relu5_fwd resnetv17_stage2_conv9_fwd 0=512 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=65536
+BatchNorm        resnetv17_stage2_batchnorm9_fwd 1 1 resnetv17_stage2_conv9_fwd resnetv17_stage2_batchnorm9_fwd 0=512
+BinaryOp         resnetv17_stage2__plus2  2 1 resnetv17_stage2_batchnorm9_fwd resnetv17_stage2_activation1_splitncnn_0 resnetv17_stage2__plus2 0=0
+ReLU             resnetv17_stage2_activation2 1 1 resnetv17_stage2__plus2 resnetv17_stage2_activation2
+Split            splitncnn_6              1 2 resnetv17_stage2_activation2 resnetv17_stage2_activation2_splitncnn_0 resnetv17_stage2_activation2_splitncnn_1
+Convolution      resnetv17_stage2_conv10_fwd 1 1 resnetv17_stage2_activation2_splitncnn_1 resnetv17_stage2_conv10_fwd 0=128 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=65536
+BatchNorm        resnetv17_stage2_batchnorm10_fwd 1 1 resnetv17_stage2_conv10_fwd resnetv17_stage2_batchnorm10_fwd 0=128
+ReLU             resnetv17_stage2_relu6_fwd 1 1 resnetv17_stage2_batchnorm10_fwd resnetv17_stage2_relu6_fwd
+Convolution      resnetv17_stage2_conv11_fwd 1 1 resnetv17_stage2_relu6_fwd resnetv17_stage2_conv11_fwd 0=128 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=147456
+BatchNorm        resnetv17_stage2_batchnorm11_fwd 1 1 resnetv17_stage2_conv11_fwd resnetv17_stage2_batchnorm11_fwd 0=128
+ReLU             resnetv17_stage2_relu7_fwd 1 1 resnetv17_stage2_batchnorm11_fwd resnetv17_stage2_relu7_fwd
+Convolution      resnetv17_stage2_conv12_fwd 1 1 resnetv17_stage2_relu7_fwd resnetv17_stage2_conv12_fwd 0=512 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=65536
+BatchNorm        resnetv17_stage2_batchnorm12_fwd 1 1 resnetv17_stage2_conv12_fwd resnetv17_stage2_batchnorm12_fwd 0=512
+BinaryOp         resnetv17_stage2__plus3  2 1 resnetv17_stage2_batchnorm12_fwd resnetv17_stage2_activation2_splitncnn_0 resnetv17_stage2__plus3 0=0
+ReLU             resnetv17_stage2_activation3 1 1 resnetv17_stage2__plus3 resnetv17_stage2_activation3
+Split            splitncnn_7              1 2 resnetv17_stage2_activation3 resnetv17_stage2_activation3_splitncnn_0 resnetv17_stage2_activation3_splitncnn_1
+Convolution      resnetv17_stage3_conv0_fwd 1 1 resnetv17_stage2_activation3_splitncnn_1 resnetv17_stage3_conv0_fwd 0=256 1=1 11=1 2=1 12=1 3=2 13=2 4=0 14=0 15=0 16=0 5=1 6=131072
+BatchNorm        resnetv17_stage3_batchnorm0_fwd 1 1 resnetv17_stage3_conv0_fwd resnetv17_stage3_batchnorm0_fwd 0=256
+ReLU             resnetv17_stage3_relu0_fwd 1 1 resnetv17_stage3_batchnorm0_fwd resnetv17_stage3_relu0_fwd
+Convolution      resnetv17_stage3_conv1_fwd 1 1 resnetv17_stage3_relu0_fwd resnetv17_stage3_conv1_fwd 0=256 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=589824
+BatchNorm        resnetv17_stage3_batchnorm1_fwd 1 1 resnetv17_stage3_conv1_fwd resnetv17_stage3_batchnorm1_fwd 0=256
+ReLU             resnetv17_stage3_relu1_fwd 1 1 resnetv17_stage3_batchnorm1_fwd resnetv17_stage3_relu1_fwd
+Convolution      resnetv17_stage3_conv2_fwd 1 1 resnetv17_stage3_relu1_fwd resnetv17_stage3_conv2_fwd 0=1024 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm2_fwd 1 1 resnetv17_stage3_conv2_fwd resnetv17_stage3_batchnorm2_fwd 0=1024
+Convolution      resnetv17_stage3_conv3_fwd 1 1 resnetv17_stage2_activation3_splitncnn_0 resnetv17_stage3_conv3_fwd 0=1024 1=1 11=1 2=1 12=1 3=2 13=2 4=0 14=0 15=0 16=0 5=0 6=524288
+BatchNorm        resnetv17_stage3_batchnorm3_fwd 1 1 resnetv17_stage3_conv3_fwd resnetv17_stage3_batchnorm3_fwd 0=1024
+BinaryOp         resnetv17_stage3__plus0  2 1 resnetv17_stage3_batchnorm2_fwd resnetv17_stage3_batchnorm3_fwd resnetv17_stage3__plus0 0=0
+ReLU             resnetv17_stage3_activation0 1 1 resnetv17_stage3__plus0 resnetv17_stage3_activation0
+Split            splitncnn_8              1 2 resnetv17_stage3_activation0 resnetv17_stage3_activation0_splitncnn_0 resnetv17_stage3_activation0_splitncnn_1
+Convolution      resnetv17_stage3_conv4_fwd 1 1 resnetv17_stage3_activation0_splitncnn_1 resnetv17_stage3_conv4_fwd 0=256 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm4_fwd 1 1 resnetv17_stage3_conv4_fwd resnetv17_stage3_batchnorm4_fwd 0=256
+ReLU             resnetv17_stage3_relu2_fwd 1 1 resnetv17_stage3_batchnorm4_fwd resnetv17_stage3_relu2_fwd
+Convolution      resnetv17_stage3_conv5_fwd 1 1 resnetv17_stage3_relu2_fwd resnetv17_stage3_conv5_fwd 0=256 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=589824
+BatchNorm        resnetv17_stage3_batchnorm5_fwd 1 1 resnetv17_stage3_conv5_fwd resnetv17_stage3_batchnorm5_fwd 0=256
+ReLU             resnetv17_stage3_relu3_fwd 1 1 resnetv17_stage3_batchnorm5_fwd resnetv17_stage3_relu3_fwd
+Convolution      resnetv17_stage3_conv6_fwd 1 1 resnetv17_stage3_relu3_fwd resnetv17_stage3_conv6_fwd 0=1024 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm6_fwd 1 1 resnetv17_stage3_conv6_fwd resnetv17_stage3_batchnorm6_fwd 0=1024
+BinaryOp         resnetv17_stage3__plus1  2 1 resnetv17_stage3_batchnorm6_fwd resnetv17_stage3_activation0_splitncnn_0 resnetv17_stage3__plus1 0=0
+ReLU             resnetv17_stage3_activation1 1 1 resnetv17_stage3__plus1 resnetv17_stage3_activation1
+Split            splitncnn_9              1 2 resnetv17_stage3_activation1 resnetv17_stage3_activation1_splitncnn_0 resnetv17_stage3_activation1_splitncnn_1
+Convolution      resnetv17_stage3_conv7_fwd 1 1 resnetv17_stage3_activation1_splitncnn_1 resnetv17_stage3_conv7_fwd 0=256 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm7_fwd 1 1 resnetv17_stage3_conv7_fwd resnetv17_stage3_batchnorm7_fwd 0=256
+ReLU             resnetv17_stage3_relu4_fwd 1 1 resnetv17_stage3_batchnorm7_fwd resnetv17_stage3_relu4_fwd
+Convolution      resnetv17_stage3_conv8_fwd 1 1 resnetv17_stage3_relu4_fwd resnetv17_stage3_conv8_fwd 0=256 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=589824
+BatchNorm        resnetv17_stage3_batchnorm8_fwd 1 1 resnetv17_stage3_conv8_fwd resnetv17_stage3_batchnorm8_fwd 0=256
+ReLU             resnetv17_stage3_relu5_fwd 1 1 resnetv17_stage3_batchnorm8_fwd resnetv17_stage3_relu5_fwd
+Convolution      resnetv17_stage3_conv9_fwd 1 1 resnetv17_stage3_relu5_fwd resnetv17_stage3_conv9_fwd 0=1024 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm9_fwd 1 1 resnetv17_stage3_conv9_fwd resnetv17_stage3_batchnorm9_fwd 0=1024
+BinaryOp         resnetv17_stage3__plus2  2 1 resnetv17_stage3_batchnorm9_fwd resnetv17_stage3_activation1_splitncnn_0 resnetv17_stage3__plus2 0=0
+ReLU             resnetv17_stage3_activation2 1 1 resnetv17_stage3__plus2 resnetv17_stage3_activation2
+Split            splitncnn_10             1 2 resnetv17_stage3_activation2 resnetv17_stage3_activation2_splitncnn_0 resnetv17_stage3_activation2_splitncnn_1
+Convolution      resnetv17_stage3_conv10_fwd 1 1 resnetv17_stage3_activation2_splitncnn_1 resnetv17_stage3_conv10_fwd 0=256 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm10_fwd 1 1 resnetv17_stage3_conv10_fwd resnetv17_stage3_batchnorm10_fwd 0=256
+ReLU             resnetv17_stage3_relu6_fwd 1 1 resnetv17_stage3_batchnorm10_fwd resnetv17_stage3_relu6_fwd
+Convolution      resnetv17_stage3_conv11_fwd 1 1 resnetv17_stage3_relu6_fwd resnetv17_stage3_conv11_fwd 0=256 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=589824
+BatchNorm        resnetv17_stage3_batchnorm11_fwd 1 1 resnetv17_stage3_conv11_fwd resnetv17_stage3_batchnorm11_fwd 0=256
+ReLU             resnetv17_stage3_relu7_fwd 1 1 resnetv17_stage3_batchnorm11_fwd resnetv17_stage3_relu7_fwd
+Convolution      resnetv17_stage3_conv12_fwd 1 1 resnetv17_stage3_relu7_fwd resnetv17_stage3_conv12_fwd 0=1024 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm12_fwd 1 1 resnetv17_stage3_conv12_fwd resnetv17_stage3_batchnorm12_fwd 0=1024
+BinaryOp         resnetv17_stage3__plus3  2 1 resnetv17_stage3_batchnorm12_fwd resnetv17_stage3_activation2_splitncnn_0 resnetv17_stage3__plus3 0=0
+ReLU             resnetv17_stage3_activation3 1 1 resnetv17_stage3__plus3 resnetv17_stage3_activation3
+Split            splitncnn_11             1 2 resnetv17_stage3_activation3 resnetv17_stage3_activation3_splitncnn_0 resnetv17_stage3_activation3_splitncnn_1
+Convolution      resnetv17_stage3_conv13_fwd 1 1 resnetv17_stage3_activation3_splitncnn_1 resnetv17_stage3_conv13_fwd 0=256 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm13_fwd 1 1 resnetv17_stage3_conv13_fwd resnetv17_stage3_batchnorm13_fwd 0=256
+ReLU             resnetv17_stage3_relu8_fwd 1 1 resnetv17_stage3_batchnorm13_fwd resnetv17_stage3_relu8_fwd
+Convolution      resnetv17_stage3_conv14_fwd 1 1 resnetv17_stage3_relu8_fwd resnetv17_stage3_conv14_fwd 0=256 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=589824
+BatchNorm        resnetv17_stage3_batchnorm14_fwd 1 1 resnetv17_stage3_conv14_fwd resnetv17_stage3_batchnorm14_fwd 0=256
+ReLU             resnetv17_stage3_relu9_fwd 1 1 resnetv17_stage3_batchnorm14_fwd resnetv17_stage3_relu9_fwd
+Convolution      resnetv17_stage3_conv15_fwd 1 1 resnetv17_stage3_relu9_fwd resnetv17_stage3_conv15_fwd 0=1024 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm15_fwd 1 1 resnetv17_stage3_conv15_fwd resnetv17_stage3_batchnorm15_fwd 0=1024
+BinaryOp         resnetv17_stage3__plus4  2 1 resnetv17_stage3_batchnorm15_fwd resnetv17_stage3_activation3_splitncnn_0 resnetv17_stage3__plus4 0=0
+ReLU             resnetv17_stage3_activation4 1 1 resnetv17_stage3__plus4 resnetv17_stage3_activation4
+Split            splitncnn_12             1 2 resnetv17_stage3_activation4 resnetv17_stage3_activation4_splitncnn_0 resnetv17_stage3_activation4_splitncnn_1
+Convolution      resnetv17_stage3_conv16_fwd 1 1 resnetv17_stage3_activation4_splitncnn_1 resnetv17_stage3_conv16_fwd 0=256 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm16_fwd 1 1 resnetv17_stage3_conv16_fwd resnetv17_stage3_batchnorm16_fwd 0=256
+ReLU             resnetv17_stage3_relu10_fwd 1 1 resnetv17_stage3_batchnorm16_fwd resnetv17_stage3_relu10_fwd
+Convolution      resnetv17_stage3_conv17_fwd 1 1 resnetv17_stage3_relu10_fwd resnetv17_stage3_conv17_fwd 0=256 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=589824
+BatchNorm        resnetv17_stage3_batchnorm17_fwd 1 1 resnetv17_stage3_conv17_fwd resnetv17_stage3_batchnorm17_fwd 0=256
+ReLU             resnetv17_stage3_relu11_fwd 1 1 resnetv17_stage3_batchnorm17_fwd resnetv17_stage3_relu11_fwd
+Convolution      resnetv17_stage3_conv18_fwd 1 1 resnetv17_stage3_relu11_fwd resnetv17_stage3_conv18_fwd 0=1024 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=262144
+BatchNorm        resnetv17_stage3_batchnorm18_fwd 1 1 resnetv17_stage3_conv18_fwd resnetv17_stage3_batchnorm18_fwd 0=1024
+BinaryOp         resnetv17_stage3__plus5  2 1 resnetv17_stage3_batchnorm18_fwd resnetv17_stage3_activation4_splitncnn_0 resnetv17_stage3__plus5 0=0
+ReLU             resnetv17_stage3_activation5 1 1 resnetv17_stage3__plus5 resnetv17_stage3_activation5
+Split            splitncnn_13             1 2 resnetv17_stage3_activation5 resnetv17_stage3_activation5_splitncnn_0 resnetv17_stage3_activation5_splitncnn_1
+Convolution      resnetv17_stage4_conv0_fwd 1 1 resnetv17_stage3_activation5_splitncnn_1 resnetv17_stage4_conv0_fwd 0=512 1=1 11=1 2=1 12=1 3=2 13=2 4=0 14=0 15=0 16=0 5=1 6=524288
+BatchNorm        resnetv17_stage4_batchnorm0_fwd 1 1 resnetv17_stage4_conv0_fwd resnetv17_stage4_batchnorm0_fwd 0=512
+ReLU             resnetv17_stage4_relu0_fwd 1 1 resnetv17_stage4_batchnorm0_fwd resnetv17_stage4_relu0_fwd
+Convolution      resnetv17_stage4_conv1_fwd 1 1 resnetv17_stage4_relu0_fwd resnetv17_stage4_conv1_fwd 0=512 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=2359296
+BatchNorm        resnetv17_stage4_batchnorm1_fwd 1 1 resnetv17_stage4_conv1_fwd resnetv17_stage4_batchnorm1_fwd 0=512
+ReLU             resnetv17_stage4_relu1_fwd 1 1 resnetv17_stage4_batchnorm1_fwd resnetv17_stage4_relu1_fwd
+Convolution      resnetv17_stage4_conv2_fwd 1 1 resnetv17_stage4_relu1_fwd resnetv17_stage4_conv2_fwd 0=2048 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=1048576
+BatchNorm        resnetv17_stage4_batchnorm2_fwd 1 1 resnetv17_stage4_conv2_fwd resnetv17_stage4_batchnorm2_fwd 0=2048
+Convolution      resnetv17_stage4_conv3_fwd 1 1 resnetv17_stage3_activation5_splitncnn_0 resnetv17_stage4_conv3_fwd 0=2048 1=1 11=1 2=1 12=1 3=2 13=2 4=0 14=0 15=0 16=0 5=0 6=2097152
+BatchNorm        resnetv17_stage4_batchnorm3_fwd 1 1 resnetv17_stage4_conv3_fwd resnetv17_stage4_batchnorm3_fwd 0=2048
+BinaryOp         resnetv17_stage4__plus0  2 1 resnetv17_stage4_batchnorm2_fwd resnetv17_stage4_batchnorm3_fwd resnetv17_stage4__plus0 0=0
+ReLU             resnetv17_stage4_activation0 1 1 resnetv17_stage4__plus0 resnetv17_stage4_activation0
+Split            splitncnn_14             1 2 resnetv17_stage4_activation0 resnetv17_stage4_activation0_splitncnn_0 resnetv17_stage4_activation0_splitncnn_1
+Convolution      resnetv17_stage4_conv4_fwd 1 1 resnetv17_stage4_activation0_splitncnn_1 resnetv17_stage4_conv4_fwd 0=512 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=1048576
+BatchNorm        resnetv17_stage4_batchnorm4_fwd 1 1 resnetv17_stage4_conv4_fwd resnetv17_stage4_batchnorm4_fwd 0=512
+ReLU             resnetv17_stage4_relu2_fwd 1 1 resnetv17_stage4_batchnorm4_fwd resnetv17_stage4_relu2_fwd
+Convolution      resnetv17_stage4_conv5_fwd 1 1 resnetv17_stage4_relu2_fwd resnetv17_stage4_conv5_fwd 0=512 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=2359296
+BatchNorm        resnetv17_stage4_batchnorm5_fwd 1 1 resnetv17_stage4_conv5_fwd resnetv17_stage4_batchnorm5_fwd 0=512
+ReLU             resnetv17_stage4_relu3_fwd 1 1 resnetv17_stage4_batchnorm5_fwd resnetv17_stage4_relu3_fwd
+Convolution      resnetv17_stage4_conv6_fwd 1 1 resnetv17_stage4_relu3_fwd resnetv17_stage4_conv6_fwd 0=2048 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=1048576
+BatchNorm        resnetv17_stage4_batchnorm6_fwd 1 1 resnetv17_stage4_conv6_fwd resnetv17_stage4_batchnorm6_fwd 0=2048
+BinaryOp         resnetv17_stage4__plus1  2 1 resnetv17_stage4_batchnorm6_fwd resnetv17_stage4_activation0_splitncnn_0 resnetv17_stage4__plus1 0=0
+ReLU             resnetv17_stage4_activation1 1 1 resnetv17_stage4__plus1 resnetv17_stage4_activation1
+Split            splitncnn_15             1 2 resnetv17_stage4_activation1 resnetv17_stage4_activation1_splitncnn_0 resnetv17_stage4_activation1_splitncnn_1
+Convolution      resnetv17_stage4_conv7_fwd 1 1 resnetv17_stage4_activation1_splitncnn_1 resnetv17_stage4_conv7_fwd 0=512 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=1048576
+BatchNorm        resnetv17_stage4_batchnorm7_fwd 1 1 resnetv17_stage4_conv7_fwd resnetv17_stage4_batchnorm7_fwd 0=512
+ReLU             resnetv17_stage4_relu4_fwd 1 1 resnetv17_stage4_batchnorm7_fwd resnetv17_stage4_relu4_fwd
+Convolution      resnetv17_stage4_conv8_fwd 1 1 resnetv17_stage4_relu4_fwd resnetv17_stage4_conv8_fwd 0=512 1=3 11=3 2=1 12=1 3=1 13=1 4=1 14=1 15=1 16=1 5=0 6=2359296
+BatchNorm        resnetv17_stage4_batchnorm8_fwd 1 1 resnetv17_stage4_conv8_fwd resnetv17_stage4_batchnorm8_fwd 0=512
+ReLU             resnetv17_stage4_relu5_fwd 1 1 resnetv17_stage4_batchnorm8_fwd resnetv17_stage4_relu5_fwd
+Convolution      resnetv17_stage4_conv9_fwd 1 1 resnetv17_stage4_relu5_fwd resnetv17_stage4_conv9_fwd 0=2048 1=1 11=1 2=1 12=1 3=1 13=1 4=0 14=0 15=0 16=0 5=1 6=1048576
+BatchNorm        resnetv17_stage4_batchnorm9_fwd 1 1 resnetv17_stage4_conv9_fwd resnetv17_stage4_batchnorm9_fwd 0=2048
+BinaryOp         resnetv17_stage4__plus2  2 1 resnetv17_stage4_batchnorm9_fwd resnetv17_stage4_activation1_splitncnn_0 resnetv17_stage4__plus2 0=0
+ReLU             resnetv17_stage4_activation2 1 1 resnetv17_stage4__plus2 resnetv17_stage4_activation2
+Pooling          resnetv17_pool1_fwd      1 1 resnetv17_stage4_activation2 resnetv17_pool1_fwd 0=1 4=1
+Flatten          flatten_473              1 1 resnetv17_pool1_fwd flatten_473
+InnerProduct     resnetv17_dense0_fwd     1 1 flatten_473 resnetv17_dense0_fwd 0=1000 1=1 2=2048000

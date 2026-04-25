@@ -145,3 +145,26 @@ target_link_libraries(benchmark_inference
     benchmark_common
     ${BACKEND_LIBS}
 )
+
+# Single operator benchmark executable
+add_executable(single_op_benchmark
+    single_op_benchmark.cpp
+    ${BACKEND_SRCS}
+)
+target_compile_options(single_op_benchmark PRIVATE -fexceptions)
+
+if(BENCHMARK_NCNN)
+    target_compile_definitions(single_op_benchmark PRIVATE BENCHMARK_NCNN)
+endif()
+if(BENCHMARK_MNN)
+    target_compile_definitions(single_op_benchmark PRIVATE BENCHMARK_MNN)
+endif()
+if(BENCHMARK_ORT)
+    target_compile_definitions(single_op_benchmark PRIVATE BENCHMARK_ORT)
+endif()
+
+target_link_libraries(single_op_benchmark
+    PRIVATE
+    benchmark_common
+    ${BACKEND_LIBS}
+)
