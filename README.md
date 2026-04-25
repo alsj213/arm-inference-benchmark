@@ -28,12 +28,36 @@
 
 ## 📱 测试平台
 
-### 骁龙 865 (SM8250)
+### 已验证设备
+
+| 设备型号 | 芯片 | 说明 |
+|---------|------|------|
+| **红米 K30 Pro** | 骁龙 865 (SM8250) | ✅ 完全验证 |
+| **红米 K40** | 骁龙 870 | ✅ 兼容 |
+| **红米 K50** | 天玑 8100 | ⚠️ 需验证 |
+| **红米 Note 系列** | 骁龙 7xx/6xx | ✅ 兼容 |
+
+### 骁龙 865 (SM8250) - 红米 K30 Pro
 - **CPU**: 1×A77@2.84GHz + 3×A77@2.42GHz + 4×A55@1.8GHz
 - **GPU**: Adreno 650
 - **ISA**: ARMv8.2-A, FP16
+- **推荐线程数**: 4 (使用大核)
 
-## 📊 基准测试结果 (MobileNetV2 FP32, 1 线程, 骁龙 865)
+## 📊 基准测试结果 (骁龙 865, FP32)
+
+### 4 线程测试 (2026-04-26 更新)
+
+| 模型 | 框架 | Init(ms) | P50(ms) | P90(ms) | Mean(ms) | FPS | MNN vs ORT 加速比 |
+|------|------|----------|---------|---------|----------|-----|-------------------|
+| **MobileNetV2** | ONNX Runtime | 67.84 | 17.29 | 17.39 | 17.31 | 57.8 | - |
+| **MobileNetV2** | MNN | 33.37 | **8.18** | 8.38 | 8.20 | 121.9 | **2.11x** |
+| **ShuffleNetV2 x0.5** | ONNX Runtime | 183.76 | 2.89 | 2.92 | 2.94 | 339.8 | - |
+| **ShuffleNetV2 x0.5** | MNN | 89.19 | **1.69** | 1.92 | 1.73 | 577.6 | **1.71x** |
+| **ResNet50** | ONNX Runtime | 377.52 | **78.53** | 79.01 | 78.61 | 12.7 | - |
+| **MobileViT-S** | ONNX Runtime | 162.55 | 71.31 | 76.63 | 72.49 | 13.79 | - |
+| **MobileViT-S** | MNN | 95.16 | **59.65** | **61.84** | **60.16** | **16.62** | **1.20x** |
+
+### 1 线程测试 (历史数据)
 
 | 框架 | Init (ms) | P50 (ms) | P90 (ms) | Mean (ms) | FPS |
 |------|-----------|----------|----------|-----------|-----|
@@ -43,7 +67,6 @@
 | **TFLite** | 15.07 | 22.70 | 22.80 | 22.67 | 44.11 |
 | **ONNX Runtime** | 47.82 | 29.27 | 29.40 | 29.26 | 34.18 |
 
-> TNN 使用 ARM NEON 汇编优化，性能显著领先；TVM 和 QNN 为可选框架，默认关闭
 > 完整测试结果参见 [docs/results_sm8250.md](docs/results_sm8250.md)
 
 ## 🚀 快速开始
@@ -83,6 +106,253 @@ export ANDROID_NDK=/path/to/your/android-ndk-r25c
 ./scripts/adb_run.sh --backend all --model mobilenetv2 --precision fp32 --threads 1 --runs 100
 ```
 
+---
+
+## 📱 红米手机完整测试指南
+
+本指南详细介绍如何在 **红米 K30 Pro**（骁龙 865）等红米系列手机上进行性能测试。
+
+### 📋 前置准备
+
+#### 1. 手机端设置
+
+```
+1. 打开 "设置" → "我的设备" → "全部参数"
+2. 连续点击 "MIUI 版本" 7 次，开启开发者模式
+3. 返回 "设置" → "更多设置" → "开发者选项"
+4. 开启以下选项：
+   ✅ USB 调试
+   ✅ USB 安装
+   ✅ USB 调试（安全设置）
+5. 将手机连接电脑，选择 "文件传输" 模式
+6. 手机弹窗点击 "允许 USB 调试"
+```
+
+#### 2. 电脑端 ADB 配置 (WSL2)
+
+```bash
+# 配置 Windows ADB 路径
+export PATH=$PATH:/mnt/e/andorid/adb/
+alias adb='/mnt/e/andorid/adb/adb.exe'
+
+# 验证设备连接
+adb devices
+# 应显示类似：
+# List of devices attached
+# b08dee23        device
+```
+
+#### 3. 安装 Android NDK
+
+```bash
+# 下载 NDK r25c (推荐版本)
+wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+unzip android-ndk-r25c-linux.zip
+
+# 配置环境变量
+export ANDROID_NDK=/path/to/android-ndk-r25c
+```
+
+---
+
+### 🚀 快速开始（5 分钟完成）
+
+#### 步骤 1: 编译 Android 版本
+
+```bash
+cd arm-inference-benchmark
+
+# 配置 NDK 路径（替换为你的实际路径）
+export ANDROID_NDK=/home/liu/android-ndk-r25c
+
+# 执行编译脚本（自动编译 MNN 和 ONNX Runtime）
+./scripts/build_android.sh
+
+# 编译成功后，可执行文件位于：
+ls -lh build_android/src/benchmark_inference
+```
+
+#### 步骤 2: 推送文件到手机
+
+```bash
+# 推送二进制文件
+adb push build_android/src/benchmark_inference /data/local/tmp/benchmark/
+
+# 推送模型文件（所有分类模型）
+adb push models/classification /data/local/tmp/benchmark/models/classification
+
+# 推送 ONNX Runtime 库（如果需要）
+adb push third_party/onnxruntime/lib-android/aarch64/libonnxruntime.so /data/local/tmp/benchmark/
+```
+
+#### 步骤 3: 运行基准测试
+
+**方式一：使用自动化脚本（推荐）**
+
+```bash
+# 测试 MobileNetV2 - 所有框架对比
+./scripts/adb_run.sh --backend all --model mobilenetv2 --precision fp32 --threads 4 --runs 50
+
+# 测试 MobileViT-S - 单框架测试
+./scripts/adb_run.sh --backend mnn --model mobilevit_s --precision fp32 --threads 4 --runs 50
+
+# 完整性能测试 - 所有模型 + 所有框架
+./scripts/adb_run.sh --backend all --model all --precision fp32 --threads 4 --runs 50
+```
+
+**方式二：手动执行（灵活）**
+
+```bash
+# 进入手机 shell
+adb shell
+
+# 设置库路径并运行
+cd /data/local/tmp/benchmark
+LD_LIBRARY_PATH=/data/local/tmp/benchmark ./benchmark_inference \
+  --backend mnn \
+  --model shufflenet_v2_x0_5 \
+  --precision fp32 \
+  --threads 4 \
+  --warmup 10 \
+  --runs 100
+```
+
+---
+
+### 📊 常用测试命令
+
+#### 单模型多框架对比
+```bash
+# MobileNetV2 - 4线程
+./scripts/adb_run.sh --backend all --model mobilenetv2 --threads 4 --runs 50
+
+# ResNet50 - 1线程
+./scripts/adb_run.sh --backend all --model resnet50 --threads 1 --runs 50
+
+# MobileViT-S - 8线程
+./scripts/adb_run.sh --backend all --model mobilevit_s --threads 8 --runs 30
+```
+
+#### 多线程性能扫描
+```bash
+# 测试 MNN 在不同线程数下的性能
+for t in 1 2 4 6 8; do
+  echo "=== Testing $t threads ==="
+  adb shell "cd /data/local/tmp/benchmark && LD_LIBRARY_PATH=. ./benchmark_inference --backend mnn --model mobilenetv2 --threads $t --runs 50"
+done
+```
+
+#### 批量测试所有模型
+```bash
+# 测试所有分类模型
+for model in mobilenetv2 resnet50 shufflenet_v2_x0_5 mobilevit_s; do
+  for backend in mnn onnxrt; do
+    echo "=== $model - $backend ==="
+    ./scripts/adb_run.sh --backend $backend --model $model --threads 4 --runs 50
+  done
+done
+```
+
+---
+
+### 🔍 结果解读
+
+**典型输出示例：**
+```
+=== ARM Inference Benchmark ===
+Backend:  mnn
+Model:    mobilenetv2
+Precision:fp32
+Threads:  4
+Warmup:   10
+Test runs:50
+
+----------------------------------------
+Model: mobilenetv2
+Input shape: 1 3 224 224 
+
+>> Running mnn on mobilenetv2...
+  Init time:  33.37 ms
+  Min:     8.01 ms
+  P50:     8.18 ms
+  P90:     8.38 ms
+  P99:     8.56 ms
+  Mean:    8.20 ms
+  Std:     0.12 ms
+  Throughput: 121.9 FPS
+  Peak mem:  0 KB
+```
+
+**关键指标说明：**
+- **Init time**: 模型初始化/加载时间（包括内存分配、算子优化）
+- **P50/P90/P99**: 延迟百分位数，P50 为中位数延迟
+- **Throughput (FPS)**: 每秒可处理的图片数
+- **Std**: 延迟标准差，越小表示性能越稳定
+
+---
+
+### ❗ 常见问题排查
+
+#### 问题 1: ADB 找不到设备
+```bash
+# 检查 Windows 下的设备状态
+/mnt/e/andorid/adb/adb.exe kill-server
+/mnt/e/andorid/adb/adb.exe start-server
+/mnt/e/andorid/adb/adb.exe devices
+
+# 确保手机授权
+# 手机上勾选 "一律允许这台计算机进行调试"
+```
+
+#### 问题 2: 编译失败 - NDK 路径错误
+```bash
+# 确认 NDK 路径正确
+ls $ANDROID_NDK/build/cmake/android.toolchain.cmake
+
+# 重新配置编译
+rm -rf build_android
+mkdir build_android && cd build_android
+cmake .. \
+  -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
+  -DANDROID_ABI=arm64-v8a \
+  -DANDROID_PLATFORM=android-29 \
+  -DBENCHMARK_MNN=ON \
+  -DBENCHMARK_ORT=ON
+make -j$(nproc)
+```
+
+#### 问题 3: 运行时找不到模型文件
+```bash
+# 检查手机上的模型路径
+adb shell ls /data/local/tmp/benchmark/models/classification/
+
+# 重新推送
+adb push models/classification/mobilevit_s /data/local/tmp/benchmark/models/classification/
+```
+
+#### 问题 4: 性能异常低
+```
+可能原因：
+1. 手机发热降频 → 冷却手机后重新测试
+2. 线程数设置不当 → 推荐 4 线程使用大核
+3. 后台应用占用资源 → 关闭后台应用，开启飞行模式
+4. 精度设置 → FP16 比 FP32 快约 2 倍
+```
+
+---
+
+### 💡 红米手机优化建议
+
+| 优化项 | 建议值 | 说明 |
+|-------|-------|------|
+| **线程数** | 4 | 骁龙 865 有 4 个大核（A77） |
+| **warmup 次数** | 10-20 | CPU 频率稳定后测试更准确 |
+| **测试次数** | 50-100 | 统计结果更稳定 |
+| **测试前准备** | 飞行模式 + 清后台 | 减少干扰 |
+| **手机温度** | < 40°C | 避免降频影响结果 |
+
+---
+
 ## 📁 项目结构
 
 ```
@@ -98,7 +368,11 @@ arm-inference-benchmark/
 │   ├── results_sm8250.md          # 骁龙 865 测试结果
 │   └── figures/                   # 性能图表
 ├── 📁 models/                     # 模型
-│   ├── classification/            # 分类模型 (MobileNetV2, ResNet50)
+│   ├── classification/            # 分类模型
+│   │   ├── mobilenetv2/           # MobileNetV2 (1.4MB)
+│   │   ├── resnet50/              # ResNet50 (98MB)
+│   │   ├── shufflenet_v2/         # ShuffleNetV2 x0.5 (5MB)
+│   │   └── mobilevit_s/           # MobileViT-S (22MB)
 │   ├── detection/                 # 检测模型 (YOLOv8n)
 │   └── nlp/                       # NLP 模型 (BERT)
 ├── 📁 scripts/                    # 脚本
@@ -145,7 +419,7 @@ arm-inference-benchmark/
 
 Options:
   --backend <backend>     指定后端: ncnn|mnn|tnn|tflite|qnn|onnxrt|tvm|all
-  --model <model>         指定模型: mobilenetv2|resnet50|yolov8n|bert|all
+  --model <model>         指定模型: mobilenetv2|resnet50|shufflenet_v2_x0_5|mobilevit_s|yolov8n|bert|all
   --precision <prec>      指定精度: fp32|fp16|int8
   --threads <num>         线程数 (默认: 1)
   --warmup <num>          warmup 次数 (默认: 10)
@@ -187,13 +461,19 @@ done
 
 ## 📝 开发计划
 
-- [ ] 集成 Qualcomm QNN SDK
+### ✅ 已完成
+- [x] MobileViT-S 模型支持 (ONNX Runtime + MNN)
+- [x] ShuffleNetV2 x0.5 模型支持
+- [x] 红米 K30 Pro (骁龙 865) 完整测试验证
+
+### 🚧 进行中
 - [ ] TVM AutoTVM 自动调优
 - [ ] GPU delegate 支持测试
 - [ ] INT8 量化测试对比
 - [ ] 更多模型支持 (YOLOv8n, BERT)
 - [ ] 功耗测试功能
 - [ ] 自动生成性能图表
+- [ ] LLM 推理 benchmark (llama.cpp)
 
 ## 📄 许可证
 

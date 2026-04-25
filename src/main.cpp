@@ -81,6 +81,14 @@ ModelInfo get_model_info(const std::string& name) {
         return get_mobilenetv2_info();
     } else if (name == "resnet50") {
         return get_resnet50_info();
+    } else if (name == "shufflenet_v2_x0_5") {
+        return get_shufflenet_v2_info();
+    } else if (name == "mobilevit_s") {
+        ModelInfo info;
+        info.name = "mobilevit_s";
+        info.input_shape = {1, 3, 256, 256};
+        info.base_path = "./models/classification/mobilevit_s";
+        return info;
     } else if (name == "yolov8n") {
         return get_yolov8n_info();
     } else if (name == "bert") {
