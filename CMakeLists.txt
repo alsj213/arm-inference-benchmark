@@ -16,9 +16,7 @@ endif()
 # Options to enable/disable backends
 option(BENCHMARK_NCNN "Enable ncnn benchmark" ON)
 option(BENCHMARK_MNN "Enable MNN benchmark" ON)
-option(BENCHMARK_TNN "Enable TNN benchmark" ON)
 option(BENCHMARK_TFLITE "Enable TensorFlow Lite benchmark" ON)
-option(BENCHMARK_QNN "Enable Qualcomm QNN benchmark" OFF)
 option(BENCHMARK_ORT "Enable ONNX Runtime benchmark" ON)
 option(BENCHMARK_TVM "Enable Apache TVM benchmark" OFF)
 

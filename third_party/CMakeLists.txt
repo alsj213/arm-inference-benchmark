@@ -30,30 +30,6 @@ if(BENCHMARK_MNN)
     endif()
 endif()
 
-# TNN
-if(BENCHMARK_TNN)
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/TNN)
-        # Build as shared library to avoid symbol conflict with MNN cpuinfo
-        set(TNN_BUILD_SHARED ON CACHE BOOL "" FORCE)
-        set(TNN_BUILD_BENCHMARK OFF CACHE BOOL "" FORCE)
-        set(TNN_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
-        # Enable ARM assembly optimizations for Android
-        if(ANDROID)
-            set(TNN_ARM_ENABLE ON CACHE BOOL "" FORCE)
-            set(TNN_ARM82_ENABLE ON CACHE BOOL "" FORCE)
-            # Force CMAKE_SYSTEM_PROCESSOR for TNN ARM detection
-            set(CMAKE_SYSTEM_PROCESSOR "aarch64")
-            message(STATUS "TNN: Enabled ARM assembly optimizations")
-        endif()
-        add_subdirectory(TNN)
-        set(TNN_FOUND TRUE)
-        message(STATUS "Found TNN")
-    else()
-        message(WARNING "TNN not found, please add as git submodule")
-        set(BENCHMARK_TNN OFF)
-    endif()
-endif()
-
 # TensorFlow Lite
 if(BENCHMARK_TFLITE)
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tflite_extracted)
