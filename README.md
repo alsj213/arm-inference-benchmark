@@ -11,7 +11,7 @@
 - 🚀 **多框架支持**: ncnn, MNN, TFLite, ONNX Runtime, TVM, TNN, QNN
 - 📊 **完整测试指标**: 延迟（P50/P90/P99）、吞吐量、初始化时间、内存占用
 - 🎯 **精度对比**: 以 ONNX Runtime 为标杆，自动计算余弦相似度、绝对误差、相对误差
-- 🤖 **真实模型测试**: MobileNetV2, ResNet50, MobileViT-S, YOLOv8n, BERT
+- 🤖 **真实模型测试**: MobileNetV2, ResNet50, MobileViT-S, ShuffleNetV2 x0.5, YOLOv8n
 - ⚡ **ARM 优化**: 原生 ARM64 编译，支持 NEON 优化
 - 📱 **端侧友好**: 专为手机端侧推理设计的基准测试
 
@@ -34,9 +34,6 @@
 | 设备型号 | 芯片 | 说明 |
 |---------|------|------|
 | **红米 K30 Pro** | 骁龙 865 (SM8250) | ✅ 完全验证 |
-| **红米 K40** | 骁龙 870 | ✅ 兼容 |
-| **红米 K50** | 天玑 8100 | ⚠️ 需验证 |
-| **红米 Note 系列** | 骁龙 7xx/6xx | ✅ 兼容 |
 
 ### 骁龙 865 (SM8250) - 红米 K30 Pro
 - **CPU**: 1×A77@2.84GHz + 3×A77@2.42GHz + 4×A55@1.8GHz
@@ -431,7 +428,7 @@ arm-inference-benchmark/
 │   │   ├── shufflenet_v2/         # ShuffleNetV2 x0.5 (5MB)
 │   │   └── mobilevit_s/           # MobileViT-S (22MB)
 │   ├── detection/                 # 检测模型 (YOLOv8n)
-│   └── nlp/                       # NLP 模型 (BERT)
+│   └── nlp/                       # NLP 模型
 ├── 📁 scripts/                    # 脚本
 │   ├── build_android.sh           # Android 编译脚本
 │   ├── build_host_tools.sh        # 主机构建转换工具脚本
@@ -476,7 +473,7 @@ arm-inference-benchmark/
 
 Options:
   --backend <backend>     指定后端: ncnn|mnn|tnn|tflite|qnn|onnxrt|tvm|all
-  --model <model>         指定模型: mobilenetv2|resnet50|shufflenet_v2_x0_5|mobilevit_s|yolov8n|bert|all
+  --model <model>         指定模型: mobilenetv2|resnet50|shufflenet_v2_x0_5|mobilevit_s|yolov8n|all
   --precision <prec>      指定精度: fp32|fp16|int8
   --threads <num>         线程数 (默认: 1)
   --warmup <num>          warmup 次数 (默认: 10)
@@ -527,7 +524,7 @@ done
 - [ ] TVM AutoTVM 自动调优
 - [ ] GPU delegate 支持测试
 - [ ] INT8 量化测试对比
-- [ ] 更多模型支持 (YOLOv8n, BERT)
+- [ ] 更多模型支持 (YOLOv8n)
 - [ ] 功耗测试功能
 - [ ] 自动生成性能图表
 - [ ] LLM 推理 benchmark (llama.cpp)
