@@ -173,9 +173,11 @@ generate_flamegraph() {
     local device_dir="/data/local/tmp/benchmark"
 
     # 使用 report-sample 生成完整的调用栈，然后转换为折叠格式
+    # 注意：需要去掉 \r 和处理函数名中的特殊字符
     adb_cmd shell "/data/local/tmp/simpleperf report-sample \
         -i $device_dir/profiling/perf.data \
         --show-callchain" | \
+        tr -d '\r' | \
         awk '
         /^sample:/ {
             if (stack != "") {
@@ -185,8 +187,10 @@ generate_flamegraph() {
             next
         }
         /symbol:/ {
-            sym = $2
-            for (i=3; i<=NF; i++) sym = sym ";" $i
+            # 提取符号名（去掉 "symbol: " 前缀）
+            sym = substr($0, index($0, ":") + 2)
+            # 将符号名中的分号替换为冒号，避免和调用栈分隔符冲突
+            gsub(/;/, ":", sym)
             if (stack == "") {
                 stack = sym
             } else {
