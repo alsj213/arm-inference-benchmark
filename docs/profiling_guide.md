@@ -58,14 +58,19 @@ adb devices
 ### 2.3 工具检查
 
 ```bash
-# 检查 simpleperf
-ls $ANDROID_NDK/simpleperf/arm64/simpleperf
+# 检查 simpleperf（NDK r25+ 路径）
+ls $ANDROID_NDK/simpleperf/bin/android/arm64/simpleperf
 
 # 检查 perfetto（设备上）
 adb shell which perfetto
 
 # 检查 atrace（设备上）
 adb shell which atrace
+
+# 检查 FlameGraph（用于生成火焰图）
+ls tools/FlameGraph/flamegraph.pl
+# 如果没有，克隆：
+# git clone https://github.com/brendangregg/FlameGraph.git tools/FlameGraph
 ```
 
 ---
@@ -79,10 +84,13 @@ simpleperf 使用 Linux `perf_event_open` 系统调用进行 CPU 采样，记录
 ### 3.2 快速开始
 
 ```bash
-# 方式一：使用集成脚本（推荐）
+# 方式一：使用集成脚本（推荐，自动生成火焰图）
 ./scripts/simpleperf_profile.sh --backend mnn --model mobilenetv2
 
-# 方式二：手动执行
+# 方式二：使用 profile_benchmark.sh
+./scripts/profile_benchmark.sh --backend mnn --model mobilenetv2 --profile simpleperf
+
+# 方式三：手动执行
 adb shell "cd /data/local/tmp/benchmark && \
     LD_LIBRARY_PATH=. nohup ./benchmark_inference \
     --backend mnn --model mobilenetv2 --runs 1000 > /dev/null 2>&1 &"
@@ -91,6 +99,13 @@ PID=$(adb shell pidof benchmark_inference)
 adb shell "/data/local/tmp/simpleperf record \
     -p $PID -e cpu-cycles -f 4000 --call-graph fp --duration 10 -o perf.data"
 adb pull /data/local/tmp/benchmark/profiling/perf.data .
+```
+
+**自动生成火焰图：**
+脚本会自动检测 FlameGraph 工具，如果存在则生成 `flamegraph.svg` 文件。
+```bash
+# 确保 FlameGraph 已克隆
+git clone https://github.com/brendangregg/FlameGraph.git tools/FlameGraph
 ```
 
 ### 3.3 参数详解
@@ -168,10 +183,11 @@ atrace 是 Android 对 Linux ftrace 的封装，可以追踪系统级事件（�
 # 方式一：使用集成脚本
 ./scripts/atrace_capture.sh --backend mnn --model mobilenetv2
 
-# 方式二：手动执行
-adb shell "atrace --async_start -c -b 32768 sched,freq,idle"
-# ... 运行 benchmark ...
-adb shell "atrace --async_stop -o /data/local/tmp/trace.txt"
+# 方式二：使用 profile_benchmark.sh
+./scripts/profile_benchmark.sh --backend mnn --model mobilenetv2 --profile atrace
+
+# 方式三：手动执行（同步模式）
+adb shell "atrace -t 5 -b 32768 sched freq idle > /data/local/tmp/trace.txt"
 adb pull /data/local/tmp/trace.txt .
 ```
 
@@ -188,10 +204,18 @@ adb pull /data/local/tmp/trace.txt .
 
 ### 4.4 查看 trace
 
+**方式一：Perfetto UI（推荐）**
+1. 打开 https://ui.perfetto.dev
+2. 点击 "Open trace file"
+3. 选择 `trace.txt` 文件
+
+**方式二：chrome://tracing**
 1. 打开 Chrome 浏览器
 2. 地址栏输入 `chrome://tracing`
 3. 点击 "Load" 按钮
 4. 选择 `trace.txt` 文件
+
+**注意：** atrace 输出的是 ftrace 格式，Perfetto UI 支持更好的兼容性。如果 chrome://tracing 无法打开，请使用 Perfetto UI。
 
 **快捷键：**
 - `W/S`：放大/缩小
@@ -220,10 +244,13 @@ perfetto 是 atrace 的继任者，提供更强大的 trace 能力和更好的�
 ### 5.2 快速开始
 
 ```bash
-# 方式一：使用集成脚本
+# 方式一：使用集成脚本（推荐）
 ./scripts/perfetto_trace.sh --backend mnn --model mobilenetv2
 
-# 方式二：手动执行
+# 方式二：使用 profile_benchmark.sh
+./scripts/profile_benchmark.sh --backend mnn --model mobilenetv2 --profile perfetto
+
+# 方式三：手动执行
 # 生成配置文件
 cat > config.pbtx << EOF
 buffers: { size_kb: 32768 fill_policy: RING_BUFFER }
@@ -240,10 +267,12 @@ data_sources: { config { name: "linux.process_stats"
 }}
 EOF
 
-# 推送配置并执行
-adb push config.pbtx /data/local/tmp/
-adb shell "perfetto --txt -c /data/local/tmp/config.pbtx -o /data/local/tmp/trace.perfetto-trace"
-adb pull /data/local/tmp/trace.perfetto-trace .
+# 推送配置并执行（注意：输出必须在 /data/misc/perfetto-traces/ 目录）
+adb push config.pbtx /data/local/tmp/benchmark/profiling/
+adb shell "cat /data/local/tmp/benchmark/profiling/config.pbtx | \
+    perfetto --txt -c - -o /data/misc/perfetto-traces/trace.perfetto-trace"
+adb shell "cp /data/misc/perfetto-traces/trace.perfetto-trace /data/local/tmp/benchmark/profiling/"
+adb pull /data/local/tmp/benchmark/profiling/trace.perfetto-trace .
 ```
 
 ### 5.3 预设配置
@@ -352,28 +381,40 @@ done
 
 ### 7.3 结果目录结构
 
+目录结构根据 `--profile` 参数动态生成，只创建启用工具的目录：
+
 ```
 results/profiling/
 └── 20260426_143000_mobilenetv2_mnn/
-    ├── metadata.txt              # 设备信息 + 测试参数
     ├── device_info.txt           # CPU、温度等详细信息
     ├── benchmark_output.txt      # benchmark 原始输出
     ├── thermal_pre.txt           # 测试前温度
     ├── thermal_post.txt          # 测试后温度
-    ├── summary.md                # 汇总报告
-    ├── simpleperf/
+    ├── summary.md                # 汇总报告（仅 profile_benchmark.sh）
+    ├── simpleperf/               # --profile simpleperf
     │   ├── perf.data             # 原始采样数据
     │   ├── report_functions.txt  # 函数热点报告
     │   ├── report_dso.txt        # 共享库报告
-    │   └── report_callchain.txt  # 调用链报告
-    ├── atrace/
-    │   └── trace.txt             # 系统 trace
-    ├── perfetto/
+    │   ├── report_callchain.txt  # 调用链报告
+    │   ├── out.folded            # 火焰图折叠数据
+    │   └── flamegraph.svg        # 火焰图（自动生成）
+    ├── atrace/                   # --profile atrace
+    │   └── trace.txt             # 系统 trace（ftrace 格式）
+    ├── perfetto/                 # --profile perfetto
     │   ├── trace.perfetto-trace  # perfetto trace
     │   └── config.pbtx           # 配置文件
-    └── framework/
+    └── framework/                # --profile framework
         ├── mnn_profile.txt       # MNN 逐算子耗时
         └── ort_profile.json      # ORT profiling trace
+```
+
+**示例：**
+```bash
+# 只生成 simpleperf 目录
+./scripts/profile_benchmark.sh --backend mnn --model mobilenetv2 --profile simpleperf
+
+# 生成 simpleperf + perfetto 目录
+./scripts/profile_benchmark.sh --backend mnn --model mobilenetv2 --profile simpleperf,perfetto
 ```
 
 ---
@@ -397,7 +438,8 @@ adb shell "zcat /proc/config.gz | grep CONFIG_PERF_EVENTS"
 **解决：**
 ```bash
 # 从 NDK 推送 simpleperf（支持非 root）
-adb push $ANDROID_NDK/simpleperf/arm64/simpleperf /data/local/tmp/
+# NDK r25+ 路径
+adb push $ANDROID_NDK/simpleperf/bin/android/arm64/simpleperf /data/local/tmp/
 adb shell chmod 755 /data/local/tmp/simpleperf
 
 # 使用 -g 参数（需要 root）或 --no-callchain-jit（非 root）
