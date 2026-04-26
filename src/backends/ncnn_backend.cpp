@@ -85,6 +85,36 @@ bool NCNNBackend::infer(const std::vector<float>& input) {
     return ret == 0;
 }
 
+bool NCNNBackend::infer_with_output(const std::vector<float>& input, std::vector<float>& output) {
+    // Copy data to input mat
+    memcpy(input_.data, input.data(), input.size() * sizeof(float));
+
+    ncnn::Extractor ex = net_.create_extractor();
+    ex.set_light_mode(true);
+
+    // Use input name
+    int ret = ex.input(input_name_.c_str(), input_);
+    if (ret != 0) {
+        printf("ncnn: ex.input failed\n");
+        return false;
+    }
+
+    ncnn::Mat output_mat;
+    // Use output name
+    ret = ex.extract(output_name_.c_str(), output_mat);
+    if (ret != 0) {
+        printf("ncnn: ex.extract failed\n");
+        return false;
+    }
+
+    // Copy output data
+    size_t output_size = output_mat.total();
+    output.resize(output_size);
+    memcpy(output.data(), output_mat.data, output_size * sizeof(float));
+
+    return true;
+}
+
 void NCNNBackend::deinit() {
     net_.clear();
 }

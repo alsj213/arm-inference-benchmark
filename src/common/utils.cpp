@@ -36,6 +36,14 @@ void fill_random_float(float* data, size_t size, float min, float max) {
     }
 }
 
+void fill_random_float(float* data, size_t size, unsigned int seed) {
+    std::mt19937 gen(seed);
+    std::uniform_real_distribution<float> dis(-1.0f, 1.0f);
+    for (size_t i = 0; i < size; ++i) {
+        data[i] = dis(gen);
+    }
+}
+
 std::vector<uint8_t> read_file(const std::string& path) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file) {

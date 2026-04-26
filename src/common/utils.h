@@ -36,6 +36,7 @@ size_t get_memory_usage_kb();
 
 // Generate random input data
 void fill_random_float(float* data, size_t size, float min = -1.0f, float max = 1.0f);
+void fill_random_float(float* data, size_t size, unsigned int seed);
 
 // Read file into buffer
 std::vector<uint8_t> read_file(const std::string& path);

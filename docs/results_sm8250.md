@@ -5,6 +5,39 @@
 
 ---
 
+## 🎯 精度对比说明
+
+从 2026-04-26 开始，所有测试包含精度对比：
+- ✅ 使用 ONNX Runtime 作为标杆，获取参考输出
+- ✅ 计算余弦相似度、绝对误差、相对误差
+- ✅ 确保各框架推理结果与 ORT 一致
+
+**精度对比指标：**
+| 指标 | 含义 | 优秀标准 |
+|------|------|---------|
+| Cosine Similarity | 余弦相似度 | >0.999 |
+| Mean Absolute Error | 平均绝对误差 | <0.001 |
+| Max Absolute Error | 最大绝对误差 | <0.01 |
+| Mean Relative Error | 平均相对误差 | <0.1% |
+
+**典型精度对比输出：**
+```
+--- [Step 1] Getting reference output from ONNX Runtime ---
+  ✅ Reference output obtained (1000 elements)
+
+--- [Step 2] Running benchmarks ---
+>> Testing mnn on mobilevit_s...
+
+--- Accuracy Comparison ---
+  ✅ [Accuracy] MNN: PASSED
+      Cosine Similarity:  1.000000 (Excellent)
+      Mean Absolute Error: 0.000173
+      Max Absolute Error:  0.000595
+      Mean Relative Error: 0.0002%
+```
+
+---
+
 ## 🆕 4 线程测试 (2026-04-26 更新)
 
 ### 多模型对比测试

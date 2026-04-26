@@ -10,7 +10,8 @@
 
 - 🚀 **多框架支持**: ncnn, MNN, TFLite, ONNX Runtime, TVM, TNN, QNN
 - 📊 **完整测试指标**: 延迟（P50/P90/P99）、吞吐量、初始化时间、内存占用
-- 🤖 **真实模型测试**: MobileNetV2, ResNet50, YOLOv8n, BERT
+- 🎯 **精度对比**: 以 ONNX Runtime 为标杆，自动计算余弦相似度、绝对误差、相对误差
+- 🤖 **真实模型测试**: MobileNetV2, ResNet50, MobileViT-S, YOLOv8n, BERT
 - ⚡ **ARM 优化**: 原生 ARM64 编译，支持 NEON 优化
 - 📱 **端侧友好**: 专为手机端侧推理设计的基准测试
 
@@ -217,6 +218,12 @@ LD_LIBRARY_PATH=/data/local/tmp/benchmark ./benchmark_inference \
   --runs 100
 ```
 
+**输出说明：**
+
+运行后会显示精度校验和性能测试结果：
+- **Accuracy Verification**: 精度校验（检查输出是否包含 NaN、全 0、无穷大等异常）
+- **Performance Results**: 性能测试结果（延迟 P50/P90、FPS、内存占用等）
+
 ---
 
 ### 📊 常用测试命令
@@ -259,31 +266,55 @@ done
 
 **典型输出示例：**
 ```
-=== ARM Inference Benchmark ===
-Backend:  mnn
-Model:    mobilenetv2
-Precision:fp32
-Threads:  4
-Warmup:   10
-Test runs:50
+========================================================
+Model: mobilevit_s
+Input shape: 1 3 256 256 
+========================================================
 
-----------------------------------------
-Model: mobilenetv2
-Input shape: 1 3 224 224 
+--- [Step 1] Getting reference output from ONNX Runtime ---
+ONNXRT: loading model: ./models/classification/mobilevit_s/mobilevit_s.onnx
+ONNXRT: input 0 = input
+ONNXRT: output 0 = output
+  ✅ Reference output obtained (1000 elements)
+      Reference stats - Min: -207.7330, Max: 13.3748, Mean: -107.6129
 
->> Running mnn on mobilenetv2...
-  Init time:  33.37 ms
-  Min:     8.01 ms
-  P50:     8.18 ms
-  P90:     8.38 ms
-  P99:     8.56 ms
-  Mean:    8.20 ms
-  Std:     0.12 ms
-  Throughput: 121.9 FPS
+--- [Step 2] Running benchmarks ---
+
+>> Testing mnn on mobilevit_s...
+
+--- Accuracy Comparison ---
+  ✅ [Accuracy] MNN: PASSED
+      Cosine Similarity:  1.000000 (Excellent)
+      Mean Absolute Error: 0.000173
+      Max Absolute Error:  0.000595
+      Mean Relative Error: 0.0002%
+      Output range: [-207.7325, 13.3747], Mean: -107.6127
+
+--- Performance Results ---
+  Init time:  93.22 ms
+  Min:    59.05 ms
+  P50:    59.46 ms
+  P90:    60.05 ms
+  Mean:   59.48 ms
+  Throughput: 16.81 FPS
   Peak mem:  0 KB
 ```
 
 **关键指标说明：**
+
+#### 🎯 精度对比 (Accuracy Comparison)
+以 ONNX Runtime 输出为标杆，与其他框架进行精度对比：
+- **Cosine Similarity**: 余弦相似度，衡量输出向量方向一致性
+  - >0.999: Excellent（优秀）
+  - >0.99: Good（良好）
+  - >0.95: Acceptable（可接受）
+  - <0.95: Poor（较差）
+- **Mean Absolute Error**: 平均绝对误差，元素级别差异
+- **Max Absolute Error**: 最大绝对误差
+- **Mean Relative Error**: 平均相对误差（考虑数值大小）
+- **PASSED**: 余弦相似度 > 0.99
+
+#### ⚡ 性能测试 (Performance Results)
 - **Init time**: 模型初始化/加载时间（包括内存分配、算子优化）
 - **P50/P90/P99**: 延迟百分位数，P50 为中位数延迟
 - **Throughput (FPS)**: 每秒可处理的图片数
@@ -337,6 +368,20 @@ adb push models/classification/mobilevit_s /data/local/tmp/benchmark/models/clas
 2. 线程数设置不当 → 推荐 4 线程使用大核
 3. 后台应用占用资源 → 关闭后台应用，开启飞行模式
 4. 精度设置 → FP16 比 FP32 快约 2 倍
+```
+
+#### 问题 5: 精度校验失败 (Accuracy Check FAILED)
+```
+可能原因：
+1. 模型文件损坏 → 重新转换或下载模型
+2. 输入数据异常 → 使用随机输入或正确的预处理
+3. 框架版本不兼容 → 检查框架版本和模型格式
+4. 模型训练问题 → 检查模型是否正确训练和导出
+
+建议：
+- 检查输出统计是否包含 NaN、无穷大或全零
+- 对比不同框架的输出范围是否一致
+- 使用 ONNX Runtime 作为参考基准进行验证
 ```
 
 ---

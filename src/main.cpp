@@ -3,6 +3,8 @@
 #include <string>
 #include <cstdlib>
 #include <cstdio>
+#include <algorithm>
+#include <numeric>
 
 #include "common/benchmark.h"
 #include "common/utils.h"
@@ -14,7 +16,7 @@ void print_usage() {
     printf("Usage: ./benchmark_inference [options]\n");
     printf("Options:\n");
     printf("  --backend <ncnn|mnn|tnn|tflite|qnn|onnxrt|tvm>  Backend to test (default: all)\n");
-    printf("  --model <mobilenetv2|resnet50|yolov8n|bert>  Model to test (default: all)\n");
+    printf("  --model <mobilenetv2|resnet50|shufflenet_v2_x0_5|mobilevit_s|yolov8n|bert>  Model to test (default: all)\n");
     printf("  --precision <fp32|fp16|int8>                  Precision (default: fp32)\n");
     printf("  --threads <num>                                Number of threads (default: 1)\n");
     printf("  --warmup <num>                                 Number of warmup runs (default: 10)\n");
@@ -123,7 +125,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> models_to_test;
     if (args.model == "all") {
-        models_to_test = {"mobilenetv2", "resnet50", "yolov8n", "bert"};
+        models_to_test = {"mobilenetv2", "resnet50", "shufflenet_v2_x0_5", "mobilevit_s", "yolov8n", "bert"};
     } else {
         models_to_test = {args.model};
     }
@@ -135,16 +137,67 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        printf("\n----------------------------------------\n");
+        printf("\n========================================================\n");
         printf("Model: %s\n", model_name.c_str());
         printf("Input shape: ");
         for (int dim : model_info.input_shape) {
             printf("%d ", dim);
         }
-        printf("\n");
+        printf("\n========================================================\n");
+
+        // Calculate input size
+        size_t input_size = 1;
+        for (int dim : model_info.input_shape) {
+            input_size *= dim;
+        }
+
+        // Generate fixed input for all backends (same seed for reproducibility)
+        std::vector<float> input(input_size);
+        utils::fill_random_float(input.data(), input.size(), (unsigned int)42);  // Fixed seed
+
+        // Step 1: Get reference output from ONNX Runtime
+        std::vector<float> reference_output;
+        bool has_reference = false;
+
+        if (std::find(backends_to_test.begin(), backends_to_test.end(), "onnxrt") != backends_to_test.end() ||
+            backends_to_test.size() > 1) {
+
+            printf("\n--- [Step 1] Getting reference output from ONNX Runtime ---\n");
+
+            BenchmarkConfig ort_config;
+            ort_config.model_name = model_name;
+            ort_config.model_path = model_info.get_model_path("onnxrt");
+            ort_config.weights_path = model_info.get_weights_path("onnxrt");
+            ort_config.input_shape = model_info.input_shape;
+            ort_config.backend_type = BackendType::ONNXRT;
+            ort_config.precision = parse_precision(args.precision);
+            ort_config.num_threads = args.threads;
+            ort_config.use_gpu = args.use_gpu;
+            ort_config.warmup_runs = 1;
+            ort_config.test_runs = 1;
+
+            auto ort_backend = create_backend(BackendType::ONNXRT);
+            if (ort_backend) {
+                ort_backend->init(ort_config);
+                if (ort_backend->infer_with_output(input, reference_output)) {
+                    has_reference = true;
+                    printf("  ✅ Reference output obtained (%zu elements)\n", reference_output.size());
+                    printf("      Reference stats - Min: %.4f, Max: %.4f, Mean: %.4f\n",
+                           *std::min_element(reference_output.begin(), reference_output.end()),
+                           *std::max_element(reference_output.begin(), reference_output.end()),
+                           std::accumulate(reference_output.begin(), reference_output.end(), 0.0) / reference_output.size());
+                } else {
+                    printf("  ⚠️  Failed to get reference output from ORT\n");
+                }
+                ort_backend->deinit();
+            }
+        }
+
+        // Step 2: Test all backends
+        printf("\n--- [Step 2] Running benchmarks ---\n");
 
         for (const auto& backend_name : backends_to_test) {
-            printf("\n>> Running %s on %s...\n", backend_name.c_str(), model_name.c_str());
+            printf("\n>> Testing %s on %s...\n", backend_name.c_str(), model_name.c_str());
 
             BenchmarkConfig config;
             config.model_name = model_name;
@@ -158,22 +211,25 @@ int main(int argc, char** argv) {
             config.warmup_runs = args.warmup;
             config.test_runs = args.runs;
 
-            size_t input_size = 1;
-            for (int dim : config.input_shape) {
-                input_size *= dim;
-            }
-
             auto backend = create_backend(config.backend_type);
             if (!backend) {
                 printf("Failed to create backend: %s\n", backend_name.c_str());
                 continue;
             }
 
-            BenchmarkResult result = run_benchmark(std::move(backend), config, input_size);
+            // Pass reference output for comparison (if available and not ORT itself)
+            std::vector<float> ref_output;
+            if (has_reference && backend_name != "onnxrt") {
+                ref_output = reference_output;
+            }
+
+            BenchmarkResult result = run_benchmark(std::move(backend), config, input_size, ref_output);
             if (result.init_time_ms <= 0) {
                 continue;
             }
 
+            // Print performance results
+            printf("\n--- Performance Results ---\n");
             printf("  Init time:  %.2f ms\n", result.init_time_ms);
             utils::print_stats(result.latency_stats);
             printf("  Throughput: %.2f FPS\n", result.throughput_fps);

@@ -68,6 +68,42 @@ bool ONNXRTBackend::infer(const std::vector<float>& input) {
     return output_tensors.size() > 0;
 }
 
+bool ONNXRTBackend::infer_with_output(const std::vector<float>& input, std::vector<float>& output) {
+    Ort::MemoryInfo mem_info = Ort::MemoryInfo::CreateCpu(
+        OrtArenaAllocator, OrtMemTypeDefault);
+
+    std::vector<Ort::Value> input_tensors;
+    input_tensors.emplace_back(Ort::Value::CreateTensor<float>(
+        mem_info, const_cast<float*>(input.data()), input.size(),
+        input_shape_.data(), input_shape_.size()));
+
+    std::vector<Ort::Value> output_tensors = session_.Run(
+        Ort::RunOptions{nullptr},
+        input_names_.data(),
+        input_tensors.data(),
+        input_tensors.size(),
+        output_names_.data(),
+        output_names_.size());
+
+    if (output_tensors.empty()) {
+        return false;
+    }
+
+    // Get output tensor data
+    auto& output_tensor = output_tensors[0];
+    auto output_shape = output_tensor.GetTensorTypeAndShapeInfo().GetShape();
+    size_t output_size = 1;
+    for (auto dim : output_shape) {
+        output_size *= dim;
+    }
+
+    output.resize(output_size);
+    const float* output_data = output_tensor.GetTensorData<float>();
+    std::copy(output_data, output_data + output_size, output.data());
+
+    return true;
+}
+
 void ONNXRTBackend::deinit() {
     if (session_) {
         session_.release();

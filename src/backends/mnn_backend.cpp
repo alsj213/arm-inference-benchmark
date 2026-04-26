@@ -46,6 +46,31 @@ bool MNNBackend::infer(const std::vector<float>& input) {
     return output != nullptr;
 }
 
+bool MNNBackend::infer_with_output(const std::vector<float>& input, std::vector<float>& output) {
+    // Copy input data
+    memcpy(input_tensor_->host<float>(), input.data(), input.size() * sizeof(float));
+
+    net_->runSession(session_);
+    MNN::Tensor* output_tensor = net_->getSessionOutput(session_, nullptr);
+
+    if (!output_tensor) {
+        return false;
+    }
+
+    // Get output size
+    auto output_shape = output_tensor->shape();
+    size_t output_size = 1;
+    for (auto dim : output_shape) {
+        output_size *= dim;
+    }
+
+    // Copy output data
+    output.resize(output_size);
+    memcpy(output.data(), output_tensor->host<float>(), output_size * sizeof(float));
+
+    return true;
+}
+
 void MNNBackend::deinit() {
     if (session_) {
         net_->releaseSession(session_);

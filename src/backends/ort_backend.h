@@ -8,6 +8,7 @@ class ONNXRTBackend : public BenchmarkBackend {
 public:
     bool init(const BenchmarkConfig& config) override;
     bool infer(const std::vector<float>& input) override;
+    bool infer_with_output(const std::vector<float>& input, std::vector<float>& output) override;
     void deinit() override;
     std::string name() const override { return "ONNXRT"; }
 
