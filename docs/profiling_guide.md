@@ -114,8 +114,13 @@ git clone https://github.com/brendangregg/FlameGraph.git tools/FlameGraph
 |------|------|--------|
 | `-e` | 采样事件 | `cpu-cycles`（默认）、`cache-misses`、`branch-misses` |
 | `-f` | 采样频率 Hz | 4000（平衡精度和开销） |
-| `--call-graph` | 调用图模式 | `fp`（快速）、`dwarf`（更准确） |
+| `-g` | 调用图模式 | 使用 DWARF 展开调用栈（推荐，更准确） |
+| `--call-graph fp` | Frame Pointer 模式 | 快速但 ARM64 上可能有 unknown 符号 |
 | `--duration` | 采样时长秒 | 10-30 |
+
+**调用图模式选择：**
+- **`-g`（DWARF 模式）**：使用 DWARF 调试信息展开调用栈，更准确，推荐使用
+- **`--call-graph fp`（Frame Pointer 模式）**：快速但 ARM64 上某些函数（如 MNN 汇编优化）可能无法正确展开，导致火焰图中出现 `unknown` 符号
 
 ### 3.4 采样事件选择
 

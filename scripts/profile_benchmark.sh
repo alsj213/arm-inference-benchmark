@@ -139,12 +139,12 @@ create_wrapper_script() {
 
     if is_tool_enabled "simpleperf"; then
         simpleperf_cmd="
-# 启动 simpleperf（后台）
+# 启动 simpleperf（后台，使用 dwarf 模式展开调用栈）
 /data/local/tmp/simpleperf record \\
     -p \$BENCH_PID \\
     -e cpu-cycles \\
     -f 4000 \\
-    --call-graph fp \\
+    -g \\
     --duration $SIMPLEPERF_DURATION \\
     -o profiling/perf.data &
 SIMPLEPERF_PID=\$!"
@@ -274,22 +274,25 @@ generate_simpleperf_reports() {
         return
     fi
 
-    log_info "Generating simpleperf reports..."
+    log_info "Generating simpleperf reports on device..."
 
-    local simpleperf_bin=""
-    if [ -f "$ANDROID_NDK/simpleperf/bin/linux/x86_64/simpleperf" ]; then
-        simpleperf_bin="$ANDROID_NDK/simpleperf/bin/linux/x86_64/simpleperf"
-    elif command -v simpleperf &>/dev/null; then
-        simpleperf_bin="simpleperf"
-    else
-        log_warn "simpleperf not found locally, reports not generated"
-        return
-    fi
+    local device_dir="/data/local/tmp/benchmark"
 
-    # 文本报告
-    $simpleperf_bin report -i "$perf_data" --sort dso,symbol -n > "$RESULT_DIR/simpleperf/report_functions.txt" 2>/dev/null
-    $simpleperf_bin report -i "$perf_data" --sort dso -n > "$RESULT_DIR/simpleperf/report_dso.txt" 2>/dev/null
-    $simpleperf_bin report -i "$perf_data" --sort comm,dso,symbol --show-callchain > "$RESULT_DIR/simpleperf/report_callchain.txt" 2>/dev/null
+    # 在设备上生成报告
+    adb_cmd shell "/data/local/tmp/simpleperf report \
+        -i $device_dir/profiling/perf.data \
+        --sort dso,symbol \
+        -n" > "$RESULT_DIR/simpleperf/report_functions.txt" 2>/dev/null
+
+    adb_cmd shell "/data/local/tmp/simpleperf report \
+        -i $device_dir/profiling/perf.data \
+        --sort dso \
+        -n" > "$RESULT_DIR/simpleperf/report_dso.txt" 2>/dev/null
+
+    adb_cmd shell "/data/local/tmp/simpleperf report \
+        -i $device_dir/profiling/perf.data \
+        --sort comm,dso,symbol \
+        --show-callchain" > "$RESULT_DIR/simpleperf/report_callchain.txt" 2>/dev/null
 
     # 火焰图
     generate_flamegraph "$perf_data"
@@ -303,13 +306,6 @@ generate_flamegraph() {
     local folded_file="$RESULT_DIR/simpleperf/out.folded"
     local svg_file="$RESULT_DIR/simpleperf/flamegraph.svg"
 
-    # 检查 simpleperf stackcollapse.py
-    local stackcollapse_py="$ANDROID_NDK/simpleperf/stackcollapse.py"
-    if [ ! -f "$stackcollapse_py" ]; then
-        log_warn "stackcollapse.py not found, skipping flamegraph"
-        return
-    fi
-
     # 检查 FlameGraph 工具
     local flamegraph_pl="./tools/FlameGraph/flamegraph.pl"
     if [ ! -f "$flamegraph_pl" ]; then
@@ -317,13 +313,30 @@ generate_flamegraph() {
         return
     fi
 
-    # 生成
-    log_info "Generating flamegraph..."
-    python3 "$stackcollapse_py" -i "$perf_data" > "$folded_file" 2>/dev/null
-    "$flamegraph_pl" "$folded_file" > "$svg_file" 2>/dev/null
+    log_info "Generating flamegraph from report..."
+    local device_dir="/data/local/tmp/benchmark"
 
-    if [ -f "$svg_file" ]; then
-        log_info "Flamegraph: $svg_file"
+    # 从报告生成折叠格式
+    adb_cmd shell "/data/local/tmp/simpleperf report \
+        -i $device_dir/profiling/perf.data \
+        --sort dso,symbol \
+        -n" | \
+        awk '/^[0-9]+\.[0-9]+%/ {
+            pct = $1
+            gsub(/%/, "", pct)
+            sym = $4
+            for (i=5; i<=NF; i++) sym = sym ";" $i
+            samples = int(pct * 100)
+            print sym " " samples
+        }' > "$folded_file" 2>/dev/null
+
+    # 生成 SVG
+    if [ -s "$folded_file" ]; then
+        "$flamegraph_pl" "$folded_file" > "$svg_file" 2>/dev/null
+
+        if [ -f "$svg_file" ]; then
+            log_info "Flamegraph generated: $svg_file"
+        fi
     fi
 }
 

@@ -84,12 +84,12 @@ echo \$BENCH_PID > profiling/benchmark.pid
 # 等待 warmup
 sleep 3
 
-# 启动 simpleperf
+# 启动 simpleperf（使用 dwarf 模式展开调用栈，更准确）
 /data/local/tmp/simpleperf record \\
     -p \$BENCH_PID \\
     -e $EVENT \\
     -f $FREQUENCY \\
-    --call-graph $CALLGRAPH \\
+    -g \\
     --duration $DURATION \\
     -o profiling/perf.data
 
@@ -127,38 +127,27 @@ generate_reports() {
         return
     fi
 
-    # 查找本地 simpleperf 工具
-    local simpleperf_bin=""
-    if [ -f "$ANDROID_NDK/simpleperf/bin/linux/x86_64/simpleperf" ]; then
-        simpleperf_bin="$ANDROID_NDK/simpleperf/bin/linux/x86_64/simpleperf"
-    elif command -v simpleperf &>/dev/null; then
-        simpleperf_bin="simpleperf"
-    else
-        log_warn "simpleperf binary not found for report generation"
-        log_warn "Install Android NDK or run: simpleperf report -i $perf_data"
-        return
-    fi
+    # 在设备上生成报告（使用设备上的 simpleperf）
+    local device_dir="/data/local/tmp/benchmark"
+    log_info "Generating reports on device..."
 
     # 函数热点报告
-    log_info "Generating function hotspot report..."
-    $simpleperf_bin report \
-        -i "$perf_data" \
+    adb_cmd shell "/data/local/tmp/simpleperf report \
+        -i $device_dir/profiling/perf.data \
         --sort dso,symbol \
-        -n > "$RESULT_DIR/simpleperf/report_functions.txt" 2>/dev/null
+        -n" > "$RESULT_DIR/simpleperf/report_functions.txt" 2>/dev/null
 
     # DSO 级报告
-    log_info "Generating DSO report..."
-    $simpleperf_bin report \
-        -i "$perf_data" \
+    adb_cmd shell "/data/local/tmp/simpleperf report \
+        -i $device_dir/profiling/perf.data \
         --sort dso \
-        -n > "$RESULT_DIR/simpleperf/report_dso.txt" 2>/dev/null
+        -n" > "$RESULT_DIR/simpleperf/report_dso.txt" 2>/dev/null
 
     # 调用链报告
-    log_info "Generating callchain report..."
-    $simpleperf_bin report \
-        -i "$perf_data" \
+    adb_cmd shell "/data/local/tmp/simpleperf report \
+        -i $device_dir/profiling/perf.data \
         --sort comm,dso,symbol \
-        --show-callchain > "$RESULT_DIR/simpleperf/report_callchain.txt" 2>/dev/null
+        --show-callchain" > "$RESULT_DIR/simpleperf/report_callchain.txt" 2>/dev/null
 
     # 生成火焰图
     generate_flamegraph "$perf_data"
@@ -172,13 +161,6 @@ generate_flamegraph() {
     local folded_file="$RESULT_DIR/simpleperf/out.folded"
     local svg_file="$RESULT_DIR/simpleperf/flamegraph.svg"
 
-    # 检查 simpleperf stackcollapse.py
-    local stackcollapse_py="$ANDROID_NDK/simpleperf/stackcollapse.py"
-    if [ ! -f "$stackcollapse_py" ]; then
-        log_warn "stackcollapse.py not found, skipping flamegraph generation"
-        return
-    fi
-
     # 检查 FlameGraph 工具
     local flamegraph_pl="./tools/FlameGraph/flamegraph.pl"
     if [ ! -f "$flamegraph_pl" ]; then
@@ -187,17 +169,35 @@ generate_flamegraph() {
         return
     fi
 
-    # 生成折叠格式
-    log_info "Generating flamegraph..."
-    python3 "$stackcollapse_py" -i "$perf_data" > "$folded_file" 2>/dev/null
+    log_info "Generating flamegraph from report..."
+    local device_dir="/data/local/tmp/benchmark"
+
+    # 从报告生成折叠格式（简化版本，只显示热点函数）
+    adb_cmd shell "/data/local/tmp/simpleperf report \
+        -i $device_dir/profiling/perf.data \
+        --sort dso,symbol \
+        -n" | \
+        awk '/^[0-9]+\.[0-9]+%/ {
+            pct = $1
+            gsub(/%/, "", pct)
+            sym = $4
+            for (i=5; i<=NF; i++) sym = sym ";" $i
+            # 将百分比转换为采样数（假设总采样数为 10000）
+            samples = int(pct * 100)
+            print sym " " samples
+        }' > "$folded_file" 2>/dev/null
 
     # 生成 SVG
-    "$flamegraph_pl" "$folded_file" > "$svg_file" 2>/dev/null
+    if [ -s "$folded_file" ]; then
+        "$flamegraph_pl" "$folded_file" > "$svg_file" 2>/dev/null
 
-    if [ -f "$svg_file" ]; then
-        log_info "Flamegraph generated: $svg_file"
+        if [ -f "$svg_file" ]; then
+            log_info "Flamegraph generated: $svg_file"
+        else
+            log_warn "Failed to generate flamegraph"
+        fi
     else
-        log_warn "Failed to generate flamegraph"
+        log_warn "No folded data generated, skipping flamegraph"
     fi
 }
 
