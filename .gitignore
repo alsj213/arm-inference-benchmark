@@ -122,3 +122,8 @@ Thumbs.db
 # Documentation build
 docs/_build/
 docs/build/
+
+# ==============================================
+# Tools (cloned third-party)
+# ==============================================
+tools/FlameGraph/
