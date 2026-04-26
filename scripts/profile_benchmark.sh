@@ -134,8 +134,7 @@ create_wrapper_script() {
 
     # 构建 profiling 命令
     local simpleperf_cmd=""
-    local atrace_start_cmd=""
-    local atrace_stop_cmd=""
+    local atrace_cmd=""
     local perfetto_cmd=""
 
     if is_tool_enabled "simpleperf"; then
@@ -152,12 +151,10 @@ SIMPLEPERF_PID=\$!"
     fi
 
     if is_tool_enabled "atrace"; then
-        atrace_start_cmd="
-# 启动 atrace
-atrace --async_start -c -b 32768 sched freq idle"
-        atrace_stop_cmd="
-# 停止 atrace
-atrace --async_stop -o profiling/trace.txt"
+        atrace_cmd="
+# 启动 atrace（同步模式，过滤掉开头的 capturing trace 行）
+atrace -t $ATRACE_DURATION -b 32768 sched freq idle 2>/dev/null | grep -v '^capturing trace' > profiling/trace.txt &
+ATRACE_PID=\$!"
     fi
 
     if is_tool_enabled "perfetto"; then
@@ -222,7 +219,7 @@ echo \$BENCH_PID > profiling/benchmark.pid
 # 等待 warmup
 sleep 3
 
-$atrace_start_cmd
+$atrace_cmd
 $simpleperf_cmd
 $perfetto_cmd
 
@@ -238,7 +235,10 @@ if [ -n \"\$PERFETTO_PID\" ]; then
     chmod 644 profiling/trace.perfetto-trace
 fi
 
-$atrace_stop_cmd
+# 等待 atrace 完成
+if [ -n \"\$ATRACE_PID\" ]; then
+    wait \$ATRACE_PID
+fi
 
 # 等待 benchmark 完成
 wait \$BENCH_PID

@@ -88,12 +88,11 @@ main() {
 
     # 将逗号分隔的类别转换为空格分隔
     local atrace_categories=$(echo "$CATEGORIES" | tr ',' ' ')
-    adb_cmd shell "atrace --async_start -c -b $BUFFER_SIZE $atrace_categories"
 
-    sleep "$DURATION"
+    # 使用 -t 参数指定采集时长，并过滤掉开头的 "capturing trace..." 行
+    adb_cmd shell "atrace -t $DURATION -b $BUFFER_SIZE $atrace_categories 2>/dev/null | grep -v '^capturing trace' > /data/local/tmp/benchmark/profiling/trace.txt"
 
-    log_info "Stopping atrace..."
-    adb_cmd shell "atrace --async_stop -o /data/local/tmp/benchmark/profiling/trace.txt"
+    log_info "Atrace capture completed"
 
     # Step 7: 等待 benchmark 完成
     log_info "Waiting for benchmark to complete..."
@@ -127,9 +126,16 @@ print_summary() {
     echo "  - trace.txt: $RESULT_DIR/atrace/trace.txt"
     echo ""
     echo "How to view:"
-    echo "  1. Chrome: Open chrome://tracing"
-    echo "  2. Click 'Load' and select trace.txt"
-    echo "  3. Or use Perfetto: https://ui.perfetto.dev"
+    echo "  Option 1 (Recommended): Perfetto UI"
+    echo "    - Open https://ui.perfetto.dev"
+    echo "    - Click 'Open trace file' and select trace.txt"
+    echo ""
+    echo "  Option 2: Systrace (requires conversion)"
+    echo "    - Run: python3 \$ANDROID_NDK/simpleperf/convert_trace.py trace.txt trace.html"
+    echo "    - Open trace.html in Chrome"
+    echo ""
+    echo "  Note: Raw ftrace format may not work directly in chrome://tracing"
+    echo "  For best compatibility, use perfetto_trace.sh instead"
     echo "========================================="
 }
 
