@@ -20,21 +20,14 @@
 | Max Absolute Error | 最大绝对误差 | <0.01 |
 | Mean Relative Error | 平均相对误差 | <0.1% |
 
-**典型精度对比输出：**
-```
---- [Step 1] Getting reference output from ONNX Runtime ---
-  ✅ Reference output obtained (1000 elements)
+**精度测试数据汇总 (4线程, FP32, 2026-04-26)**
 
---- [Step 2] Running benchmarks ---
->> Testing mnn on mobilevit_s...
+| 模型 | 对比框架 | Cosine Similarity | Mean Abs Error | Max Abs Error | Mean Rel Error | 状态 |
+|------|---------|-------------------|----------------|---------------|----------------|------|
+| **MobileNetV2** | MNN vs ORT | 1.000000 | 0.000002 | 0.000009 | 0.0005% | ✅ Excellent |
+| **MobileViT-S** | MNN vs ORT | 1.000000 | 0.000173 | 0.000595 | 0.0002% | ✅ Excellent |
 
---- Accuracy Comparison ---
-  ✅ [Accuracy] MNN: PASSED
-      Cosine Similarity:  1.000000 (Excellent)
-      Mean Absolute Error: 0.000173
-      Max Absolute Error:  0.000595
-      Mean Relative Error: 0.0002%
-```
+**结论：** MNN 框架与 ONNX Runtime 输出高度一致，精度损失可忽略不计。
 
 ---
 
@@ -44,8 +37,8 @@
 
 | 模型 | 参数量 | 框架 | 初始化(ms) | P50(ms) | P90(ms) | P99(ms) | Mean(ms) | FPS | MNN vs ORT 加速比 |
 |------|-------|------|-----------|---------|---------|---------|----------|-----|-------------------|
-| **MobileNetV2** | 3.5M | ONNX Runtime | 67.84 | 17.29 | 17.39 | 17.66 | 17.31 | 57.8 | - |
-| **MobileNetV2** | 3.5M | MNN | 33.37 | **8.18** | 8.38 | 8.56 | 8.20 | 121.9 | **2.11x** |
+| **MobileNetV2** | 3.5M | ONNX Runtime | 49.05 | 18.16 | 18.36 | 18.53 | 18.17 | 55.0 | - |
+| **MobileNetV2** | 3.5M | MNN | 29.53 | **8.70** | 8.96 | 9.14 | 8.70 | **114.9** | **2.09x** |
 | **ShuffleNetV2 x0.5** | 1.4M | ONNX Runtime | 183.76 | 2.89 | 2.92 | 4.15 | 2.94 | 339.8 | - |
 | **ShuffleNetV2 x0.5** | 1.4M | MNN | 89.19 | **1.69** | 1.92 | 1.97 | 1.73 | 577.6 | **1.71x** |
 | **ResNet50** | 25.6M | ONNX Runtime | 377.52 | **78.53** | 79.01 | 79.79 | 78.61 | 12.7 | - |
