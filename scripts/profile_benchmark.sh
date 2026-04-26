@@ -80,8 +80,8 @@ main() {
     check_device || exit 1
     check_root
 
-    # Step 2: 创建结果目录
-    create_result_dir "$MODEL" "$BACKEND"
+    # Step 2: 创建结果目录（只创建启用的工具目录）
+    create_result_dir "$MODEL" "$BACKEND" "$PROFILE_TOOLS"
 
     # Step 3: 推送文件
     push_benchmark_files

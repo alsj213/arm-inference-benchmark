@@ -150,14 +150,35 @@ create_result_dir() {
     local model="${1:-unknown}"
     local backend="${2:-unknown}"
     local base_dir="results/profiling"
+    local enabled_tools="${3:-}"  # 可选：启用的工具列表，逗号分隔
 
     local timestamp=$(date '+%Y%m%d_%H%M%S')
     RESULT_DIR="${base_dir}/${timestamp}_${model}_${backend}"
 
-    mkdir -p "$RESULT_DIR/simpleperf"
-    mkdir -p "$RESULT_DIR/atrace"
-    mkdir -p "$RESULT_DIR/perfetto"
-    mkdir -p "$RESULT_DIR/framework"
+    # 如果指定了启用的工具，只创建对应的目录
+    if [ -n "$enabled_tools" ]; then
+        IFS=',' read -ra tools <<< "$enabled_tools"
+        for tool in "${tools[@]}"; do
+            case "$tool" in
+                simpleperf) mkdir -p "$RESULT_DIR/simpleperf" ;;
+                atrace) mkdir -p "$RESULT_DIR/atrace" ;;
+                perfetto) mkdir -p "$RESULT_DIR/perfetto" ;;
+                framework) mkdir -p "$RESULT_DIR/framework" ;;
+                all)
+                    mkdir -p "$RESULT_DIR/simpleperf"
+                    mkdir -p "$RESULT_DIR/atrace"
+                    mkdir -p "$RESULT_DIR/perfetto"
+                    mkdir -p "$RESULT_DIR/framework"
+                    ;;
+            esac
+        done
+    else
+        # 默认创建所有目录
+        mkdir -p "$RESULT_DIR/simpleperf"
+        mkdir -p "$RESULT_DIR/atrace"
+        mkdir -p "$RESULT_DIR/perfetto"
+        mkdir -p "$RESULT_DIR/framework"
+    fi
 
     log_info "Result directory: $RESULT_DIR"
 }
