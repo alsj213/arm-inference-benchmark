@@ -489,6 +489,24 @@ adb shell "perfetto --txt -c config.pbtx -o trace.perfetto-trace --background"
 adb shell "atrace --async_start -c sched,freq,idle"
 ```
 
+### Q6: 火焰图中部分调用链只有 2 层深度
+
+**现象：** 火焰图中约 30-40% 的采样只有叶子函数和直接调用者，没有完整的从 `main` 到叶子函数的调用链。
+
+**原因：** 推理框架（如 MNN、ncnn）使用手写汇编优化关键计算路径（如矩阵乘法、卷积）。这些汇编函数不包含 DWARF unwind info（`.eh_frame` / `.debug_frame`），导致 simpleperf 无法穿透这些函数展开完整调用栈。
+
+**影响：**
+- 主线程和工作线程都受影响
+- `--call-graph dwarf` 和 `--call-graph fp` 都无法解决
+- 增加 dump stack size（`--call-graph dwarf,16384`）也无效
+
+**如何处理：**
+- **部分调用链仍有价值**：可以看到热点叶子函数及其直接调用者，足以定位性能瓶颈
+- **关注完整调用链**：约 50-60% 的采样有完整调用链（深度 ≥ 10），这些足以分析整体调用模式
+- **结合框架 profiling**：使用 `--profile framework` 获取逐算子耗时，补充调用链信息
+
+**根本解决：** 需要推理框架在汇编代码中添加 `.cfi` 指令（CFI = Call Frame Information），这不是用户侧能解决的问题。
+
 ---
 
 ## 9. 最佳实践
