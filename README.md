@@ -11,6 +11,7 @@
 - 🚀 **多框架支持**: ncnn, MNN, TFLite, ONNX Runtime, TVM, TNN, QNN
 - 📊 **完整测试指标**: 延迟（P50/P90/P99）、吞吐量、初始化时间、内存占用
 - 🎯 **精度对比**: 以 ONNX Runtime 为标杆，自动计算余弦相似度、绝对误差、相对误差
+- 🔬 **CPU Profiling**: simpleperf 热点分析、atrace/perfetto 调度可视化
 - 🤖 **真实模型测试**: MobileNetV2, ResNet50, MobileViT-S, ShuffleNetV2 x0.5, YOLOv8n
 - ⚡ **ARM 优化**: 原生 ARM64 编译，支持 NEON 优化
 - 📱 **端侧友好**: 专为手机端侧推理设计的基准测试
@@ -410,6 +411,7 @@ arm-inference-benchmark/
 │   └── android.toolchain.cmake    # Android 交叉编译工具链
 ├── 📁 docs/                       # 文档
 │   ├── results_sm8250.md          # 骁龙 865 测试结果
+│   ├── profiling_guide.md         # CPU Profiling 使用指南
 │   └── figures/                   # 性能图表
 ├── 📁 models/                     # 模型
 │   ├── classification/            # 分类模型
@@ -426,6 +428,12 @@ arm-inference-benchmark/
 │   ├── convert_models.sh          # 模型转换脚本 (所有框架)
 │   ├── convert_tflite.py          # TFLite 转换脚本
 │   ├── adb_run.sh                 # ADB 运行脚本
+│   ├── profiling_utils.sh         # Profiling 公共工具库
+│   ├── simpleperf_profile.sh      # simpleperf CPU 采样分析
+│   ├── atrace_capture.sh          # atrace 系统 trace 采集
+│   ├── perfetto_trace.sh          # perfetto 综合 trace 采集
+│   ├── framework_profiling.sh     # 框架内置 profiling
+│   ├── profile_benchmark.sh       # 集成 profiling 入口
 │   └── run_benchmark.sh           # 自动测试脚本
 ├── 📁 tools/                      # 转换工具
 │   ├── bin/                       # 编译好的转换工具 (onnx2ncnn, onnx2mnn, onnx2tnn)
