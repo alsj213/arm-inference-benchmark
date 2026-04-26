@@ -286,10 +286,45 @@ generate_simpleperf_reports() {
         return
     fi
 
+    # 文本报告
     $simpleperf_bin report -i "$perf_data" --sort dso,symbol -n > "$RESULT_DIR/simpleperf/report_functions.txt" 2>/dev/null
     $simpleperf_bin report -i "$perf_data" --sort dso -n > "$RESULT_DIR/simpleperf/report_dso.txt" 2>/dev/null
     $simpleperf_bin report -i "$perf_data" --sort comm,dso,symbol --show-callchain > "$RESULT_DIR/simpleperf/report_callchain.txt" 2>/dev/null
+
+    # 火焰图
+    generate_flamegraph "$perf_data"
+
     log_info "simpleperf reports generated"
+}
+
+# 生成火焰图
+generate_flamegraph() {
+    local perf_data="$1"
+    local folded_file="$RESULT_DIR/simpleperf/out.folded"
+    local svg_file="$RESULT_DIR/simpleperf/flamegraph.svg"
+
+    # 检查 simpleperf stackcollapse.py
+    local stackcollapse_py="$ANDROID_NDK/simpleperf/stackcollapse.py"
+    if [ ! -f "$stackcollapse_py" ]; then
+        log_warn "stackcollapse.py not found, skipping flamegraph"
+        return
+    fi
+
+    # 检查 FlameGraph 工具
+    local flamegraph_pl="./tools/FlameGraph/flamegraph.pl"
+    if [ ! -f "$flamegraph_pl" ]; then
+        log_warn "FlameGraph not found. Run: git clone https://github.com/brendangregg/FlameGraph.git tools/FlameGraph"
+        return
+    fi
+
+    # 生成
+    log_info "Generating flamegraph..."
+    python3 "$stackcollapse_py" -i "$perf_data" > "$folded_file" 2>/dev/null
+    "$flamegraph_pl" "$folded_file" > "$svg_file" 2>/dev/null
+
+    if [ -f "$svg_file" ]; then
+        log_info "Flamegraph: $svg_file"
+    fi
 }
 
 # 生成汇总报告
