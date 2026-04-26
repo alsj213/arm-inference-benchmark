@@ -169,22 +169,34 @@ generate_flamegraph() {
         return
     fi
 
-    log_info "Generating flamegraph from report..."
+    log_info "Generating flamegraph from report-sample..."
     local device_dir="/data/local/tmp/benchmark"
 
-    # 从报告生成折叠格式（简化版本，只显示热点函数）
-    adb_cmd shell "/data/local/tmp/simpleperf report \
+    # 使用 report-sample 生成完整的调用栈，然后转换为折叠格式
+    adb_cmd shell "/data/local/tmp/simpleperf report-sample \
         -i $device_dir/profiling/perf.data \
-        --sort dso,symbol \
-        -n" | \
-        awk '/^[0-9]+\.[0-9]+%/ {
-            pct = $1
-            gsub(/%/, "", pct)
-            sym = $4
-            for (i=5; i<=NF; i++) sym = sym ";" $i
-            # 将百分比转换为采样数（假设总采样数为 10000）
-            samples = int(pct * 100)
-            print sym " " samples
+        --show-callchain" | \
+        awk '
+        /^sample:/ {
+            if (stack != "") {
+                print stack " 1"
+                stack = ""
+            }
+            next
+        }
+        /symbol:/ {
+            sym = $2
+            for (i=3; i<=NF; i++) sym = sym ";" $i
+            if (stack == "") {
+                stack = sym
+            } else {
+                stack = stack ";" sym
+            }
+        }
+        END {
+            if (stack != "") {
+                print stack " 1"
+            }
         }' > "$folded_file" 2>/dev/null
 
     # 生成 SVG
