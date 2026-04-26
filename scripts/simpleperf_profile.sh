@@ -12,7 +12,7 @@ THREADS=4
 DURATION=10
 FREQUENCY=4000
 EVENT="cpu-cycles"
-CALLGRAPH="fp"
+CALLGRAPH="dwarf"
 BENCHMARK_RUNS=1000
 
 # 解析参数
@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --duration <sec>      Sampling duration in seconds (default: 10)"
             echo "  --frequency <hz>      Sampling frequency in Hz (default: 4000)"
             echo "  --event <event>       Sampling event (default: cpu-cycles)"
-            echo "  --callgraph <mode>    Call graph mode: fp or dwarf (default: fp)"
+            echo "  --callgraph <mode>    Call graph mode: fp or dwarf (default: dwarf)"
             echo "  --runs <num>          Benchmark runs (default: 1000)"
             exit 0
             ;;
@@ -84,12 +84,12 @@ echo \$BENCH_PID > profiling/benchmark.pid
 # 等待 warmup
 sleep 3
 
-# 启动 simpleperf（使用 dwarf 模式展开调用栈，更准确）
+# 启动 simpleperf（使用 dwarf 模式展开调用栈，穿透汇编函数）
 /data/local/tmp/simpleperf record \\
     -p \$BENCH_PID \\
     -e $EVENT \\
     -f $FREQUENCY \\
-    -g \\
+    --call-graph $CALLGRAPH \\
     --duration $DURATION \\
     -o profiling/perf.data
 
@@ -173,7 +173,7 @@ generate_flamegraph() {
     local device_dir="/data/local/tmp/benchmark"
 
     # 使用 report-sample 生成完整的调用栈，然后转换为折叠格式
-    # 注意：需要去掉 \r 和处理函数名中的特殊字符
+    # 注意：需要去掉 \r、处理函数名中的特殊字符、反转调用栈顺序
     adb_cmd shell "/data/local/tmp/simpleperf report-sample \
         -i $device_dir/profiling/perf.data \
         --show-callchain" | \
@@ -181,7 +181,13 @@ generate_flamegraph() {
         awk '
         /^sample:/ {
             if (stack != "") {
-                print stack " 1"
+                # 反转调用栈顺序（从根到叶）
+                n = split(stack, arr, ";")
+                reversed = arr[n]
+                for (i = n-1; i >= 1; i--) {
+                    reversed = reversed ";" arr[i]
+                }
+                print reversed " 1"
                 stack = ""
             }
             next
@@ -199,7 +205,13 @@ generate_flamegraph() {
         }
         END {
             if (stack != "") {
-                print stack " 1"
+                # 反转调用栈顺序（从根到叶）
+                n = split(stack, arr, ";")
+                reversed = arr[n]
+                for (i = n-1; i >= 1; i--) {
+                    reversed = reversed ";" arr[i]
+                }
+                print reversed " 1"
             }
         }' > "$folded_file" 2>/dev/null
 

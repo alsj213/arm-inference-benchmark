@@ -97,7 +97,7 @@ adb shell "cd /data/local/tmp/benchmark && \
 
 PID=$(adb shell pidof benchmark_inference)
 adb shell "/data/local/tmp/simpleperf record \
-    -p $PID -e cpu-cycles -f 4000 --call-graph fp --duration 10 -o perf.data"
+    -p $PID -e cpu-cycles -f 4000 --call-graph dwarf --duration 10 -o perf.data"
 adb pull /data/local/tmp/benchmark/profiling/perf.data .
 ```
 
@@ -114,13 +114,13 @@ git clone https://github.com/brendangregg/FlameGraph.git tools/FlameGraph
 |------|------|--------|
 | `-e` | 采样事件 | `cpu-cycles`（默认）、`cache-misses`、`branch-misses` |
 | `-f` | 采样频率 Hz | 4000（平衡精度和开销） |
-| `-g` | 调用图模式 | 使用 DWARF 展开调用栈（推荐，更准确） |
-| `--call-graph fp` | Frame Pointer 模式 | 快速但 ARM64 上可能有 unknown 符号 |
+| `--call-graph dwarf` | DWARF 调用图模式 | ARM64 推荐，能穿透汇编函数（如 MNN 优化） |
+| `--call-graph fp` | Frame Pointer 模式 | 快速但 ARM64 上汇编函数会中断调用栈 |
 | `--duration` | 采样时长秒 | 10-30 |
 
 **调用图模式选择：**
-- **`-g`（DWARF 模式）**：使用 DWARF 调试信息展开调用栈，更准确，推荐使用
-- **`--call-graph fp`（Frame Pointer 模式）**：快速但 ARM64 上某些函数（如 MNN 汇编优化）可能无法正确展开，导致火焰图中出现 `unknown` 符号
+- **`--call-graph dwarf`（DWARF 模式，推荐）**：使用 DWARF 调试信息展开调用栈，不依赖 frame pointer，能正确穿透手写汇编函数（如 MNN 的 `LoopL2`、`StoreLH8` 等），火焰图调用链完整
+- **`--call-graph fp`（Frame Pointer 模式）**：快速但 ARM64 上手写汇编函数不保存 frame pointer 链，会导致调用栈中断，火焰图中出现大量 depth=2 的不完整调用链
 
 ### 3.4 采样事件选择
 

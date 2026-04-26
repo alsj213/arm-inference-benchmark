@@ -139,12 +139,12 @@ create_wrapper_script() {
 
     if is_tool_enabled "simpleperf"; then
         simpleperf_cmd="
-# 启动 simpleperf（后台，使用 dwarf 模式展开调用栈）
+# 启动 simpleperf（后台，使用 dwarf 模式展开调用栈，穿透汇编函数）
 /data/local/tmp/simpleperf record \\
     -p \$BENCH_PID \\
     -e cpu-cycles \\
     -f 4000 \\
-    -g \\
+    --call-graph dwarf \\
     --duration $SIMPLEPERF_DURATION \\
     -o profiling/perf.data &
 SIMPLEPERF_PID=\$!"
@@ -317,7 +317,7 @@ generate_flamegraph() {
     local device_dir="/data/local/tmp/benchmark"
 
     # 使用 report-sample 生成完整的调用栈
-    # 注意：需要去掉 \r 和处理函数名中的特殊字符
+    # 注意：需要去掉 \r、处理函数名中的特殊字符、反转调用栈顺序
     adb_cmd shell "/data/local/tmp/simpleperf report-sample \
         -i $device_dir/profiling/perf.data \
         --show-callchain" | \
@@ -325,7 +325,13 @@ generate_flamegraph() {
         awk '
         /^sample:/ {
             if (stack != "") {
-                print stack " 1"
+                # 反转调用栈顺序（从根到叶）
+                n = split(stack, arr, ";")
+                reversed = arr[n]
+                for (i = n-1; i >= 1; i--) {
+                    reversed = reversed ";" arr[i]
+                }
+                print reversed " 1"
                 stack = ""
             }
             next
@@ -343,7 +349,13 @@ generate_flamegraph() {
         }
         END {
             if (stack != "") {
-                print stack " 1"
+                # 反转调用栈顺序（从根到叶）
+                n = split(stack, arr, ";")
+                reversed = arr[n]
+                for (i = n-1; i >= 1; i--) {
+                    reversed = reversed ";" arr[i]
+                }
+                print reversed " 1"
             }
         }' > "$folded_file" 2>/dev/null
 
