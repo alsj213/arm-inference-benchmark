@@ -23,7 +23,7 @@ bool ONNXRTBackend::init(const BenchmarkConfig& config) {
         input_shape_[i] = config.input_shape[i];
     }
 
-    // Get input/output names
+    // Get input/output names - ORT v1.21.0 API (GetInputNameAllocated/GetOutputNameAllocated)
     Ort::AllocatorWithDefaultOptions allocator;
     size_t num_inputs = session_.GetInputCount();
     input_names_store_.resize(num_inputs);

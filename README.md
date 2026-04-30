@@ -91,13 +91,38 @@ git submodule update --init --recursive
 
 ```bash
 export ANDROID_NDK=/path/to/your/android-ndk-r25c
+export ANDROID_SDK=/path/to/Android/Sdk
 ```
 
-### 3. 编译
+### 3. 编译 ONNX Runtime（首次需单独编译）
 
 ```bash
-# 编译 Android 版本
-./scripts/build_android.sh
+cd third_party/onnxruntime
+
+# 清理 conda 环境变量，避免交叉编译冲突
+env -u CFLAGS -u CXXFLAGS -u CPPFLAGS -u CONDA_PREFIX -u CONDA_DEFAULT_ENV \
+  -u LD_LIBRARY_PATH -u LDFLAGS -u PKG_CONFIG_PATH \
+  ./build.sh \
+  --android --android_abi arm64-v8a --android_api 21 \
+  --android_sdk_path $ANDROID_SDK --android_ndk_path $ANDROID_NDK \
+  --build_shared_lib --config Release --use_nnapi \
+  --skip_tests --parallel --skip_submodule_sync
+
+cd ../..
+```
+
+编译产物: `third_party/onnxruntime/build/Android/Release/libonnxruntime.so`
+
+### 4. 编译 benchmark
+
+```bash
+cmake -S . -B build_android \
+  -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
+  -DANDROID_ABI=arm64-v8a \
+  -DANDROID_PLATFORM=android-21 \
+  -DBENCHMARK_ORT=ON \
+  -DBENCHMARK_MNN=ON
+cmake --build build_android -j$(nproc)
 ```
 
 ### 4. 运行测试
@@ -183,7 +208,7 @@ adb push build_android/src/benchmark_inference /data/local/tmp/benchmark/
 adb push models/classification /data/local/tmp/benchmark/models/classification
 
 # 推送 ONNX Runtime 库（如果需要）
-adb push third_party/onnxruntime/lib-android/aarch64/libonnxruntime.so /data/local/tmp/benchmark/
+adb push third_party/onnxruntime/build/Android/Release/libonnxruntime.so /data/local/tmp/benchmark/
 ```
 
 #### 步骤 3: 运行基准测试
@@ -342,14 +367,27 @@ ls $ANDROID_NDK/build/cmake/android.toolchain.cmake
 
 # 重新配置编译
 rm -rf build_android
-mkdir build_android && cd build_android
-cmake .. \
+cmake -S . -B build_android \
   -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
   -DANDROID_ABI=arm64-v8a \
-  -DANDROID_PLATFORM=android-29 \
+  -DANDROID_PLATFORM=android-21 \
   -DBENCHMARK_MNN=ON \
   -DBENCHMARK_ORT=ON
-make -j$(nproc)
+cmake --build build_android -j$(nproc)
+```
+
+#### 问题 6: ORT 编译失败 - conda 环境变量冲突
+```bash
+# 症状: 编译时报错 -march=nocona 或 libatomic.so 不兼容
+# 原因: conda 的 CFLAGS/LDFLAGS 污染了交叉编译环境
+
+# 解决: 清理环境变量后重新编译
+cd third_party/onnxruntime
+env -u CFLAGS -u CXXFLAGS -u CPPFLAGS -u CONDA_PREFIX -u CONDA_DEFAULT_ENV \
+  -u LD_LIBRARY_PATH -u LDFLAGS -u PKG_CONFIG_PATH \
+  ./build.sh --android --android_abi arm64-v8a --android_api 21 \
+  --android_sdk_path $ANDROID_SDK --android_ndk_path $ANDROID_NDK \
+  --build_shared_lib --config Release --use_nnapi --skip_tests --parallel --skip_submodule_sync
 ```
 
 #### 问题 3: 运行时找不到模型文件
@@ -454,12 +492,14 @@ arm-inference-benchmark/
 │   └── models/                    # 模型信息
 ├── 📁 results/                    # 测试结果输出
 └── 📁 third_party/                # 第三方依赖（git submodule）
-    ├── ncnn/
-    ├── MNN/
-    ├── TNN/
-    ├── tensorflow/
-    ├── onnxruntime/
-    └── tvm/
+    ├── ncnn/                      # 腾讯 ncnn (add_subdirectory 编译)
+    ├── MNN/                       # 阿里 MNN (add_subdirectory 编译)
+    ├── TNN/                       # 字节跳动 TNN
+    ├── onnxruntime/               # Microsoft ORT v1.21.0 (需单独编译)
+    │   ├── build/Android/Release/ # 编译产物 (libonnxruntime.so)
+    │   └── include/               # 头文件
+    ├── tvm/                       # Apache TVM
+    └── tflite_extracted/          # TensorFlow Lite (AAR 提取)
 ```
 
 ## 🔧 使用方式

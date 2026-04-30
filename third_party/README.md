@@ -9,7 +9,7 @@
 | **ncnn** | Tencent/ncnn | Git Submodule | latest | ~230MB |
 | **MNN** | alibaba/MNN | Git Submodule | latest | ~540MB |
 | **TNN** | Tencent/TNN | Git Submodule | latest | ~700MB |
-| **ONNX Runtime** | microsoft/onnxruntime | 预编译下载 | 1.16.x | ~50MB |
+| **ONNX Runtime** | microsoft/onnxruntime | Git Submodule | v1.21.0 | ~1.3GB |
 | **TensorFlow Lite** | tensorflow/tensorflow | AAR 下载 | 2.15.0 | ~20MB |
 | **Apache TVM** | apache/tvm | Git Submodule | latest | ~1GB |
 | **QNN** | Qualcomm | 官网下载 | 2.2x+ | - |
@@ -36,14 +36,16 @@ git submodule update --init third_party/ncnn
 git submodule update --init third_party/MNN
 git submodule update --init third_party/TNN
 git submodule update --init third_party/tvm
+git submodule update --init third_party/onnxruntime
 ```
 
-#### 2. 下载预编译库
+#### 2. 编译 ONNX Runtime
+
+ORT 需要从源码编译（参考上面的编译命令），编译完成后才能编译 benchmark 项目。
+
+#### 3. 下载预编译库（TFLite）
 
 ```bash
-# ONNX Runtime
-./scripts/download_onnxruntime.sh
-
 # TensorFlow Lite
 ./scripts/download_tflite.sh
 ```
@@ -112,10 +114,56 @@ git submodule update --init --recursive
 
 ### ONNX Runtime
 
-Microsoft 开源的跨平台推理引擎。
+Microsoft 开源的跨平台推理引擎，通过 Git Submodule 管理源码，需单独编译。
 
+- 仓库: https://github.com/microsoft/onnxruntime
 - 官网: https://onnxruntime.ai/
-- 下载: https://github.com/microsoft/onnxruntime/releases
+- 版本: v1.21.0
+
+#### 编译 ONNX Runtime (Android ARM64)
+
+```bash
+cd third_party/onnxruntime
+
+# 清理 conda 环境变量（避免交叉编译冲突）
+env -u CFLAGS -u CXXFLAGS -u CPPFLAGS -u CONDA_PREFIX -u CONDA_DEFAULT_ENV \
+  -u LD_LIBRARY_PATH -u LDFLAGS -u PKG_CONFIG_PATH \
+  PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+  ./build.sh \
+  --android \
+  --android_abi arm64-v8a \
+  --android_api 21 \
+  --android_sdk_path /home/$USER/Android/Sdk \
+  --android_ndk_path /home/$USER/android-ndk \
+  --build_shared_lib \
+  --config Release \
+  --use_nnapi \
+  --skip_tests \
+  --parallel \
+  --skip_submodule_sync
+```
+
+编译产物: `build/Android/Release/libonnxruntime.so`
+
+#### 编译参数说明
+
+| 参数 | 说明 |
+|------|------|
+| `--build_shared_lib` | 构建共享库 libonnxruntime.so |
+| `--use_nnapi` | 启用 Android NNAPI 硬件加速 |
+| `--skip_tests` | 跳过测试编译（节省时间和内存） |
+| `--skip_submodule_sync` | 跳过 ORT 自身的 submodule 同步 |
+| `--config Release` | Release 编译（可用 Debug 替换） |
+
+#### 编译 Debug 版本
+
+```bash
+./build.sh --android --android_abi arm64-v8a --android_api 21 \
+  --android_sdk_path /path/to/sdk --android_ndk_path /path/to/ndk \
+  --build_shared_lib --config Debug --use_nnapi --skip_tests --parallel --skip_submodule_sync
+```
+
+产物: `build/Android/Debug/libonnxruntime.so`
 
 ### TensorFlow Lite
 

@@ -3,8 +3,8 @@
 # Enable exceptions for ONNX Runtime and TVM
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -UNO_EXCEPTIONS")
 
-# Common library
-add_library(benchmark_common
+# Common library - STATIC to avoid linker issues with backend vtable symbols
+add_library(benchmark_common STATIC
     common/utils.cpp
     common/benchmark.cpp
     common/config.cpp
@@ -24,7 +24,10 @@ if(BENCHMARK_TFLITE)
 target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/tflite_extracted/headers)
 endif()
 if(BENCHMARK_ORT)
-target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/onnxruntime/include)
+target_include_directories(benchmark_common PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/onnxruntime/include/onnxruntime/core/session
+    ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/onnxruntime/include/onnxruntime
+)
 endif()
 if(BENCHMARK_TVM)
 target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/tvm/include)
@@ -56,7 +59,7 @@ if(BENCHMARK_LLAMACPP)
     target_compile_definitions(benchmark_common PUBLIC BENCHMARK_LLAMACPP)
 endif()
 
-# Backend sources
+# Backend sources - add to benchmark_common STATIC library so vtable symbols are resolved
 set(BACKEND_SRCS)
 set(BACKEND_LIBS)
 
@@ -89,6 +92,10 @@ if(BENCHMARK_LLAMACPP)
     list(APPEND BACKEND_LIBS llama)
 endif()
 
+# Add backend sources to benchmark_common so create_backend() can resolve symbols
+target_sources(benchmark_common PRIVATE ${BACKEND_SRCS})
+target_link_libraries(benchmark_common PUBLIC ${BACKEND_LIBS})
+
 # Model wrappers
 set(MODEL_SRCS
     models/mobilenet.cpp
@@ -101,7 +108,6 @@ set(MODEL_SRCS
 # Main executable
 add_executable(benchmark_inference
     main.cpp
-    ${BACKEND_SRCS}
     ${MODEL_SRCS}
 )
 target_compile_options(benchmark_inference PRIVATE -fexceptions)
@@ -125,46 +131,34 @@ if(BENCHMARK_TVM)
     target_compile_definitions(benchmark_inference PRIVATE BENCHMARK_TVM)
 endif()
 
+# Link against all required libraries (backends already linked to benchmark_common)
 target_link_libraries(benchmark_inference
     PRIVATE
     benchmark_common
-    ${BACKEND_LIBS}
 )
 
 # Single operator benchmark executable
 add_executable(single_op_benchmark
     single_op_benchmark.cpp
-    ${BACKEND_SRCS}
 )
 target_compile_options(single_op_benchmark PRIVATE -fexceptions)
 
-if(BENCHMARK_NCNN)
-    target_compile_definitions(single_op_benchmark PRIVATE BENCHMARK_NCNN)
-endif()
-if(BENCHMARK_MNN)
-    target_compile_definitions(single_op_benchmark PRIVATE BENCHMARK_MNN)
-endif()
-if(BENCHMARK_ORT)
-    target_compile_definitions(single_op_benchmark PRIVATE BENCHMARK_ORT)
-endif()
+# Compile definitions already inherited from benchmark_common
 
 target_link_libraries(single_op_benchmark
     PRIVATE
     benchmark_common
-    ${BACKEND_LIBS}
 )
 
 # LLM benchmark executable for llama.cpp
 if(BENCHMARK_LLAMACPP)
     add_executable(llm_benchmark
         llm_benchmark.cpp
-        backends/llamacpp_backend.cpp
     )
     target_compile_options(llm_benchmark PRIVATE -fexceptions)
-    target_compile_definitions(llm_benchmark PRIVATE BENCHMARK_LLAMACPP)
+    # Compile definitions and llama lib already inherited from benchmark_common
     target_link_libraries(llm_benchmark
         PRIVATE
         benchmark_common
-        llama
     )
 endif()
