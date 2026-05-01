@@ -165,7 +165,7 @@ adb devices
 
 ```bash
 # 使用脚本自动推送和运行
-./scripts/adb_run.sh --backend all --model mobilenetv2 --runs 100
+./scripts/run_benchmark_android.sh --backend all --model mobilenetv2 --runs 100
 
 # 或者手动操作
 cd build_android

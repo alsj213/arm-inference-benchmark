@@ -46,7 +46,7 @@ adb devices
 # 安装特定设备的驱动（如果需要）
 
 # 推送并运行测试
-./scripts/adb_run.sh --backend all --model mobilenetv2
+./scripts/run_benchmark_android.sh --backend all --model mobilenetv2
 
 # 查看设备信息
 adb shell cat /proc/cpuinfo

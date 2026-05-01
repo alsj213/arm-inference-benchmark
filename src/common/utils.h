@@ -55,6 +55,22 @@ struct Stats {
 
 Stats calculate_stats(const std::vector<double>& times_ms);
 
+// Remove outliers from data (remove first and last N values)
+std::vector<double> remove_outliers(const std::vector<double>& data, int remove_count);
+
+// Confidence interval structure
+struct ConfidenceInterval {
+    double lower;
+    double upper;
+    double mean;
+    double margin_of_error;
+};
+
+// Calculate confidence interval using t-distribution
+ConfidenceInterval calculate_confidence_interval(
+    const std::vector<double>& data,
+    double confidence_level = 0.95);
+
 // Print statistics
 void print_stats(const Stats& stats);
 

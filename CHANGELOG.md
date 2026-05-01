@@ -15,6 +15,21 @@
 - Android ARM64 交叉编译支持
 - 自动化测试脚本
 
+### 🔧 改进
+- **Debug/Release 构建类型切换支持**
+  - `build_android.sh`: 支持 `--debug` / `--release` 标志
+  - `run_benchmark_android.sh`: 支持 `--build-type` 参数
+  - `simpleperf_profile.sh`: 默认使用 Debug 版本生成火焰图
+  - `profile_benchmark.sh`: 默认使用 Release 版本性能测试
+- **测试基础设施增强**
+  - `setup_test_environment.sh`: 预测试环境设置（CPU 调度器、nice 值）
+  - `restore_test_environment.sh`: 测试后环境恢复
+  - `run_comprehensive_benchmark.sh`: 自动化综合测试脚本
+  - `generate_report.py`: 自动生成 Markdown 测试报告
+  - `validate_results.py`: 结果验证脚本
+- **脚本重命名**: `adb_run.sh` → `run_benchmark_android.sh`（更清晰的命名）
+- **统计鲁棒性**: 新增异常值移除和置信区间计算功能
+
 ### 📊 已完成测试
 - **骁龙 865 (SM8250)** 平台 MobileNetV2 FP32 性能对比
 - 单线程推理性能基准

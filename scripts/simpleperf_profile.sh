@@ -14,6 +14,7 @@ FREQUENCY=4000
 EVENT="cpu-cycles"
 CALLGRAPH="dwarf"
 BENCHMARK_RUNS=1000
+BUILD_TYPE="debug"  # 火焰图分析默认使用 Debug 版本（包含调试符号）
 
 # 解析参数
 while [[ $# -gt 0 ]]; do
@@ -26,6 +27,7 @@ while [[ $# -gt 0 ]]; do
         --event) EVENT="$2"; shift 2 ;;
         --callgraph) CALLGRAPH="$2"; shift 2 ;;
         --runs) BENCHMARK_RUNS="$2"; shift 2 ;;
+        --build-type) BUILD_TYPE="$2"; shift 2 ;;
         --help)
             echo "Usage: $0 [options]"
             echo "Options:"
@@ -37,6 +39,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --event <event>       Sampling event (default: cpu-cycles)"
             echo "  --callgraph <mode>    Call graph mode: fp or dwarf (default: dwarf)"
             echo "  --runs <num>          Benchmark runs (default: 1000)"
+            echo "  --build-type <type>   Build type: debug or release (default: debug)"
             exit 0
             ;;
         *) log_error "Unknown option: $1"; exit 1 ;;
@@ -58,7 +61,7 @@ main() {
     create_result_dir "$MODEL" "$BACKEND"
 
     # Step 3: 推送文件
-    push_benchmark_files
+    push_benchmark_files "" "" "$BUILD_TYPE"
     push_simpleperf
 
     # Step 4: 保存设备信息

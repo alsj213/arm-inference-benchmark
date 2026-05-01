@@ -110,4 +110,71 @@ void print_stats(const Stats& stats) {
     printf("  Std:    %.2f ms\n", stats.std_dev);
 }
 
+// Remove outliers from data (remove first and last N values)
+std::vector<double> remove_outliers(const std::vector<double>& data, int remove_count) {
+    if (data.size() <= static_cast<size_t>(remove_count * 2)) {
+        return data;
+    }
+
+    std::vector<double> sorted_data = data;
+    std::sort(sorted_data.begin(), sorted_data.end());
+
+    // Remove first and last remove_count values
+    return std::vector<double>(
+        sorted_data.begin() + remove_count,
+        sorted_data.end() - remove_count);
+}
+
+// Calculate confidence interval using t-distribution
+ConfidenceInterval calculate_confidence_interval(
+    const std::vector<double>& data,
+    double confidence_level) {
+    ConfidenceInterval result;
+
+    if (data.empty()) {
+        result.lower = 0.0;
+        result.upper = 0.0;
+        result.mean = 0.0;
+        result.margin_of_error = 0.0;
+        return result;
+    }
+
+    // Calculate mean
+    double sum = 0.0;
+    for (double val : data) {
+        sum += val;
+    }
+    result.mean = sum / data.size();
+
+    // Calculate standard deviation
+    double variance = 0.0;
+    for (double val : data) {
+        variance += (val - result.mean) * (val - result.mean);
+    }
+    variance /= (data.size() - 1);
+    double std_dev = std::sqrt(variance);
+
+    // Calculate standard error
+    double standard_error = std_dev / std::sqrt(data.size());
+
+    // T-distribution critical values (simplified for common confidence levels)
+    // For large samples (>30), t-distribution approaches normal distribution
+    double t_critical;
+    if (confidence_level >= 0.99) {
+        t_critical = 2.576;  // For 99% CI (normal approximation)
+    } else if (confidence_level >= 0.95) {
+        t_critical = 1.96;   // For 95% CI (normal approximation)
+    } else if (confidence_level >= 0.90) {
+        t_critical = 1.645;  // For 90% CI (normal approximation)
+    } else {
+        t_critical = 1.0;    // Default fallback
+    }
+
+    result.margin_of_error = t_critical * standard_error;
+    result.lower = result.mean - result.margin_of_error;
+    result.upper = result.mean + result.margin_of_error;
+
+    return result;
+}
+
 } // namespace utils

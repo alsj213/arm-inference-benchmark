@@ -129,7 +129,7 @@ cmake --build build_android -j$(nproc)
 
 ```bash
 # 推送并运行测试
-./scripts/adb_run.sh --backend all --model mobilenetv2 --precision fp32 --threads 1 --runs 100
+./scripts/run_benchmark_android.sh --backend all --model mobilenetv2 --precision fp32 --threads 1 --runs 100
 ```
 
 ---
@@ -217,13 +217,13 @@ adb push third_party/onnxruntime/build/Android/Release/libonnxruntime.so /data/l
 
 ```bash
 # 测试 MobileNetV2 - 所有框架对比
-./scripts/adb_run.sh --backend all --model mobilenetv2 --precision fp32 --threads 4 --runs 50
+./scripts/run_benchmark_android.sh --backend all --model mobilenetv2 --precision fp32 --threads 4 --runs 50
 
 # 测试 MobileViT-S - 单框架测试
-./scripts/adb_run.sh --backend mnn --model mobilevit_s --precision fp32 --threads 4 --runs 50
+./scripts/run_benchmark_android.sh --backend mnn --model mobilevit_s --precision fp32 --threads 4 --runs 50
 
 # 完整性能测试 - 所有模型 + 所有框架
-./scripts/adb_run.sh --backend all --model all --precision fp32 --threads 4 --runs 50
+./scripts/run_benchmark_android.sh --backend all --model all --precision fp32 --threads 4 --runs 50
 ```
 
 **方式二：手动执行（灵活）**
@@ -256,13 +256,13 @@ LD_LIBRARY_PATH=/data/local/tmp/benchmark ./benchmark_inference \
 #### 单模型多框架对比
 ```bash
 # MobileNetV2 - 4线程
-./scripts/adb_run.sh --backend all --model mobilenetv2 --threads 4 --runs 50
+./scripts/run_benchmark_android.sh --backend all --model mobilenetv2 --threads 4 --runs 50
 
 # ResNet50 - 1线程
-./scripts/adb_run.sh --backend all --model resnet50 --threads 1 --runs 50
+./scripts/run_benchmark_android.sh --backend all --model resnet50 --threads 1 --runs 50
 
 # MobileViT-S - 8线程
-./scripts/adb_run.sh --backend all --model mobilevit_s --threads 8 --runs 30
+./scripts/run_benchmark_android.sh --backend all --model mobilevit_s --threads 8 --runs 30
 ```
 
 #### 多线程性能扫描
@@ -280,7 +280,7 @@ done
 for model in mobilenetv2 resnet50 shufflenet_v2_x0_5 mobilevit_s; do
   for backend in mnn onnxrt; do
     echo "=== $model - $backend ==="
-    ./scripts/adb_run.sh --backend $backend --model $model --threads 4 --runs 50
+    ./scripts/run_benchmark_android.sh --backend $backend --model $model --threads 4 --runs 50
   done
 done
 ```
@@ -465,7 +465,12 @@ arm-inference-benchmark/
 │   ├── download_pretrained.py     # 下载预训练 ONNX 模型
 │   ├── convert_models.sh          # 模型转换脚本 (所有框架)
 │   ├── convert_tflite.py          # TFLite 转换脚本
-│   ├── adb_run.sh                 # ADB 运行脚本
+│   ├── run_benchmark_android.sh   # Android 设备运行脚本
+│   ├── run_comprehensive_benchmark.sh  # 综合基准测试脚本
+│   ├── setup_test_environment.sh  # 测试环境设置脚本
+│   ├── restore_test_environment.sh # 测试环境恢复脚本
+│   ├── generate_report.py         # 测试报告生成脚本
+│   ├── validate_results.py        # 结果验证脚本
 │   ├── profiling_utils.sh         # Profiling 公共工具库
 │   ├── simpleperf_profile.sh      # simpleperf CPU 采样分析
 │   ├── atrace_capture.sh          # atrace 系统 trace 采集

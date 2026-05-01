@@ -15,6 +15,7 @@ SIMPLEPERF_DURATION=10
 ATRACE_DURATION=5
 PERFETTO_DURATION=5
 PERFETTO_PRESET="cpu"
+BUILD_TYPE="release"  # 性能测试默认使用 Release 版本（性能最优）
 
 # 解析参数
 while [[ $# -gt 0 ]]; do
@@ -28,6 +29,7 @@ while [[ $# -gt 0 ]]; do
         --atrace-duration) ATRACE_DURATION="$2"; shift 2 ;;
         --perfetto-duration) PERFETTO_DURATION="$2"; shift 2 ;;
         --perfetto-preset) PERFETTO_PRESET="$2"; shift 2 ;;
+        --build-type) BUILD_TYPE="$2"; shift 2 ;;
         --help)
             echo "Usage: $0 [options]"
             echo ""
@@ -42,13 +44,14 @@ while [[ $# -gt 0 ]]; do
             echo "  --atrace-duration <sec>       Atrace capture duration (default: 5)"
             echo "  --perfetto-duration <sec>     Perfetto capture duration (default: 5)"
             echo "  --perfetto-preset <preset>    Perfetto preset: cpu/memory/full (default: cpu)"
+            echo "  --build-type <type>           Build type: debug or release (default: release)"
             echo ""
             echo "Examples:"
-            echo "  # Simpleperf only"
+            echo "  # Simpleperf only (Release build)"
             echo "  $0 --backend mnn --model mobilenetv2 --profile simpleperf"
             echo ""
-            echo "  # All profiling tools"
-            echo "  $0 --backend mnn --model mobilenetv2 --profile all"
+            echo "  # All profiling tools (Debug build for detailed analysis)"
+            echo "  $0 --backend mnn --model mobilenetv2 --profile all --build-type debug"
             exit 0
             ;;
         *) log_error "Unknown option: $1"; exit 1 ;;
@@ -84,7 +87,7 @@ main() {
     create_result_dir "$MODEL" "$BACKEND" "$PROFILE_TOOLS"
 
     # Step 3: 推送文件
-    push_benchmark_files
+    push_benchmark_files "" "" "$BUILD_TYPE"
     if is_tool_enabled "simpleperf"; then
         push_simpleperf
     fi
