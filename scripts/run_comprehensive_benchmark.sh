@@ -24,7 +24,7 @@ echo "结果目录: $RESULTS_DIR"
 echo ""
 
 # 定义测试配置
-BACKENDS=("mnn" "ort" "ncnn" "tnn" "tflite")
+BACKENDS=("mnn" "ort")
 MODELS=("mobilenetv2" "resnet50")
 PRECISIONS=("fp32")
 THREADS=(1 2 4)
