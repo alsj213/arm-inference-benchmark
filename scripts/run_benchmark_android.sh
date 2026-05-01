@@ -18,6 +18,8 @@ fi
 
 # Parse arguments for hardware control flags and build type
 HARDWARE_CONTROL=true
+GENERATE_REPORT=false
+RESULTS_DIR=""
 while [[ $# -gt 0 ]]; do
     case $1 in
         --no-hardware-control)
@@ -36,6 +38,14 @@ while [[ $# -gt 0 ]]; do
             BUILD_TYPE="$2"
             shift 2
             ;;
+        --generate-report)
+            GENERATE_REPORT=true
+            shift
+            ;;
+        --results-dir)
+            RESULTS_DIR="$2"
+            shift 2
+            ;;
         --help)
             echo "Usage: $0 [options] [benchmark_args...]"
             echo ""
@@ -43,6 +53,8 @@ while [[ $# -gt 0 ]]; do
             echo "  --build-type <type>    Build type: release or debug (default: release)"
             echo "  --no-hardware-control  Skip hardware control setup"
             echo "  --hardware-check       Check device status only"
+            echo "  --generate-report      Generate Markdown report after test"
+            echo "  --results-dir <path>   Results directory (default: auto-generated)"
             echo "  --help                 Show this help message"
             echo ""
             echo "Benchmark arguments are passed through to benchmark_inference"
@@ -97,7 +109,21 @@ echo "=== Starting benchmark ==="
 echo "Running: ./benchmark_inference $*"
 echo "=================================================="
 
-adb shell "cd /data/local/tmp/benchmark && LD_LIBRARY_PATH=/data/local/tmp/benchmark ./benchmark_inference $@"
+# 创建结果目录（如果需要生成报告）
+if [ "$GENERATE_REPORT" = true ]; then
+    if [ -z "$RESULTS_DIR" ]; then
+        RESULTS_DIR="$PROJECT_ROOT/results/single_$(date +%Y%m%d_%H%M%S)"
+    fi
+    mkdir -p "$RESULTS_DIR"
+    echo "Results directory: $RESULTS_DIR"
+
+    # 运行测试并保存输出到日志文件
+    LOG_FILE="$RESULTS_DIR/benchmark_output.log"
+    adb shell "cd /data/local/tmp/benchmark && LD_LIBRARY_PATH=/data/local/tmp/benchmark ./benchmark_inference $@" 2>&1 | tee "$LOG_FILE"
+else
+    # 不生成报告，直接输出到终端
+    adb shell "cd /data/local/tmp/benchmark && LD_LIBRARY_PATH=/data/local/tmp/benchmark ./benchmark_inference $@"
+fi
 
 echo "=================================================="
 
@@ -105,6 +131,12 @@ echo "=================================================="
 if [ "$HARDWARE_CONTROL" = true ]; then
     echo "=== 恢复测试环境 ==="
     "$SCRIPT_DIR/restore_test_environment.sh"
+fi
+
+# 生成报告
+if [ "$GENERATE_REPORT" = true ]; then
+    echo "=== 生成测试报告 ==="
+    "$SCRIPT_DIR/generate_report.py" "$RESULTS_DIR"
 fi
 
 echo "Done!"
