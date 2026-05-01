@@ -53,6 +53,10 @@ struct BenchmarkConfig {
     int outlier_removal_count;  // 异常值移除数量（首尾）
     double confidence_level;    // 置信区间置信度（0.95, 0.99）
 
+    // Profiling configuration
+    bool enable_profiling;      // 是否启用逐算子 profiling
+    std::string profile_file;   // profiling 输出文件路径
+
     BenchmarkConfig()
         : precision(Precision::FP32)
         , num_threads(1)
@@ -68,7 +72,9 @@ struct BenchmarkConfig {
         , memory_limit_mb(0)
         , enable_memory_pool(false)
         , outlier_removal_count(0)
-        , confidence_level(0.95) {}
+        , confidence_level(0.95)
+        , enable_profiling(false)
+        , profile_file("") {}
 };
 
 #endif // BENCHMARK_COMMON_CONFIG_H_

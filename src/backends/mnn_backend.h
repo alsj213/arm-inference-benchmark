@@ -17,6 +17,8 @@ private:
     std::unique_ptr<MNN::Interpreter> net_;
     MNN::Session* session_ = nullptr;
     MNN::Tensor* input_tensor_ = nullptr;
+    bool profiling_enabled_ = false;
+    std::string profile_file_;
 };
 
 #endif // BENCHMARK_BACKENDS_MNN_BACKEND_H_

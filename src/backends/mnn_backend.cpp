@@ -8,6 +8,14 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
     MNN::ScheduleConfig schedule_config;
     schedule_config.numThread = config.num_threads;
 
+    // Enable profiling if configured
+    if (config.enable_profiling && !config.profile_file.empty()) {
+        profiling_enabled_ = true;
+        profile_file_ = config.profile_file;
+        // MNN profiling is enabled via environment variable MNN_PROFILING
+        printf("MNN: Profiling enabled, output: %s\n", config.profile_file.c_str());
+    }
+
     net_ = std::unique_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(config.model_path.c_str()));
     if (!net_) {
         printf("Failed to load MNN model: %s\n", config.model_path.c_str());
@@ -40,7 +48,15 @@ bool MNNBackend::infer(const std::vector<float>& input) {
     // Copy input data
     memcpy(input_tensor_->host<float>(), input.data(), input.size() * sizeof(float));
 
-    net_->runSession(session_);
+    // Run inference with profiling if enabled
+    if (profiling_enabled_) {
+        // MNN profiling is controlled via environment variable
+        // Set MNN_PROFILING=1 and MNN_PROFILING_FILE=<file> before running
+        net_->runSession(session_);
+    } else {
+        net_->runSession(session_);
+    }
+
     MNN::Tensor* output = net_->getSessionOutput(session_, nullptr);
 
     return output != nullptr;

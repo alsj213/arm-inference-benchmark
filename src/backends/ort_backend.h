@@ -21,6 +21,7 @@ private:
     std::vector<const char*> input_names_;
     std::vector<const char*> output_names_;
     std::vector<int64_t> input_shape_;
+    bool profiling_enabled_ = false;
 };
 
 #endif // BENCHMARK_BACKENDS_ORT_BACKEND_H_

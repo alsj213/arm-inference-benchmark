@@ -22,6 +22,7 @@ void print_usage() {
     printf("  --warmup <num>                                 Number of warmup runs (default: 10)\n");
     printf("  --runs <num>                                   Number of test runs (default: 100)\n");
     printf("  --gpu                                          Use GPU if available\n");
+    printf("  --profiling <file>                             Enable operator profiling (output to file)\n");
     printf("  --help                                         Show this help\n");
 }
 
@@ -34,6 +35,7 @@ struct CommandLineArgs {
     int runs = 100;
     bool use_gpu = false;
     bool help = false;
+    std::string profiling_file = "";  // Profiling output file
 };
 
 CommandLineArgs parse_args(int argc, char** argv) {
@@ -54,6 +56,8 @@ CommandLineArgs parse_args(int argc, char** argv) {
             args.runs = std::atoi(argv[++i]);
         } else if (arg == "--gpu") {
             args.use_gpu = true;
+        } else if (arg == "--profiling" && i + 1 < argc) {
+            args.profiling_file = argv[++i];
         } else if (arg == "--help") {
             args.help = true;
         }
@@ -210,6 +214,18 @@ int main(int argc, char** argv) {
             config.use_gpu = args.use_gpu;
             config.warmup_runs = args.warmup;
             config.test_runs = args.runs;
+
+            // Enable profiling if configured
+            if (!args.profiling_file.empty()) {
+                config.enable_profiling = true;
+                // ONNX Runtime expects a file prefix, not a full filename
+                // Strip .json extension if present (e.g., "profiling/ort_profile.json" -> "profiling/ort_profile")
+                config.profile_file = args.profiling_file;
+                if (config.profile_file.size() > 5 &&
+                    config.profile_file.substr(config.profile_file.size() - 5) == ".json") {
+                    config.profile_file = config.profile_file.substr(0, config.profile_file.size() - 5);
+                }
+            }
 
             auto backend = create_backend(config.backend_type);
             if (!backend) {

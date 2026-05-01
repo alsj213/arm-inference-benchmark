@@ -10,6 +10,14 @@ bool ONNXRTBackend::init(const BenchmarkConfig& config) {
     session_options_->SetInterOpNumThreads(1);
     session_options_->SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 
+    // Enable profiling if configured
+    if (config.enable_profiling && !config.profile_file.empty()) {
+        session_options_->EnableProfiling(config.profile_file.c_str());
+        profiling_enabled_ = true;
+        printf("ONNXRT: Profiling enabled, output prefix: %s\n", config.profile_file.c_str());
+        printf("ONNXRT: Profiling will generate: %s_<timestamp>.json\n", config.profile_file.c_str());
+    }
+
     printf("ONNXRT: loading model: %s\n", config.model_path.c_str());
     session_ = Ort::Session(env_, config.model_path.c_str(), *session_options_);
     if (!session_) {
@@ -105,9 +113,15 @@ bool ONNXRTBackend::infer_with_output(const std::vector<float>& input, std::vect
 }
 
 void ONNXRTBackend::deinit() {
-    if (session_) {
-        session_.release();
+    // Note: Don't call session_.release() here!
+    // The session destructor will be called automatically when the backend is destroyed,
+    // which will write the profiling data if profiling is enabled.
+    // Calling release() would prevent the destructor from being called.
+
+    if (profiling_enabled_) {
+        printf("ONNXRT: Profiling enabled, session will write profiling data on destruction\n");
     }
+
     session_options_.reset();
     input_names_store_.clear();
     output_names_store_.clear();
