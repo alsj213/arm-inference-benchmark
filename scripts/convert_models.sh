@@ -1,5 +1,8 @@
 #!/bin/bash
 # Convert ONNX models to each framework format
+# 当前仅激活 MNN 模型转换，ncnn/TNN/TFLite 转换块保留（工具不存在时自动跳过）
+# 如需恢复已停用的后端转换，见 backup/all-backends 分支
+#
 # This script must be run after download_pretrained.py
 # Run ./scripts/build_host_tools.sh first to build conversion tools
 

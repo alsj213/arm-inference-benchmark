@@ -14,12 +14,30 @@ else()
 endif()
 
 # Options to enable/disable backends
-option(BENCHMARK_NCNN "Enable ncnn benchmark" OFF)
+# =============================================================================
+# 当前活动后端：MNN (BENCHMARK_MNN) 和 ONNX Runtime (BENCHMARK_ORT)
+#
+# 要重新启用已停用的后端，将下方对应选项设为 ON，然后重新编译即可。
+# 所有后端源代码完整保留在 src/backends/ 和 third_party/ 中。
+#
+# 可恢复的后端：
+#   BENCHMARK_NCNN    - ncnn（腾讯）
+#   BENCHMARK_TFLITE  - TensorFlow Lite
+#   BENCHMARK_TNN     - TNN（字节跳动）
+#   BENCHMARK_QNN     - Qualcomm QNN SDK
+#   BENCHMARK_TVM     - Apache TVM
+#   BENCHMARK_LLAMACPP - llama.cpp（LLM 推理）
+#
+# 完整的多后端配置见 backup/all-backends 分支
+# =============================================================================
+option(BENCHMARK_NCNN "Enable ncnn benchmark" OFF)       # 已停用，可恢复
 option(BENCHMARK_MNN "Enable MNN benchmark" ON)
-option(BENCHMARK_TFLITE "Enable TensorFlow Lite benchmark" OFF)
+option(BENCHMARK_TFLITE "Enable TensorFlow Lite benchmark" OFF)  # 已停用，可恢复
+option(BENCHMARK_TNN "Enable TNN benchmark" OFF)          # 已停用，可恢复
 option(BENCHMARK_ORT "Enable ONNX Runtime benchmark" ON)
-option(BENCHMARK_TVM "Enable Apache TVM benchmark" OFF)
-option(BENCHMARK_LLAMACPP "Enable llama.cpp LLM benchmark" OFF)
+option(BENCHMARK_QNN "Enable QNN benchmark" OFF)          # 已停用，可恢复
+option(BENCHMARK_TVM "Enable Apache TVM benchmark" OFF)   # 已停用，可恢复
+option(BENCHMARK_LLAMACPP "Enable llama.cpp LLM benchmark" OFF)  # 已停用，可恢复
 
 # Enable position independent code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

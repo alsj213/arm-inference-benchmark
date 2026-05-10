@@ -14,7 +14,8 @@ echo "=== Starting Benchmark (SDM8250 - Snapdragon 865) ==="
 date
 
 # Run combinations
-BACKENDS=("ncnn" "mnn" "tnn" "tflite" "qnn" "tvm")
+# 当前仅测试 MNN 和 ONNX Runtime，其他后端可恢复（见 backup/all-backends 分支）
+BACKENDS=("mnn" "onnxrt")
 MODELS=("mobilenetv2" "resnet50" "yolov8n" "bert")
 PRECISIONS=("fp32" "fp16" "int8")
 THREADS=(1 4)

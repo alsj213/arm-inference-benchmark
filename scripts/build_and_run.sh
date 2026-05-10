@@ -51,7 +51,7 @@ while [ $# -gt 0 ]; do
         --help)
             echo "Usage: ./scripts/build_and_run.sh [options]"
             echo "Options:"
-            echo "  --backend <ncnn|mnn|tnn|tflite|qnn|onnxrt|all>   Backend to test (default: all)"
+            echo "  --backend <mnn|onnxrt|ort|all>   Backend to test (default: all)"
             echo "  --model <mobilenetv2|resnet50|yolov8n|bert|all>    Model to test (default: all)"
             echo "  --precision <fp32|fp16|int8>                    Precision (default: fp32)"
             echo "  --threads <num>                                Number of threads (default: 1)"
@@ -69,34 +69,23 @@ while [ $# -gt 0 ]; do
 done
 
 # Convert backend to cmake options
+# 已停用的后端保留在此，重新启用后端后设为 ON 即可
 cmake_options=()
 if [ "$BACKEND" != "all" ]; then
     # Disable all except selected
-    cmake_options+=("-DBENCHMARK_NCNN=OFF")
+    cmake_options+=("-DBENCHMARK_NCNN=OFF")   # 已停用
     cmake_options+=("-DBENCHMARK_MNN=OFF")
-    cmake_options+=("-DBENCHMARK_TNN=OFF")
-    cmake_options+=("-DBENCHMARK_TFLITE=OFF")
-    cmake_options+=("-DBENCHMARK_QNN=OFF")
+    cmake_options+=("-DBENCHMARK_TNN=OFF")    # 已停用
+    cmake_options+=("-DBENCHMARK_TFLITE=OFF") # 已停用
+    cmake_options+=("-DBENCHMARK_QNN=OFF")    # 已停用
     cmake_options+=("-DBENCHMARK_ORT=OFF")
 
     # Enable selected
     case "$BACKEND" in
-        "ncnn")
-            cmake_options+=("-DBENCHMARK_NCNN=ON")
-            ;;
         "mnn")
             cmake_options+=("-DBENCHMARK_MNN=ON")
             ;;
-        "tnn")
-            cmake_options+=("-DBENCHMARK_TNN=ON")
-            ;;
-        "tflite")
-            cmake_options+=("-DBENCHMARK_TFLITE=ON")
-            ;;
-        "qnn")
-            cmake_options+=("-DBENCHMARK_QNN=ON")
-            ;;
-        "onnxrt")
+        "onnxrt"|"ort")
             cmake_options+=("-DBENCHMARK_ORT=ON")
             ;;
     esac

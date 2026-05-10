@@ -11,13 +11,14 @@ enum class Precision {
 };
 
 enum class BackendType {
-    NCNN,
+    // 以下枚举值完整保留，重新启用后端后无需修改此处
+    NCNN,       // 已停用，可恢复
     MNN,
-    TNN,
-    TFLITE,
-    QNN,
+    TNN,        // 已停用，可恢复
+    TFLITE,     // 已停用，可恢复
+    QNN,        // 已停用，可恢复
     ONNXRT,
-    TVM,
+    TVM,        // 已停用，可恢复
 };
 
 struct BenchmarkConfig {

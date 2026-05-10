@@ -8,7 +8,7 @@
 
 ## ✨ 特性
 
-- 🚀 **多框架支持**: ncnn, MNN, TFLite, ONNX Runtime, TVM, TNN, QNN
+- 🚀 **多框架支持**: MNN, ONNX Runtime (ncnn, TFLite, TVM, TNN, QNN 可恢复)
 - 📊 **完整测试指标**: 延迟（P50/P90/P99）、吞吐量、初始化时间、内存占用
 - 🎯 **精度对比**: 以 ONNX Runtime 为标杆，自动计算余弦相似度、绝对误差、相对误差
 - 🔬 **CPU Profiling**: simpleperf 热点分析、atrace/perfetto 调度可视化
@@ -20,13 +20,14 @@
 
 | 框架 | 状态 | 说明 |
 |------|------|------|
-| **ncnn** | ✅ | 腾讯 ncnn，手工 ARM 汇编优化 |
-| **MNN** | ✅ | 阿里 MNN，移动端深度优化 |
-| **TFLite** | ✅ | Google TensorFlow Lite |
-| **ONNX Runtime** | ✅ | Microsoft ONNX Runtime Mobile |
-| **TNN** | ✅ | 字节跳动 TNN，ARM NEON 汇编优化 |
-| **TVM** | ⚙️ | Apache TVM - 可选（默认关闭） |
-| **QNN** | ⚙️ | Qualcomm QNN SDK - 可选（默认关闭） |
+| **MNN** | ✅ 活跃 | 阿里 MNN，移动端深度优化 |
+| **ONNX Runtime** | ✅ 活跃 | Microsoft ONNX Runtime Mobile |
+| ncnn | ⏸️ 可恢复 | 腾讯 ncnn — 见 BACKEND_REENABLE_GUIDE.md |
+| TFLite | ⏸️ 可恢复 | Google TensorFlow Lite — 见 BACKEND_REENABLE_GUIDE.md |
+| TNN | ⏸️ 可恢复 | 字节跳动 TNN — 见 BACKEND_REENABLE_GUIDE.md |
+| TVM | ⏸️ 可恢复 | Apache TVM — 见 BACKEND_REENABLE_GUIDE.md |
+| QNN | ⏸️ 可恢复 | Qualcomm QNN SDK — 见 BACKEND_REENABLE_GUIDE.md |
+| llama.cpp | ⏸️ 可恢复 | LLM 推理 — 见 BACKEND_REENABLE_GUIDE.md |
 
 ## 📱 测试平台
 

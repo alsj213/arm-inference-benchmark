@@ -99,11 +99,12 @@ adb shell chmod +x /data/local/tmp/benchmark/benchmark_inference
 echo "Pushing models..."
 adb push "$PROJECT_ROOT/models/classification" /data/local/tmp/benchmark/models/classification
 
-# Push shared libraries (TFLite, ONNX Runtime)
+# Push shared libraries (仅当前启用的后端)
 echo "Pushing shared libraries..."
-adb push "$PROJECT_ROOT/third_party/tflite_extracted/jni/arm64-v8a/libtensorflowlite_jni.so" /data/local/tmp/benchmark/ 2>/dev/null || true
+# 已停用的后端：TFLite、TVM（见 backup/all-backends 分支恢复）
+# adb push "$PROJECT_ROOT/third_party/tflite_extracted/jni/arm64-v8a/libtensorflowlite_jni.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 adb push "$PROJECT_ROOT/third_party/onnxruntime/lib-android/aarch64/libonnxruntime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
-adb push "$PROJECT_ROOT/third_party/tvm/build-android/libtvm_runtime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
+# adb push "$PROJECT_ROOT/third_party/tvm/build-android/libtvm_runtime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 
 echo "=== Starting benchmark ==="
 echo "Running: ./benchmark_inference $*"

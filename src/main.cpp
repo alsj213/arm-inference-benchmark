@@ -15,8 +15,8 @@
 void print_usage() {
     printf("Usage: ./benchmark_inference [options]\n");
     printf("Options:\n");
-    printf("  --backend <ncnn|mnn|tnn|tflite|qnn|onnxrt|tvm>  Backend to test (default: all)\n");
-    printf("  --model <mobilenetv2|resnet50|shufflenet_v2_x0_5|mobilevit_s|yolov8n|bert>  Model to test (default: all)\n");
+    printf("  --backend <mnn|onnxrt|ort>  Backend to test (default: all)\n");
+    printf("  --model <mobilenetv2|resnet50|shufflenet_v2_x0_5|mobilevit_s|yolov8n>  Model to test (default: all)\n");
     printf("  --precision <fp32|fp16|int8>                  Precision (default: fp32)\n");
     printf("  --threads <num>                                Number of threads (default: 1)\n");
     printf("  --warmup <num>                                 Number of warmup runs (default: 10)\n");
@@ -72,13 +72,14 @@ Precision parse_precision(const std::string& p) {
 }
 
 BackendType parse_backend(const std::string& b) {
-    if (b == "ncnn" || b == "NCNN") return BackendType::NCNN;
+    // 已停用的后端映射保留在此，重新启用后取消注释即可
+    // if (b == "ncnn" || b == "NCNN") return BackendType::NCNN;
     if (b == "mnn" || b == "MNN") return BackendType::MNN;
-    if (b == "tnn" || b == "TNN") return BackendType::TNN;
-    if (b == "tflite" || b == "TFLite" || b == "TFLITE") return BackendType::TFLITE;
-    if (b == "qnn" || b == "QNN") return BackendType::QNN;
+    // if (b == "tnn" || b == "TNN") return BackendType::TNN;
+    // if (b == "tflite" || b == "TFLite" || b == "TFLITE") return BackendType::TFLITE;
+    // if (b == "qnn" || b == "QNN") return BackendType::QNN;
     if (b == "onnxrt" || b == "ort" || b == "ONNXRT" || b == "ORT") return BackendType::ONNXRT;
-    if (b == "tvm" || b == "TVM") return BackendType::TVM;
+    // if (b == "tvm" || b == "TVM") return BackendType::TVM;
     return (BackendType)-1;
 }
 

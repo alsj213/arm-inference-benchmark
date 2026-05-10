@@ -23,7 +23,7 @@ usage() {
     echo ""
     echo "Options:"
     echo "  --all         Setup all frameworks (default)"
-    echo "  --minimal     Setup only ncnn + MNN"
+    echo "  --minimal     Setup only MNN + ONNX Runtime"
     echo "  --ncnn        Setup ncnn only"
     echo "  --mnn         Setup MNN only"
     echo "  --tflite      Setup TFLite only"
@@ -45,7 +45,7 @@ SETUP_TVM=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --all) SETUP_ALL=true; shift ;;
-        --minimal) SETUP_ALL=false; SETUP_NCNN=true; SETUP_MNN=true; shift ;;
+        --minimal) SETUP_ALL=false; SETUP_MNN=true; SETUP_ORT=true; shift ;;
         --ncnn) SETUP_ALL=false; SETUP_NCNN=true; shift ;;
         --mnn) SETUP_ALL=false; SETUP_MNN=true; shift ;;
         --tflite) SETUP_ALL=false; SETUP_TFLITE=true; shift ;;

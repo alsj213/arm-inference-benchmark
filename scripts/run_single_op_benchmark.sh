@@ -9,7 +9,7 @@ set -e
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SINGLE_OPS_DIR="$PROJECT_ROOT/models/single_ops"
 DEVICE_DIR="/data/local/tmp/single_ops"
-BACKENDS=${BACKENDS:-"ncnn,mnn,onnxruntime"}
+BACKENDS=${BACKENDS:-"mnn,onnxruntime"}
 WARMUP=${WARMUP:-10}
 RUNS=${RUNS:-100}
 PRECISION=${PRECISION:-"fp32"}
