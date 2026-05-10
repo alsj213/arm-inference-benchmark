@@ -83,28 +83,34 @@ endif()
 # ONNX Runtime v1.21.0 - git submodule, source build
 if(BENCHMARK_ORT)
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/cmake/CMakeLists.txt)
-        if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/build/Android/Release/libonnxruntime.so)
-            add_library(onnxruntime SHARED IMPORTED GLOBAL)
-            target_include_directories(onnxruntime INTERFACE
-                ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/include/onnxruntime/core/session
-                ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/include/onnxruntime
-            )
-            if(ANDROID)
+        add_library(onnxruntime SHARED IMPORTED GLOBAL)
+        target_include_directories(onnxruntime INTERFACE
+            ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/include/onnxruntime/core/session
+            ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/include/onnxruntime
+        )
+
+        # Select ORT library based on build type
+        if(ANDROID)
+            if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+                set(ORT_LIB ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/build/Android/Debug/libonnxruntime.so)
+            else()
                 set(ORT_LIB ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/build/Android/Release/libonnxruntime.so)
+            endif()
+        else()
+            if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+                find_library(ORT_LIB NAMES onnxruntime PATHS ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/build/Linux/Debug)
             else()
                 find_library(ORT_LIB NAMES onnxruntime PATHS ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/build/Linux/Release)
             endif()
-            if(EXISTS ${ORT_LIB})
-                set_target_properties(onnxruntime PROPERTIES IMPORTED_LOCATION ${ORT_LIB})
-                target_link_libraries(onnxruntime INTERFACE ${ORT_LIB} -pthread -ldl -lstdc++)
-                set(ONNXRUNTIME_FOUND TRUE)
-                message(STATUS "Found ONNX Runtime v1.21.0: ${ORT_LIB}")
-            else()
-                message(WARNING "ONNX Runtime library not found for target architecture")
-                set(BENCHMARK_ORT OFF)
-            endif()
+        endif()
+
+        if(EXISTS ${ORT_LIB})
+            set_target_properties(onnxruntime PROPERTIES IMPORTED_LOCATION ${ORT_LIB})
+            target_link_libraries(onnxruntime INTERFACE ${ORT_LIB} -pthread -ldl -lstdc++)
+            set(ONNXRUNTIME_FOUND TRUE)
+            message(STATUS "Found ONNX Runtime v1.21.0 (${CMAKE_BUILD_TYPE}): ${ORT_LIB}")
         else()
-            message(WARNING "ORT submodule found but not built. Run build.sh first.")
+            message(WARNING "ONNX Runtime library not found for target architecture: ${ORT_LIB}")
             set(BENCHMARK_ORT OFF)
         endif()
     else()

@@ -93,8 +93,8 @@ sleep 3
     -e $EVENT \\
     -f $FREQUENCY \\
     --call-graph $CALLGRAPH \\
-    --duration $DURATION \\
-    -o profiling/perf.data
+    -o profiling/perf.data \\
+    --duration $DURATION
 
 # 等待 benchmark 完成
 wait \$BENCH_PID
