@@ -128,9 +128,11 @@ cmake --build build_android -j$(nproc)
 ### 4. 运行测试
 
 ```bash
-# 推送并运行测试
-./scripts/run_benchmark_android.sh --backend all --model mobilenetv2 --precision fp32 --threads 1 --runs 100
+# 完整测试流程（含硬件环境设置）
+./scripts/run_benchmark_android.sh --backend all --model mobilenetv2 --precision fp32 --threads 4 --runs 100
 ```
+
+> `run_benchmark_android.sh` 会自动锁频、清理缓存、推送二进制和模型到手机，测试完成后自动恢复环境。详见下方"红米手机完整测试指南"。
 
 ---
 
@@ -213,7 +215,15 @@ adb push third_party/onnxruntime/build/Android/Release/libonnxruntime.so /data/l
 
 #### 步骤 3: 运行基准测试
 
-**方式一：使用自动化脚本（推荐）**
+**一条命令（推荐）— 自动锁频 + 测试 + 恢复环境：**
+
+```bash
+./scripts/run_benchmark_android.sh --backend all --model all --threads 4 --runs 50
+```
+
+> 该脚本内部自动执行：`setup_test_environment.sh`（锁 performance 频率 + 清缓存）→ 推送二进制和模型 → 运行 benchmark → `restore_test_environment.sh`（恢复调度器）
+
+**方式一：指定后端和模型**
 
 ```bash
 # 测试 MobileNetV2 - 所有框架对比
@@ -227,6 +237,8 @@ adb push third_party/onnxruntime/build/Android/Release/libonnxruntime.so /data/l
 ```
 
 **方式二：手动执行（灵活）**
+
+> ⚠️ 手动执行前，建议先运行 `./scripts/setup_test_environment.sh` 锁定 CPU 频率。
 
 ```bash
 # 进入手机 shell
@@ -267,22 +279,32 @@ LD_LIBRARY_PATH=/data/local/tmp/benchmark ./benchmark_inference \
 
 #### 多线程性能扫描
 ```bash
+# 先锁频
+./scripts/setup_test_environment.sh
+
 # 测试 MNN 在不同线程数下的性能
 for t in 1 2 4 6 8; do
   echo "=== Testing $t threads ==="
   adb shell "cd /data/local/tmp/benchmark && LD_LIBRARY_PATH=. ./benchmark_inference --backend mnn --model mobilenetv2 --threads $t --runs 50"
 done
+
+# 恢复环境
+./scripts/restore_test_environment.sh
 ```
 
 #### 批量测试所有模型
 ```bash
-# 测试所有分类模型
+# 先锁频
+./scripts/setup_test_environment.sh
 for model in mobilenetv2 resnet50 shufflenet_v2_x0_5 mobilevit_s; do
   for backend in mnn onnxrt; do
     echo "=== $model - $backend ==="
     ./scripts/run_benchmark_android.sh --backend $backend --model $model --threads 4 --runs 50
   done
 done
+
+# 恢复环境
+./scripts/restore_test_environment.sh
 ```
 
 ---

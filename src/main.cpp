@@ -122,14 +122,14 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> backends_to_test;
     if (args.backend == "all") {
-        backends_to_test = {"ncnn", "mnn", "tnn", "tflite", "qnn", "onnxrt", "tvm"};
+        backends_to_test = {"mnn", "onnxrt"};
     } else {
         backends_to_test = {args.backend};
     }
 
     std::vector<std::string> models_to_test;
     if (args.model == "all") {
-        models_to_test = {"mobilenetv2", "resnet50", "shufflenet_v2_x0_5", "mobilevit_s", "yolov8n", "bert"};
+        models_to_test = {"mobilenetv2", "resnet50", "shufflenet_v2_x0_5", "mobilevit_s", "yolov8n"};
     } else {
         models_to_test = {args.model};
     }
