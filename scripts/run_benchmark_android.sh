@@ -103,7 +103,9 @@ adb push "$PROJECT_ROOT/models/classification" /data/local/tmp/benchmark/models/
 echo "Pushing shared libraries..."
 # 已停用的后端：TFLite、TVM（见 backup/all-backends 分支恢复）
 # adb push "$PROJECT_ROOT/third_party/tflite_extracted/jni/arm64-v8a/libtensorflowlite_jni.so" /data/local/tmp/benchmark/ 2>/dev/null || true
-adb push "$PROJECT_ROOT/third_party/onnxruntime/lib-android/aarch64/libonnxruntime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
+if [ -f "$PROJECT_ROOT/third_party/onnxruntime/build/Android/$BUILD_TYPE/libonnxruntime.so" ]; then
+    adb push "$PROJECT_ROOT/third_party/onnxruntime/build/Android/$BUILD_TYPE/libonnxruntime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
+fi
 # adb push "$PROJECT_ROOT/third_party/tvm/build-android/libtvm_runtime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 
 echo "=== Starting benchmark ==="
