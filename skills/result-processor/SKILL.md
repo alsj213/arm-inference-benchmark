@@ -19,9 +19,9 @@ description: Use when benchmarks or profiling are complete — parse logs, compa
 
 | 操作 | 命令 |
 |------|------|
-| 生成报告 | `python scripts/generate_report.py -i <log> -o <output>` |
-| 验证结果 | `python scripts/validate_results.py -i <results>` |
-| 分析单算子 | `python scripts/analyze_single_op_results.py -i <csv>` |
+| 生成报告 | `python3 scripts/generate_report.py <results_dir>` |
+| 验证结果 | `python3 scripts/validate_results.py <results_dir>` |
+| 分析单算子 | `python3 scripts/analyze_single_op_results.py <csv_file>` |
 
 ## 输出指标
 

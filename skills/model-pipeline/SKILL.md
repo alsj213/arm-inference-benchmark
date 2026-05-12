@@ -16,7 +16,7 @@ description: Use when needing to prepare models for benchmark testing — downlo
 | MobileNetV2 | classification | .mnn | .onnx | 就绪 |
 | ResNet50 | classification | .mnn | .onnx | 就绪 |
 | ShuffleNetV2 x0.5 | classification | .mnn | .onnx | 就绪 |
-| MobileViT-S | classification | .mnn | .onnx | 就绪 |
+| MobileViT-S | classification | — | — | 待下载 |
 | YOLOv8n | detection | .mnn | .onnx/.ort | 就绪 |
 | BERT | nlp | — | — | 待下载 |
 
@@ -59,13 +59,13 @@ python scripts/download_pretrained.py
 ```bash
 ./tools/bin/MNNConvert -f ONNX \
   --modelFile models/classification/mobilenetv2/mobilenetv2.onnx \
-  --MNNModel models/classification/mobilenetv2/mobilenetv2.mnn \
+  --MNNModel models/classification/mobilenetv2/mobilenetv2_MNN.mnn \
   --bizCode benchmark
 ```
 
 ### 3. ONNX Runtime
 
-ORT 直接使用 `.onnx` 格式，无需转换。YOLOv8n 可使用优化后的 `.ort` 格式。
+ORT 直接使用 `.onnx` 格式，无需转换。YOLOv8n 的 `.ort` 格式已存在于 `models/detection/yolov8n/`，但当前 benchmark 代码使用 `.onnx` 路径加载。
 
 ## 常见问题
 

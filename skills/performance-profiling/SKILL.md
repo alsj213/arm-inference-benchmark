@@ -30,6 +30,7 @@ description: Use when analyzing inference latency bottlenecks — operator-level
 |------|------|------|
 | `--backend <name>` | 后端选择 | mnn |
 | `--model <name>` | 模型选择 | mobilenetv2 |
+| `--runs <num>` | benchmark 运行次数 | 100 |
 | `--threads <num>` | 线程数 | 4 |
 | `--profile <tools>` | 工具集（逗号分隔） | simpleperf |
 | `--build-type <type>` | 构建类型（release/debug） | release |

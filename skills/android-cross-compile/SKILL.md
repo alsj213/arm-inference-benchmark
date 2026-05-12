@@ -1,6 +1,6 @@
 ---
 name: android-cross-compile
-description: Use when compiling benchmark binary for Android ARM64 — configure NDK, build MNN statically, prepare ORT dynamic library, select Release/Debug mode
+description: Use when compiling benchmark binary for Android ARM64 — configure NDK, build MNN as shared library, prepare ORT dynamic library, select Release/Debug mode
 ---
 
 # Android Cross Compile
@@ -88,4 +88,4 @@ make -j$(nproc)
 
 - **ANDROID_NDK 未设置**: `export ANDROID_NDK=~/android-ndk-r25c`，NDK r25c 或更新版本
 - **ORT 头文件找不到**: 确保 ONNX Runtime 子模块已初始化（`git submodule update --init third_party/onnxruntime`），并已单独编译出 `libonnxruntime.so`
-- **MNN 编译慢**: 首次编译静态库较慢，后续增量编译很快
+- **MNN 编译慢**: 首次编译共享库较慢，后续增量编译很快
