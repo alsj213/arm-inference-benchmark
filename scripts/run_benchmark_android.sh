@@ -106,6 +106,16 @@ echo "Pushing shared libraries..."
 if [ -f "$PROJECT_ROOT/third_party/onnxruntime/build/Android/$BUILD_TYPE/libonnxruntime.so" ]; then
     adb push "$PROJECT_ROOT/third_party/onnxruntime/build/Android/$BUILD_TYPE/libonnxruntime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 fi
+# libMNN.so（共享库版）
+if [ "$BUILD_TYPE" = "Debug" ]; then
+    MNN_SO_DIR="$PROJECT_ROOT/build_android_debug"
+else
+    MNN_SO_DIR="$PROJECT_ROOT/build_android"
+fi
+MNN_SO="$MNN_SO_DIR/third_party/MNN/OFF/arm64-v8a/libMNN.so"
+if [ -f "$MNN_SO" ]; then
+    adb push "$MNN_SO" /data/local/tmp/benchmark/ 2>/dev/null || true
+fi
 # adb push "$PROJECT_ROOT/third_party/tvm/build-android/libtvm_runtime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 
 echo "=== Starting benchmark ==="

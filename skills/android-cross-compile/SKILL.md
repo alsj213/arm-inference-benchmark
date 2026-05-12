@@ -7,7 +7,7 @@ description: Use when compiling benchmark binary for Android ARM64 — configure
 
 ## Overview
 
-将 benchmark 交叉编译到 Android ARM64 (arm64-v8a)。MNN 通过 git 子模块 + add_subdirectory 静态编译，ONNX Runtime 为预编译动态库 (libonnxruntime.so)。
+将 benchmark 交叉编译到 Android ARM64 (arm64-v8a)。MNN 通过 git 子模块 + add_subdirectory 编译为共享库 (libMNN.so)，ONNX Runtime 为预编译动态库 (libonnxruntime.so)。
 
 ## 前置条件
 
@@ -75,7 +75,7 @@ make -j$(nproc)
 
 | 选项 | 默认 | 说明 |
 |------|------|------|
-| `BENCHMARK_MNN` | ON | MNN 后端（静态链接） |
+| `BENCHMARK_MNN` | ON | MNN 后端（共享库 libMNN.so） |
 | `BENCHMARK_ORT` | ON | ONNX Runtime 后端（动态库） |
 | `BENCHMARK_NCNN` | OFF | ncnn（已停用） |
 | `BENCHMARK_TFLITE` | OFF | TFLite（已停用） |

@@ -49,7 +49,7 @@ description: Use when running inference performance tests on Android devices —
 脚本自动完成：
 1. 调用 `setup_test_environment.sh` 锁频（自动检测 root）
 2. 推送 `benchmark_inference` 到 `/data/local/tmp/benchmark/`
-3. 推送 `libonnxruntime.so` 动态库
+3. 推送 `libonnxruntime.so` 和 `libMNN.so` 动态库
 4. 推送 `models/classification` 模型文件
 5. 执行测试（`LD_LIBRARY_PATH=/data/local/tmp/benchmark`）
 6. 调用 `restore_test_environment.sh` 恢复环境
