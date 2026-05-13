@@ -16,7 +16,7 @@ void print_usage() {
     printf("Usage: ./benchmark_inference [options]\n");
     printf("Options:\n");
     printf("  --backend <mnn|onnxrt|ort>  Backend to test (default: all)\n");
-    printf("  --model <mobilenetv2|resnet50|shufflenet_v2_x0_5|mobilevit_s|yolov8n>  Model to test (default: all)\n");
+    printf("  --model <mobilenetv2|resnet50|yolov8n|bert>  Model to test (default: all)\n");
     printf("  --precision <fp32|fp16|int8>                  Precision (default: fp32)\n");
     printf("  --threads <num>                                Number of threads (default: 1)\n");
     printf("  --warmup <num>                                 Number of warmup runs (default: 10)\n");
@@ -88,14 +88,6 @@ ModelInfo get_model_info(const std::string& name) {
         return get_mobilenetv2_info();
     } else if (name == "resnet50") {
         return get_resnet50_info();
-    } else if (name == "shufflenet_v2_x0_5") {
-        return get_shufflenet_v2_info();
-    } else if (name == "mobilevit_s") {
-        ModelInfo info;
-        info.name = "mobilevit_s";
-        info.input_shape = {1, 3, 256, 256};
-        info.base_path = "./models/classification/mobilevit_s";
-        return info;
     } else if (name == "yolov8n") {
         return get_yolov8n_info();
     } else if (name == "bert") {
@@ -130,7 +122,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> models_to_test;
     if (args.model == "all") {
-        models_to_test = {"mobilenetv2", "resnet50", "shufflenet_v2_x0_5", "mobilevit_s", "yolov8n"};
+        models_to_test = {"mobilenetv2", "resnet50", "yolov8n", "bert"};
     } else {
         models_to_test = {args.model};
     }

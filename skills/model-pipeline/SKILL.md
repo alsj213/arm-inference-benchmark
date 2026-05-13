@@ -15,8 +15,6 @@ description: Use when needing to prepare models for benchmark testing — downlo
 |------|------|-----|-----|------|
 | MobileNetV2 | classification | .mnn | .onnx | 就绪 |
 | ResNet50 | classification | .mnn | .onnx | 就绪 |
-| ShuffleNetV2 x0.5 | classification | .mnn | .onnx | 就绪 |
-| MobileViT-S | classification | — | — | 待下载 |
 | YOLOv8n | detection | .mnn | .onnx/.ort | 就绪 |
 | BERT | nlp | — | — | 待下载 |
 
@@ -27,9 +25,7 @@ models/
 ├── classification/
 │   ├── mobilenetv2/        # .onnx, .mnn
 │   ├── resnet50/           # .onnx, .mnn
-│   ├── shufflenet_v2/      # .onnx, .mnn
-│   ├── squeezenet/         # 仅 .tnn（已停用）
-│   └── mobilevit_s/        # .onnx, .mnn
+│   └── squeezenet/         # 仅 .tnn（已停用）
 ├── detection/yolov8n/      # .onnx, .ort, .mnn
 ├── nlp/bert/               # 空（待下载）
 └── speech/                 # 空
@@ -44,7 +40,7 @@ cd /home/liu/project/newwork/benchmark
 python scripts/download_pretrained.py
 ```
 
-导出模型：MobileNetV2、ResNet50、ShuffleNetV2、MobileViT-S、YOLOv8n、BERT。
+导出模型：MobileNetV2、ResNet50、YOLOv8n、BERT。
 
 ### 2. MNN 模型转换
 

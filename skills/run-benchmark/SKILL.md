@@ -78,7 +78,7 @@ python3 scripts/generate_report.py results/sm8250
 
 | 参数 | 说明 | 示例值 |
 |------|------|--------|
-| `--model` | 模型名 | mobilenetv2, resnet50, shufflenet_v2_x0_5, mobilevit_s, yolov8n, bert |
+| `--model` | 模型名 | mobilenetv2, resnet50, yolov8n, bert |
 | `--backend` | 后端类型 | mnn, onnxrt, ort |
 | `--precision` | 推理精度 | fp32, fp16, int8 |
 | `--threads` | 线程数 | 1, 2, 4 |

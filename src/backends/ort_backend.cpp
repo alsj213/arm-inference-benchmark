@@ -3,6 +3,7 @@
 #include "onnxruntime_cxx_api.h"
 #include <vector>
 #include <string>
+#include <cstdint>
 
 bool ONNXRTBackend::init(const BenchmarkConfig& config) {
     session_options_ = std::make_unique<Ort::SessionOptions>();
@@ -31,16 +32,19 @@ bool ONNXRTBackend::init(const BenchmarkConfig& config) {
         input_shape_[i] = config.input_shape[i];
     }
 
-    // Get input/output names - ORT v1.21.0 API (GetInputNameAllocated/GetOutputNameAllocated)
+    // Get input info
     Ort::AllocatorWithDefaultOptions allocator;
-    size_t num_inputs = session_.GetInputCount();
-    input_names_store_.resize(num_inputs);
-    input_names_.resize(num_inputs);
-    for (size_t i = 0; i < num_inputs; ++i) {
+    num_inputs_ = session_.GetInputCount();
+    input_names_store_.resize(num_inputs_);
+    input_names_.resize(num_inputs_);
+    input_types_.resize(num_inputs_);
+    for (size_t i = 0; i < num_inputs_; ++i) {
         auto name = session_.GetInputNameAllocated(i, allocator);
         input_names_store_[i] = name.get();
         input_names_[i] = input_names_store_[i].c_str();
-        printf("ONNXRT: input %zu = %s\n", i, input_names_[i]);
+        auto type_info = session_.GetInputTypeInfo(i);
+        input_types_[i] = type_info.GetTensorTypeAndShapeInfo().GetElementType();
+        printf("ONNXRT: input %zu = %s (type %d)\n", i, input_names_[i], (int)input_types_[i]);
     }
 
     size_t num_outputs = session_.GetOutputCount();
@@ -56,14 +60,41 @@ bool ONNXRTBackend::init(const BenchmarkConfig& config) {
     return true;
 }
 
-bool ONNXRTBackend::infer(const std::vector<float>& input) {
+void ONNXRTBackend::create_input_tensors(const std::vector<float>& input,
+                                         std::vector<Ort::Value>& input_tensors,
+                                         std::vector<std::vector<int64_t>>& scratch) {
     Ort::MemoryInfo mem_info = Ort::MemoryInfo::CreateCpu(
         OrtArenaAllocator, OrtMemTypeDefault);
 
+    scratch.resize(num_inputs_);
+
+    for (size_t i = 0; i < num_inputs_; ++i) {
+        if (input_types_[i] == ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64) {
+            // Generate int64 tensor from the float input
+            scratch[i].resize(input.size());
+            for (size_t j = 0; j < input.size(); ++j) {
+                int64_t val = static_cast<int64_t>(input[j] * 1000.0f) % 30521;
+                if (val < 0) val = -val;
+                if (val == 0) val = 101;  // [CLS] token
+                scratch[i][j] = val;
+            }
+
+            input_tensors.emplace_back(Ort::Value::CreateTensor<int64_t>(
+                mem_info, scratch[i].data(), scratch[i].size(),
+                input_shape_.data(), input_shape_.size()));
+        } else {
+            // Float tensor (or other, default to float)
+            input_tensors.emplace_back(Ort::Value::CreateTensor<float>(
+                mem_info, const_cast<float*>(input.data()), input.size(),
+                input_shape_.data(), input_shape_.size()));
+        }
+    }
+}
+
+bool ONNXRTBackend::infer(const std::vector<float>& input) {
     std::vector<Ort::Value> input_tensors;
-    input_tensors.emplace_back(Ort::Value::CreateTensor<float>(
-        mem_info, const_cast<float*>(input.data()), input.size(),
-        input_shape_.data(), input_shape_.size()));
+    std::vector<std::vector<int64_t>> scratch;
+    create_input_tensors(input, input_tensors, scratch);
 
     std::vector<Ort::Value> output_tensors = session_.Run(
         Ort::RunOptions{nullptr},
@@ -77,13 +108,9 @@ bool ONNXRTBackend::infer(const std::vector<float>& input) {
 }
 
 bool ONNXRTBackend::infer_with_output(const std::vector<float>& input, std::vector<float>& output) {
-    Ort::MemoryInfo mem_info = Ort::MemoryInfo::CreateCpu(
-        OrtArenaAllocator, OrtMemTypeDefault);
-
     std::vector<Ort::Value> input_tensors;
-    input_tensors.emplace_back(Ort::Value::CreateTensor<float>(
-        mem_info, const_cast<float*>(input.data()), input.size(),
-        input_shape_.data(), input_shape_.size()));
+    std::vector<std::vector<int64_t>> scratch;
+    create_input_tensors(input, input_tensors, scratch);
 
     std::vector<Ort::Value> output_tensors = session_.Run(
         Ort::RunOptions{nullptr},
@@ -113,11 +140,6 @@ bool ONNXRTBackend::infer_with_output(const std::vector<float>& input, std::vect
 }
 
 void ONNXRTBackend::deinit() {
-    // Note: Don't call session_.release() here!
-    // The session destructor will be called automatically when the backend is destroyed,
-    // which will write the profiling data if profiling is enabled.
-    // Calling release() would prevent the destructor from being called.
-
     if (profiling_enabled_) {
         printf("ONNXRT: Profiling enabled, session will write profiling data on destruction\n");
     }
@@ -127,4 +149,5 @@ void ONNXRTBackend::deinit() {
     output_names_store_.clear();
     input_names_.clear();
     output_names_.clear();
+    input_types_.clear();
 }
