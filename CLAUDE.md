@@ -116,6 +116,10 @@ benchmark/
 4. 停用的后端源代码完整保留，恢复见 `BACKEND_REENABLE_GUIDE.md`
 5. 停用后端的旧完整配置备份在 `backup/all-backends` 分支
 
+## 项目 Agent
+
+- **[benchmark-agent](.claude/agents/benchmark-agent.md)** — 一句话自动执行完整 benchmark 测试。说"benchmark mnn mobilenetv2 --threads 4"即可自动完成编译、推送、锁频、运行、出报告全流程。
+
 ## 项目技能
 
 本项目包含以下技能，存储在 `skills/` 目录下：
