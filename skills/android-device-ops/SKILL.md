@@ -20,6 +20,9 @@ description: Use when needing to interact with Android test device — check ADB
 | 操作 | 命令 |
 |------|------|
 | 检查连接 | `adb devices` |
+| **验证设备信息** | `adb shell getprop ro.product.model && adb shell cat /proc/cpuinfo \| grep "A77"` |
+| **检测温度** | `adb shell cat /sys/class/thermal/thermal_zone*/temp` |
+| **记录完整状态** | `adb shell "echo MODEL=$(getprop ro.product.model); cat /proc/cpuinfo \| grep -c A77; cat /sys/class/thermal/thermal_zone0/temp"` |
 | 推送二进制 | `adb push build_android/src/benchmark_inference /data/local/tmp/` |
 | 推送 ORT so | `adb push third_party/onnxruntime/build/Android/Release/libonnxruntime.so /data/local/tmp/` |
 | 推送模型 | `adb push models /data/local/tmp/` |
@@ -39,6 +42,13 @@ adb push third_party/onnxruntime/build/Android/Release/libonnxruntime.so /data/l
 adb push models/classification/mobilenetv2 /data/local/tmp/models/
 adb shell "cd /data/local/tmp && LD_LIBRARY_PATH=. ./benchmark_inference --model mobilenetv2"
 ```
+
+## 温度说明
+
+- **< 40°C**: 正常，数据可信
+- **40-45°C**: 可能轻微降频
+- **> 45°C**: ⚠️ 降频风险高，建议冷却后重跑
+- 读取方法: CPU 温度在 `thermal_zone` 中名称含 "cpu" 的那个
 
 ## 常见问题
 

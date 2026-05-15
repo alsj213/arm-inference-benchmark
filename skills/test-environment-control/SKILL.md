@@ -20,6 +20,16 @@ description: Use when running benchmarks or profiling to ensure consistent test 
 | 设置测试环境 | `./scripts/setup_test_environment.sh` | 自动检测 |
 | 恢复环境 | `./scripts/restore_test_environment.sh` | 自动检测 |
 
+## 温度阈值
+
+测试前必须检查设备温度。温度 > 45°C 时数据不可信，需在报告中标注。
+
+```bash
+# 检查温度
+adb shell cat /sys/class/thermal/thermal_zone*/temp
+# 温度单位: 0.001°C, 45000 = 45°C
+```
+
 ## 脚本行为
 
 ### setup_test_environment.sh（自动检测 root）
