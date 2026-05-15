@@ -164,7 +164,7 @@ export ANDROID_NDK=/home/liu/android-ndk
 
 ## 项目 Agent
 
-- **[benchmark-agent](.claude/agents/benchmark-agent.md)** — 一句话自动执行完整 benchmark 测试。说"benchmark mnn mobilenetv2 --threads 4"即可自动完成编译、推送、锁频、运行、出报告全流程。
+- **[benchmark-agent](.claude/agents/benchmark-agent.md)** — 可 dispatch 的 benchmark 子 agent。主 Claude 将 agent 文件全文传给 `Agent(subagent_type="general-purpose")` 执行。说"跑 benchmark mnn mobilenetv2"即可启动。
 
 ## 项目技能
 
