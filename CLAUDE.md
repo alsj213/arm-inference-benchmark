@@ -116,6 +116,52 @@ benchmark/
 4. 停用的后端源代码完整保留，恢复见 `BACKEND_REENABLE_GUIDE.md`
 5. 停用后端的旧完整配置备份在 `backup/all-backends` 分支
 
+## Benchmark 执行协议（强制性）
+
+当用户要求执行基准测试时，**必须严格遵守以下流程，不得跳过任何步骤**。每一步的输出都要展示给用户作为"证物"。
+
+### 协议步骤
+
+**Step 1: 设备握手** — 必须执行，否则拒绝继续
+```bash
+adb devices | grep "device$" || exit 1    # 设备必须在线
+adb shell getprop ro.product.model        # 打印设备型号
+adb shell cat /proc/cpuinfo | grep "A77"  # 打印芯片信息
+```
+
+**Step 2: 检查代码版本**
+```bash
+git log --oneline -1   # 当前 commit
+```
+
+**Step 3: 检查/编译二进制**
+```bash
+ls -lh build_android/src/benchmark_inference  # 验证产物
+# 如需重新编译则执行 build_android.sh
+```
+
+**Step 4: 检查模型文件**
+```
+ls -lh models/nlp/bert/bert.onnx  # BERT 示例
+# 缺失则执行下载和转换
+```
+
+**Step 5: 运行并记录原始日志** — 必须使用 `tee` 保留原始输出
+```bash
+export ANDROID_NDK=/home/liu/android-ndk
+./scripts/run_benchmark_android.sh ... | tee results/latest_benchmark.log
+```
+
+**Step 6: 输出结果摘要** — 直接从日志中提取真实数据，不得凭空填写
+
+**Step 7: 生成 HTML 报告** — 按 `skills/result-processor/SKILL.md` 中的 HTML 生成流程
+
+### 协议红线
+- ❌ **不得伪造 adb 输出、模型数据、性能数字**
+- ❌ **不得跳过设备握手步骤**
+- ❌ **不得以"假设设备已连接"为由跳过验证**
+- ✅ 如果设备连接失败，向用户报告失败，停止执行
+
 ## 项目 Agent
 
 - **[benchmark-agent](.claude/agents/benchmark-agent.md)** — 一句话自动执行完整 benchmark 测试。说"benchmark mnn mobilenetv2 --threads 4"即可自动完成编译、推送、锁频、运行、出报告全流程。
