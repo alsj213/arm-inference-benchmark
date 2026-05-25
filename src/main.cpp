@@ -35,6 +35,7 @@ struct CommandLineArgs {
     int runs = 100;
     bool use_gpu = false;
     bool help = false;
+    bool show_version = false;
     std::string profiling_file = "";  // Profiling output file
 };
 
@@ -60,6 +61,8 @@ CommandLineArgs parse_args(int argc, char** argv) {
             args.profiling_file = argv[++i];
         } else if (arg == "--help") {
             args.help = true;
+        } else if (arg == "--version") {
+            args.show_version = true;
         }
     }
     return args;
@@ -100,6 +103,10 @@ int main(int argc, char** argv) {
     CommandLineArgs args = parse_args(argc, argv);
     if (args.help) {
         print_usage();
+        return 0;
+    }
+    if (args.show_version) {
+        printf("benchmark_inference %s\n", GIT_COMMIT_HASH);
         return 0;
     }
 
