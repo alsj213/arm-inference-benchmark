@@ -152,7 +152,7 @@ benchmark/
 ├── third_party/              # 第三方依赖（git 子模块）
 │   ├── MNN/                 # libMNN.so（共享库）
 │   └── onnxruntime/         # libonnxruntime.so（需单独编译）
-├── skills/                   # 项目技能文档（8 个 SKILL.md）
+├── skills/                   # 项目技能文档（4 个 SKILL.md）
 ├── docs/                     # 文档 + 测试结果
 ├── results/                  # 测试结果输出
 └── tools/                    # MNNConvert 等转换工具
@@ -173,16 +173,12 @@ benchmark/
 
 ## 详细指南
 
-本项目包含 8 个 `skills/` 技能文档，覆盖各操作环节的详细步骤：
+本项目包含 4 个 `skills/` 技能文档，覆盖各操作环节的详细步骤：
 
-- **模型准备**: [skills/model-pipeline/SKILL.md](skills/model-pipeline/SKILL.md)
-- **交叉编译**: [skills/android-cross-compile/SKILL.md](skills/android-cross-compile/SKILL.md)
-- **运行测试**: [skills/run-benchmark/SKILL.md](skills/run-benchmark/SKILL.md)
-- **性能分析**: [skills/performance-profiling/SKILL.md](skills/performance-profiling/SKILL.md)
-- **集成框架**: [skills/integrate-framework/SKILL.md](skills/integrate-framework/SKILL.md)
-- **设备操作**: [skills/android-device-ops/SKILL.md](skills/android-device-ops/SKILL.md)
-- **环境控制**: [skills/test-environment-control/SKILL.md](skills/test-environment-control/SKILL.md)
-- **结果处理**: [skills/result-processor/SKILL.md](skills/result-processor/SKILL.md)
+- **完整流程**: [skills/benchmark-run/SKILL.md](skills/benchmark-run/SKILL.md)
+- **模型准备和编译**: [skills/benchmark-model-prep/SKILL.md](skills/benchmark-model-prep/SKILL.md)
+- **性能分析**: [skills/benchmark-profiling/SKILL.md](skills/benchmark-profiling/SKILL.md)
+- **集成框架**: [skills/benchmark-integrate/SKILL.md](skills/benchmark-integrate/SKILL.md)
 
 ## 许可证
 

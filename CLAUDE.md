@@ -33,15 +33,11 @@ benchmark/
 ├── models/               # 模型文件（onnx/mnn/tflite/ncnn/tnn/tvm）
 ├── third_party/          # 第三方依赖（git子模块 / 手动下载）
 ├── cmake/                # Android NDK 工具链
-├── skills/               # 项目技能（4基础+4流程，MNN/ORT工作流）
-│   │   ├── model-pipeline/
-│   │   ├── android-device-ops/
-│   │   ├── test-environment-control/
-│   │   ├── result-processor/
-│   │   ├── android-cross-compile/
-│   │   ├── run-benchmark/
-│   │   ├── performance-profiling/
-│   │   └── integrate-framework/
+├── skills/               # 项目技能（4 个，MNN/ORT 工作流）
+│   │   ├── benchmark-run/
+│   │   ├── benchmark-model-prep/
+│   │   ├── benchmark-profiling/
+│   │   └── benchmark-integrate/
 ├── docs/                 # 文档 + 测试结果
 ├── results/              # 测试结果输出
 ├── tools/                # 转换工具（MNNConvert、FlameGraph）
@@ -154,7 +150,7 @@ export ANDROID_NDK=/home/liu/android-ndk
 
 **Step 6: 输出结果摘要** — 直接从日志中提取真实数据，不得凭空填写
 
-**Step 7: 生成 HTML 报告** — 按 `skills/result-processor/SKILL.md` 中的 HTML 生成流程
+**Step 7: 生成 HTML 报告** — 按 `skills/benchmark-run/SKILL.md` 中的 HTML 生成流程
 
 ### 协议红线
 - ❌ **不得伪造 adb 输出、模型数据、性能数字**
@@ -175,16 +171,7 @@ export ANDROID_NDK=/home/liu/android-ndk
 
 本项目包含以下技能，存储在 `skills/` 目录下：
 
-### 基础技能
-
-- [model-pipeline](skills/model-pipeline/SKILL.md) — 模型下载、格式转换（MNN/ORT）、路径管理。需要准备测试模型时使用
-- [android-device-ops](skills/android-device-ops/SKILL.md) — ADB 连接、文件推送/拉取、远程执行。需要与 Android 设备通信时使用
-- [test-environment-control](skills/test-environment-control/SKILL.md) — CPU 锁频、缓存清理、环境恢复。需要在测试前保证环境一致性时使用
-- [result-processor](skills/result-processor/SKILL.md) — 日志解析、精度对比、报告生成。需要分析测试结果时使用
-
-### 流程技能
-
-- [android-cross-compile](skills/android-cross-compile/SKILL.md) — NDK 交叉编译、Release/Debug 构建。需要编译 Android 二进制时使用
-- [run-benchmark](skills/run-benchmark/SKILL.md) — 端侧推理基准测试完整流程。需要在 Android 设备上运行性能测试时使用
-- [performance-profiling](skills/performance-profiling/SKILL.md) — 逐算子 profiling、火焰图、系统 trace。需要分析推理瓶颈时使用
-- [integrate-framework](skills/integrate-framework/SKILL.md) — 添加新后端或恢复已停用后端的完整步骤。需要集成推理框架时使用
+- [benchmark-run](skills/benchmark-run/SKILL.md) — 完整 benchmark 流程：设备握手、环境控制、执行测试、结果解析与报告
+- [benchmark-model-prep](skills/benchmark-model-prep/SKILL.md) — 模型下载、格式转换（MNN/ORT）、NDK 交叉编译
+- [benchmark-profiling](skills/benchmark-profiling/SKILL.md) — 逐算子 profiling、火焰图、系统 trace
+- [benchmark-integrate](skills/benchmark-integrate/SKILL.md) — 添加新推理框架后端的完整步骤

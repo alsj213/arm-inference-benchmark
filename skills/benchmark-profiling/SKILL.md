@@ -1,23 +1,23 @@
 ---
-name: performance-profiling
-description: Use when analyzing inference latency bottlenecks — operator-level profiling with MNN/ORT built-in tools, CPU sampling with simpleperf, system tracing with atrace/perfetto
+name: benchmark-profiling
+description: Use when analyzing inference latency bottlenecks — operator-level profiling, CPU sampling with simpleperf, system tracing with atrace/perfetto, and flame graph generation
 ---
 
-# Performance Profiling
+# Benchmark Profiling
 
 ## Overview
 
-分析推理延迟瓶颈，从算子级别到系统级别。引用基础技能：android-device-ops、test-environment-control、result-processor。
+分析推理延迟瓶颈的方法集，从算子级别到系统级别。
 
 ## 方法对比
 
-| 方法 | 粒度 | 适用场景 |
-|------|------|---------|
-| MNN_PROFILING | 逐算子 | MNN 各算子耗时分布 |
-| ORT Profiling API | 逐算子 | ORT 各算子耗时分布 |
-| simpleperf | CPU 采样 | 热点函数定位，火焰图 |
-| atrace | 系统 trace | 系统调用、线程调度分析 |
-| perfetto | 综合 trace | CPU/GPU/内存全面分析 |
+| 方法 | 粒度 | 适用场景 | 前置条件 |
+|------|------|---------|---------|
+| MNN_PROFILING | 逐算子 | MNN 各算子耗时分布 | MNN 编译时未禁用 profiling |
+| ORT Profiling API | 逐算子 | ORT 各算子耗时分布 | — |
+| simpleperf | CPU 采样 | 热点函数定位，火焰图 | Debug 构建获得完整符号 |
+| atrace | 系统 trace | 系统调用、线程调度分析 | Android 10+ |
+| perfetto | 综合 trace | CPU/GPU/内存全面分析 | Android 10+ 内置支持 |
 
 ## 集成入口
 
@@ -25,7 +25,6 @@ description: Use when analyzing inference latency bottlenecks — operator-level
 ./scripts/profile_benchmark.sh [options]
 ```
 
-选项：
 | 选项 | 说明 | 默认 |
 |------|------|------|
 | `--backend <name>` | 后端选择 | mnn |
@@ -41,16 +40,14 @@ description: Use when analyzing inference latency bottlenecks — operator-level
 
 工具集可选值：`simpleperf`, `atrace`, `perfetto`, `framework`, `all`
 
-## 工作流
-
-### 前置条件
+## 前置条件
 
 ```bash
 # profiling 分析建议使用 Debug 版本以获得完整符号信息
 ./scripts/build_android.sh --debug
 ```
 
-### MNN 逐算子 Profiling
+## MNN 逐算子 Profiling
 
 ```bash
 adb shell "cd /data/local/tmp/benchmark && MNN_PROFILING=1 LD_LIBRARY_PATH=. ./benchmark_inference --model mobilenetv2 --backend mnn"
@@ -58,16 +55,17 @@ adb shell "cd /data/local/tmp/benchmark && MNN_PROFILING=1 LD_LIBRARY_PATH=. ./b
 
 输出包含每个 MNN 算子的耗时和占比。
 
-### ORT 逐算子 Profiling
+## ORT 逐算子 Profiling
 
 通过 `--profiling` 参数启用：
+
 ```bash
 adb shell "cd /data/local/tmp/benchmark && LD_LIBRARY_PATH=. ./benchmark_inference --model mobilenetv2 --backend ort --profiling ort_profile.json"
 ```
 
 输出 JSON 文件包含各算子耗时。
 
-### simpleperf 火焰图
+## simpleperf 火焰图
 
 ```bash
 ./scripts/simpleperf_profile.sh --backend mnn --model mobilenetv2 --duration 10
@@ -75,12 +73,34 @@ adb shell "cd /data/local/tmp/benchmark && LD_LIBRARY_PATH=. ./benchmark_inferen
 
 产物在 `results/profiling/<timestamp>_<model>_<backend>/simpleperf/flamegraph.svg`。
 
-### atrace / perfetto
+### 手动生成火焰图
+
+```bash
+# 1. simpleperf 采样
+adb shell simpleperf record -o /data/local/tmp/perf.data -e cpu-cycles:u -f 4000 --duration 10 \
+  --app benchmark_inference
+
+# 2. 拉取数据
+adb pull /data/local/tmp/perf.data .
+
+# 3. 生成火焰图
+simpleperf report -i perf.data --full-call-graph | \
+  stackcollapse-perf.pl | flamegraph.pl > flamegraph.svg
+```
+
+## atrace
 
 ```bash
 ./scripts/atrace_capture.sh --duration 10 --categories sched,freq
+```
+
+## perfetto
+
+```bash
 ./scripts/perfetto_trace.sh --duration 15
 ```
+
+Android 10+ 内置支持 perfetto。
 
 ## 常见问题
 
