@@ -128,3 +128,10 @@ docs/build/
 # Tools (cloned third-party)
 # ==============================================
 tools/FlameGraph/
+
+# Claude local settings
+.claude/settings.local.json
+.claude/agent-memory/
+
+# Model backup files
+*.bak
