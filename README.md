@@ -7,10 +7,10 @@
 
 ## 特性
 
-- **多框架支持**: MNN + ONNX Runtime（活跃），ncnn / TFLite / TNN / QNN / TVM / llama.cpp（完整保留，可恢复）
+- **多框架支持**: MNN / ONNX Runtime / ncnn（活跃），MindSpore Lite（待调试），QNN / TVM / TNN / TFLite / llama.cpp（完整保留，可恢复）
 - **性能指标**: 延迟 P50/P90/P99、吞吐量 FPS、初始化时间、峰值内存
 - **精度对比**: 以 ONNX Runtime 为标杆，自动计算余弦相似度、平均绝对/相对误差
-- **CPU Profiling**: simpleperf 火焰图、atrace/perfetto 系统 trace、MNN/ORT 逐算子分析
+- **Claude Code 插件**: 通过 `claude-code-mobile-bench` 插件自动化测试流程
 - **测试模型**: MobileNetV2 / ResNet50 / YOLOv8n / BERT
 - **环境控制**: CPU 锁频 + 缓存清理，保证结果可复现
 
@@ -171,14 +171,32 @@ benchmark/
 | TVM | `BENCHMARK_TVM=OFF` | 已停用，可恢复 |
 | llama.cpp | `BENCHMARK_LLAMACPP=OFF` | 已停用，可恢复 |
 
+## 最新测试结果
+
+骁龙 865 / SM8250 · FP32 · 单线程 (2026-05-26)
+
+| Model | MNN | ncnn | ONNX Runtime |
+|-------|-----|------|-------------|
+| **MobileNetV2** | **18.7ms** (53.5 FPS) | 19.5ms (51.4 FPS) | 28.6ms (35.0 FPS) |
+| **ResNet50** | **143.6ms** (7.0 FPS) | 164.0ms (6.1 FPS) ❌ | 222.5ms (4.5 FPS) |
+| **YOLOv8n** | 173.9ms (5.8 FPS) | **169.6ms** (5.9 FPS) | 302.9ms (3.3 FPS) |
+
+> ncnn ResNet50 精度不通过 (cos=0.66)，需用 PNNX 重新转换。
+
+## Claude Code 插件
+
+Benchmark 流程由 `claude-code-mobile-bench` 插件自动化管理：
+
+```bash
+claude plugins marketplace add ./claude-code-mobile-bench
+claude plugins install claude-code-mobile-bench@claude-code-mobile-bench
+```
+
+插件仓库: [github.com/alsj213/claude-code-mobile-bench](https://github.com/alsj213/claude-code-mobile-bench)
+
 ## 详细指南
 
-本项目包含 4 个 `skills/` 技能文档，覆盖各操作环节的详细步骤：
-
-- **完整流程**: [skills/benchmark-run/SKILL.md](skills/benchmark-run/SKILL.md)
-- **模型准备和编译**: [skills/benchmark-model-prep/SKILL.md](skills/benchmark-model-prep/SKILL.md)
-- **性能分析**: [skills/benchmark-profiling/SKILL.md](skills/benchmark-profiling/SKILL.md)
-- **集成框架**: [skills/benchmark-integrate/SKILL.md](skills/benchmark-integrate/SKILL.md)
+- **插件 skills**: 安装 `claude-code-mobile-bench` 后自动加载 4 个 skill + agent + 11 条数据红线
 
 ## 许可证
 
