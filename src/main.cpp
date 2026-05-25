@@ -155,8 +155,9 @@ int main(int argc, char** argv) {
         std::vector<float> reference_output;
         bool has_reference = false;
 
-        if (std::find(backends_to_test.begin(), backends_to_test.end(), "onnxrt") != backends_to_test.end() ||
-            backends_to_test.size() > 1) {
+        // Always attempt ORT reference; if ORT backend unavailable, skip silently
+        {
+            (void)backends_to_test;  // suppress unused-variable warning
 
             printf("\n--- [Step 1] Getting reference output from ONNX Runtime ---\n");
 
