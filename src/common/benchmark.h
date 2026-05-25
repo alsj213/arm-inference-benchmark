@@ -33,6 +33,8 @@ struct BenchmarkResult {
 
     // Accuracy comparison results
     AccuracyResult accuracy;
+
+    std::string to_json() const;
 };
 
 class BenchmarkBackend {

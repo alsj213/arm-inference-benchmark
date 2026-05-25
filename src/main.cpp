@@ -23,6 +23,7 @@ void print_usage() {
     printf("  --runs <num>                                   Number of test runs (default: 100)\n");
     printf("  --gpu                                          Use GPU if available\n");
     printf("  --profiling <file>                             Enable operator profiling (output to file)\n");
+    printf("  --json                                          Output results as JSON lines\n");
     printf("  --help                                         Show this help\n");
 }
 
@@ -35,6 +36,7 @@ struct CommandLineArgs {
     int runs = 100;
     bool use_gpu = false;
     bool help = false;
+    bool json_output = false;
     bool show_version = false;
     std::string profiling_file = "";  // Profiling output file
 };
@@ -59,6 +61,8 @@ CommandLineArgs parse_args(int argc, char** argv) {
             args.use_gpu = true;
         } else if (arg == "--profiling" && i + 1 < argc) {
             args.profiling_file = argv[++i];
+        } else if (arg == "--json") {
+            args.json_output = true;
         } else if (arg == "--help") {
             args.help = true;
         } else if (arg == "--version") {
@@ -245,11 +249,15 @@ int main(int argc, char** argv) {
             }
 
             // Print performance results
-            printf("\n--- Performance Results ---\n");
-            printf("  Init time:  %.2f ms\n", result.init_time_ms);
-            utils::print_stats(result.latency_stats);
-            printf("  Throughput: %.2f FPS\n", result.throughput_fps);
-            printf("  Peak mem:   %zu KB\n", result.peak_memory_kb);
+            if (args.json_output) {
+                printf("JSON_RESULT: %s\n", result.to_json().c_str());
+            } else {
+                printf("\n--- Performance Results ---\n");
+                printf("  Init time:  %.2f ms\n", result.init_time_ms);
+                utils::print_stats(result.latency_stats);
+                printf("  Throughput: %.2f FPS\n", result.throughput_fps);
+                printf("  Peak mem:   %zu KB\n", result.peak_memory_kb);
+            }
         }
     }
 

@@ -5,6 +5,7 @@
 #include <memory>
 #include <cmath>
 #include <numeric>
+#include <sstream>
 
 #ifdef BENCHMARK_NCNN
 #include "backends/ncnn_backend.h"
@@ -244,4 +245,35 @@ std::unique_ptr<BenchmarkBackend> create_backend(BackendType type) {
         default:
             return nullptr;
     }
+}
+
+std::string BenchmarkResult::to_json() const {
+    std::ostringstream ss;
+    ss << "{";
+    ss << "\"backend\":\"" << backend_name << "\",";
+    ss << "\"model\":\"" << model_name << "\",";
+    ss << "\"precision\":\"" << (precision == Precision::FP32 ? "fp32" : precision == Precision::FP16 ? "fp16" : "int8") << "\",";
+    ss << "\"threads\":" << num_threads << ",";
+    ss << "\"gpu\":" << (use_gpu ? "true" : "false") << ",";
+    ss << "\"init_time_ms\":" << init_time_ms << ",";
+    ss << "\"peak_memory_kb\":" << peak_memory_kb << ",";
+    ss << "\"latency\":{";
+    ss << "\"min\":" << latency_stats.min_ms << ",";
+    ss << "\"max\":" << latency_stats.max_ms << ",";
+    ss << "\"mean\":" << latency_stats.mean_ms << ",";
+    ss << "\"p50\":" << latency_stats.p50_ms << ",";
+    ss << "\"p90\":" << latency_stats.p90_ms << ",";
+    ss << "\"p95\":" << latency_stats.p95_ms << ",";
+    ss << "\"p99\":" << latency_stats.p99_ms << ",";
+    ss << "\"std_dev\":" << latency_stats.std_dev;
+    ss << "},";
+    ss << "\"throughput_fps\":" << throughput_fps << ",";
+    ss << "\"accuracy\":{";
+    ss << "\"passed\":" << (accuracy.passed ? "true" : "false") << ",";
+    ss << "\"cosine_similarity\":" << accuracy.cosine_similarity << ",";
+    ss << "\"mean_absolute_error\":" << accuracy.mean_absolute_error << ",";
+    ss << "\"max_absolute_error\":" << accuracy.max_absolute_error;
+    ss << "}";
+    ss << "}";
+    return ss.str();
 }
