@@ -27,6 +27,7 @@ endif()
 #   BENCHMARK_QNN     - Qualcomm QNN SDK
 #   BENCHMARK_TVM     - Apache TVM
 #   BENCHMARK_LLAMACPP - llama.cpp（LLM 推理）
+#   BENCHMARK_MINDSPORE_LITE - MindSpore Lite（华为，需手动下载 SDK）
 #
 # 完整的多后端配置见 backup/all-backends 分支
 # =============================================================================
@@ -38,6 +39,7 @@ option(BENCHMARK_ORT "Enable ONNX Runtime benchmark" ON)
 option(BENCHMARK_QNN "Enable QNN benchmark" OFF)          # 已停用，可恢复
 option(BENCHMARK_TVM "Enable Apache TVM benchmark" OFF)   # 已停用，可恢复
 option(BENCHMARK_LLAMACPP "Enable llama.cpp LLM benchmark" OFF)  # 已停用，可恢复
+option(BENCHMARK_MINDSPORE_LITE "Enable MindSpore Lite benchmark" OFF)  # 需手动下载 SDK
 
 # Enable position independent code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

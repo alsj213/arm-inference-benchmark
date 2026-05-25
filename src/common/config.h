@@ -19,6 +19,7 @@ enum class BackendType {
     QNN,        // 已停用，可恢复
     ONNXRT,
     TVM,        // 已停用，可恢复
+    MINDSPORE_LITE,  // 待下载 SDK
 };
 
 struct BenchmarkConfig {

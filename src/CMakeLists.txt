@@ -42,6 +42,9 @@ if(BENCHMARK_LLAMACPP)
 target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/llama.cpp/include)
 target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/llama.cpp/src)
 endif()
+if(BENCHMARK_MINDSPORE_LITE)
+target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/mindspore_lite/include)
+endif()
 
 # Add compile definitions for enabled backends
 if(BENCHMARK_NCNN)
@@ -64,6 +67,9 @@ if(BENCHMARK_TVM)
 endif()
 if(BENCHMARK_LLAMACPP)
     target_compile_definitions(benchmark_common PUBLIC BENCHMARK_LLAMACPP)
+endif()
+if(BENCHMARK_MINDSPORE_LITE)
+    target_compile_definitions(benchmark_common PUBLIC BENCHMARK_MINDSPORE_LITE)
 endif()
 
 # Backend sources - add to benchmark_common STATIC library so vtable symbols are resolved
@@ -102,6 +108,11 @@ endif()
 if(BENCHMARK_LLAMACPP)
     list(APPEND BACKEND_SRCS backends/llamacpp_backend.cpp)
     list(APPEND BACKEND_LIBS llama)
+endif()
+
+if(BENCHMARK_MINDSPORE_LITE)
+    list(APPEND BACKEND_SRCS backends/mindspore_lite_backend.cpp)
+    list(APPEND BACKEND_LIBS mindspore_lite)
 endif()
 
 # Add backend sources to benchmark_common so create_backend() can resolve symbols
@@ -167,6 +178,9 @@ if(BENCHMARK_ORT)
 endif()
 if(BENCHMARK_TVM)
     target_compile_definitions(benchmark_inference PRIVATE BENCHMARK_TVM)
+endif()
+if(BENCHMARK_MINDSPORE_LITE)
+    target_compile_definitions(benchmark_inference PRIVATE BENCHMARK_MINDSPORE_LITE)
 endif()
 
 # Link against all required libraries (backends already linked to benchmark_common)

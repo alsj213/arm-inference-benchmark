@@ -88,6 +88,7 @@ BackendType parse_backend(const std::string& b) {
     // if (b == "qnn" || b == "QNN") return BackendType::QNN;
     if (b == "onnxrt" || b == "ort" || b == "ONNXRT" || b == "ORT") return BackendType::ONNXRT;
     // if (b == "tvm" || b == "TVM") return BackendType::TVM;
+    if (b == "mindspore_lite" || b == "mslite") return BackendType::MINDSPORE_LITE;
     return (BackendType)-1;
 }
 

@@ -68,6 +68,28 @@ ncnn、TFLite、TNN、QNN、TVM 和 llama.cpp 后端的源代码已完整保留�
 | 第三方依赖 | `third_party/llama.cpp`（git 子模块，已检出） |
 | 模型格式 | GGUF 格式 |
 
+### MindSpore Lite（华为）
+
+| 项目 | 内容 |
+|------|------|
+| CMake 选项 | `BENCHMARK_MINDSPORE_LITE` |
+| 第三方依赖 | `third_party/mindspore_lite/`（需手动下载 SDK） |
+| 模型格式 | `.ms`（通过 converter_lite 从 ONNX 转换） |
+| 下载地址 | https://www.mindspore.cn/lite |
+
+下载步骤：
+1. 访问 https://www.mindspore.cn/lite
+2. 下载 `mindspore-lite-2.x.x-android-aarch64.tar.gz`
+3. 解压到 `third_party/mindspore_lite/`
+4. 下载 `mindspore-lite-2.x.x-linux-x64.tar.gz` (converter_lite 工具)
+5. 将 `converter_lite` 放入 `tools/bin/`
+
+模型转换：
+```bash
+./tools/bin/converter_lite --fmk=ONNX --modelFile=model.onnx --outputFile=model
+# 输出: model.ms
+```
+
 ---
 
 ## 完整的多后端配置

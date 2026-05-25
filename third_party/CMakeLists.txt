@@ -163,6 +163,31 @@ if(BENCHMARK_TVM)
     endif()
 endif()
 
+# MindSpore Lite — 需手动下载 SDK
+# 下载: https://www.mindspore.cn/lite → mindspore-lite-2.x.x-android-aarch64.tar.gz
+# 解压到 third_party/mindspore_lite/
+if(BENCHMARK_MINDSPORE_LITE)
+    set(MS_LITE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/mindspore_lite)
+    if(EXISTS ${MS_LITE_ROOT})
+        add_library(mindspore_lite SHARED IMPORTED GLOBAL)
+        target_include_directories(mindspore_lite INTERFACE ${MS_LITE_ROOT}/include)
+        set(MS_LITE_LIB ${MS_LITE_ROOT}/lib/libmindspore-lite.so)
+        if(EXISTS ${MS_LITE_LIB})
+            set_target_properties(mindspore_lite PROPERTIES IMPORTED_LOCATION ${MS_LITE_LIB})
+            target_link_libraries(mindspore_lite INTERFACE ${MS_LITE_LIB})
+            set(MINDSPORE_LITE_FOUND TRUE)
+            message(STATUS "Found MindSpore Lite: ${MS_LITE_LIB}")
+        else()
+            message(WARNING "MindSpore Lite .so not found at: ${MS_LITE_LIB}")
+            set(BENCHMARK_MINDSPORE_LITE OFF)
+        endif()
+    else()
+        message(WARNING "MindSpore Lite SDK not found at ${MS_LITE_ROOT}")
+        message(WARNING "Download from: https://www.mindspore.cn/lite")
+        set(BENCHMARK_MINDSPORE_LITE OFF)
+    endif()
+endif()
+
 # llama.cpp for LLM inference
 if(BENCHMARK_LLAMACPP)
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/llama.cpp)

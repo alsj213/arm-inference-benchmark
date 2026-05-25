@@ -28,6 +28,9 @@ struct ModelInfo {
         if (backend == "tflite" || backend == "TFLite") {
             return base_path + "/" + name + ".tflite";
         }
+        if (backend == "mindspore_lite" || backend == "mslite") {
+            return base_path + "/" + name + ".ms";
+        }
         return base_path + "/" + name + "_" + backend + ".model";
     }
 
