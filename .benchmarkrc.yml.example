@@ -10,6 +10,9 @@ project:
 backends:
   - mnn
   - onnxruntime
+  - ncnn
+  - tflite
+  - tnn
 
 models:
   - mobilenetv2

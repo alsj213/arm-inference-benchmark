@@ -143,6 +143,11 @@ MNN_SO="$MNN_SO_DIR/third_party/MNN/OFF/arm64-v8a/libMNN.so"
 if [ -f "$MNN_SO" ]; then
     adb push "$MNN_SO" /data/local/tmp/benchmark/ 2>/dev/null || true
 fi
+# libTNN.so（共享库版）
+TNN_SO="$MNN_SO_DIR/third_party/TNN/libTNN.so"
+if [ -f "$TNN_SO" ]; then
+    adb push "$TNN_SO" /data/local/tmp/benchmark/ 2>/dev/null || true
+fi
 # adb push "$PROJECT_ROOT/third_party/tvm/build-android/libtvm_runtime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 
 echo "=== Starting benchmark ==="

@@ -83,7 +83,7 @@ BackendType parse_backend(const std::string& b) {
     // 已停用的后端映射保留在此，重新启用后取消注释即可
     if (b == "ncnn" || b == "NCNN") return BackendType::NCNN;
     if (b == "mnn" || b == "MNN") return BackendType::MNN;
-    // if (b == "tnn" || b == "TNN") return BackendType::TNN;
+    if (b == "tnn" || b == "TNN") return BackendType::TNN;
     if (b == "tflite" || b == "TFLite" || b == "TFLITE") return BackendType::TFLITE;
     // if (b == "qnn" || b == "QNN") return BackendType::QNN;
     if (b == "onnxrt" || b == "ort" || b == "ONNXRT" || b == "ORT") return BackendType::ONNXRT;

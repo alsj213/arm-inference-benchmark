@@ -54,6 +54,25 @@ if(BENCHMARK_TFLITE)
     endif()
 endif()
 
+# TNN
+if(BENCHMARK_TNN)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/TNN)
+        set(TNN_ARM_ENABLE ON CACHE BOOL "" FORCE)
+        set(TNN_ARM82_ENABLE ON CACHE BOOL "" FORCE)
+        set(TNN_OPENCL_ENABLE OFF CACHE BOOL "" FORCE)
+        set(TNN_CPU_ENABLE ON CACHE BOOL "" FORCE)
+        set(TNN_TEST_ENABLE OFF CACHE BOOL "" FORCE)
+        set(TNN_BENCHMARK_MODE OFF CACHE BOOL "" FORCE)
+        set(TNN_BUILD_SHARED ON CACHE BOOL "" FORCE)
+        add_subdirectory(TNN)
+        set(TNN_FOUND TRUE)
+        message(STATUS "Found TNN")
+    else()
+        message(WARNING "TNN not found, please add as git submodule")
+        set(BENCHMARK_TNN OFF)
+    endif()
+endif()
+
 # QNN
 if(BENCHMARK_QNN)
     # QNN needs to be downloaded from Qualcomm Developer Network

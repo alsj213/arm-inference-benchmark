@@ -13,6 +13,9 @@ struct ModelInfo {
         if (backend == "mnn" || backend == "MNN") {
             return base_path + "/" + name + "_MNN.mnn";
         }
+        if (backend == "ncnn" || backend == "NCNN") {
+            return base_path + "/" + name + "_ncnn.param";
+        }
         if (backend == "onnxrt" || backend == "ort") {
             return base_path + "/" + name + ".onnx";
         }
@@ -31,6 +34,9 @@ struct ModelInfo {
     std::string get_weights_path(const std::string& backend) const {
         if (backend == "mnn" || backend == "MNN" || backend == "onnxrt" || backend == "ort") {
             return ""; // MNN and ONNX Runtime store everything in one file
+        }
+        if (backend == "ncnn" || backend == "NCNN") {
+            return base_path + "/" + name + "_ncnn.bin";
         }
         if (backend == "tnn" || backend == "TNN") {
             return base_path + "/" + name + "_TNN.tnnmodel";
