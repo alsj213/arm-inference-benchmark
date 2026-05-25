@@ -1,0 +1,21 @@
+device:
+  adb: /mnt/e/andorid/adb/adb.exe
+  id: b08dee23
+
+project:
+  build_dir: build_android
+  binary: benchmark_inference
+  models_dir: models
+
+backends:
+  - mnn
+  - onnxruntime
+
+models:
+  - mobilenetv2
+  - resnet50
+  - yolov8n
+  - bert
+
+ndk:
+  path: /home/liu/android-ndk
