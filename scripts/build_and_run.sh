@@ -115,11 +115,18 @@ echo
 echo "=== Pushing and running on device ==="
 echo
 
-# Run via adb
-export PATH=$PATH:/mnt/e/andorid/adb/
-adb() {
-    /mnt/e/andorid/adb/adb.exe "$@"
-}
+# Run via adb (read path from config file with fallback)
+CONFIG_FILE="$PROJECT_ROOT/.benchmarkrc.yml"
+if [ -f "$CONFIG_FILE" ]; then
+    ADB_PATH=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG_FILE')); print(c.get('device',{}).get('adb',''))" 2>/dev/null)
+    if [ -n "$ADB_PATH" ] && [ -x "$ADB_PATH" ]; then
+        adb() { "$ADB_PATH" "$@"; }
+    fi
+fi
+if ! command -v adb &>/dev/null && [ -x "/mnt/e/andorid/adb/adb.exe" ]; then
+    export PATH=$PATH:/mnt/e/andorid/adb/
+    adb() { /mnt/e/andorid/adb/adb.exe "$@"; }
+fi
 
 # Create directory on device
 adb shell mkdir -p /data/local/tmp/benchmark

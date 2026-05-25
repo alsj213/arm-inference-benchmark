@@ -9,11 +9,16 @@ PROJECT_ROOT=$(dirname $SCRIPT_DIR)
 # Default build type
 BUILD_TYPE="Release"
 
-# Use adb from Windows (WSL2 case)
-if [ -x "/mnt/e/andorid/adb/adb.exe" ]; then
-    adb() {
-        /mnt/e/andorid/adb/adb.exe "$@"
-    }
+# Read ADB path from config file (priority), fallback to WSL2 path
+CONFIG_FILE="$PROJECT_ROOT/.benchmarkrc.yml"
+if [ -f "$CONFIG_FILE" ]; then
+    ADB_PATH=$(python3 -c "import yaml; c=yaml.safe_load(open('$CONFIG_FILE')); print(c.get('device',{}).get('adb',''))" 2>/dev/null)
+    if [ -n "$ADB_PATH" ] && [ -x "$ADB_PATH" ]; then
+        adb() { "$ADB_PATH" "$@"; }
+    fi
+fi
+if ! command -v adb &>/dev/null && [ -x "/mnt/e/andorid/adb/adb.exe" ]; then
+    adb() { /mnt/e/andorid/adb/adb.exe "$@"; }
 fi
 
 # Parse arguments for hardware control flags and build type
