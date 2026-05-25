@@ -11,6 +11,7 @@
 #include "common/config.h"
 
 #include "models/model_info.h"
+#include "model_registry.h"
 
 void print_usage() {
     printf("Usage: ./benchmark_inference [options]\n");
@@ -90,19 +91,6 @@ BackendType parse_backend(const std::string& b) {
     return (BackendType)-1;
 }
 
-ModelInfo get_model_info(const std::string& name) {
-    if (name == "mobilenetv2") {
-        return get_mobilenetv2_info();
-    } else if (name == "resnet50") {
-        return get_resnet50_info();
-    } else if (name == "yolov8n") {
-        return get_yolov8n_info();
-    } else if (name == "bert") {
-        return get_bert_info();
-    }
-    return {};
-}
-
 int main(int argc, char** argv) {
     CommandLineArgs args = parse_args(argc, argv);
     if (args.help) {
@@ -133,7 +121,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> models_to_test;
     if (args.model == "all") {
-        models_to_test = {"mobilenetv2", "resnet50", "yolov8n", "bert"};
+        models_to_test = get_all_model_names();
     } else {
         models_to_test = {args.model};
     }

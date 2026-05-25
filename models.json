@@ -1,0 +1,10 @@
+{
+  "models": [
+    {"name": "mobilenetv2",   "input_shape": [1, 3, 224, 224], "base_path": "models/classification/mobilenetv2"},
+    {"name": "resnet50",      "input_shape": [1, 3, 224, 224], "base_path": "models/classification/resnet50"},
+    {"name": "shufflenet_v2", "input_shape": [1, 3, 224, 224], "base_path": "models/classification/shufflenet_v2"},
+    {"name": "yolov8n",       "input_shape": [1, 3, 640, 640], "base_path": "models/detection/yolov8n"},
+    {"name": "bert",          "input_shape": [1, 128],          "base_path": "models/nlp/bert"},
+    {"name": "whisper_tiny",  "input_shape": [1, 80, 3000],     "base_path": "models/speech/whisper_tiny"}
+  ]
+}

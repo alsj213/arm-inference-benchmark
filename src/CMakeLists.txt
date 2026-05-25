@@ -96,20 +96,26 @@ endif()
 target_sources(benchmark_common PRIVATE ${BACKEND_SRCS})
 target_link_libraries(benchmark_common PUBLIC ${BACKEND_LIBS})
 
-# Model wrappers
-set(MODEL_SRCS
-    models/mobilenet.cpp
-    models/resnet.cpp
-    models/shufflenet_v2.cpp
-    models/yolov8.cpp
-    models/bert.cpp
+# Generate model registry from models.json
+set(MODELS_JSON ${CMAKE_SOURCE_DIR}/models.json)
+set(MODEL_GEN_HEADER ${CMAKE_CURRENT_BINARY_DIR}/generated/model_registry.h)
+
+add_custom_command(
+    OUTPUT ${MODEL_GEN_HEADER}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/generated
+    COMMAND python3 ${CMAKE_SOURCE_DIR}/scripts/generate_model_header.py ${MODELS_JSON} ${MODEL_GEN_HEADER}
+    DEPENDS ${MODELS_JSON} ${CMAKE_SOURCE_DIR}/scripts/generate_model_header.py
+    COMMENT "Generating model registry from models.json"
 )
+add_custom_target(generate_models DEPENDS ${MODEL_GEN_HEADER})
 
 # Main executable
 add_executable(benchmark_inference
     main.cpp
-    ${MODEL_SRCS}
 )
+
+add_dependencies(benchmark_inference generate_models)
+target_include_directories(benchmark_inference PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
 # Inject git commit hash for --version
 execute_process(
