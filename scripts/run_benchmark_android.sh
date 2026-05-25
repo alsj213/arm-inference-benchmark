@@ -128,8 +128,8 @@ fi
 
 # Push shared libraries (仅当前启用的后端)
 echo "Pushing shared libraries..."
-# TFLite .so（已恢复）
-adb push "$PROJECT_ROOT/third_party/tflite_extracted/jni/arm64-v8a/libtensorflowlite_jni.so" /data/local/tmp/benchmark/ 2>/dev/null || true
+# TFLite — 已停用（已恢复时取消注释）
+# adb push "$PROJECT_ROOT/third_party/tflite_extracted/jni/arm64-v8a/libtensorflowlite_jni.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 if [ -f "$PROJECT_ROOT/third_party/onnxruntime/build/Android/$BUILD_TYPE/libonnxruntime.so" ]; then
     adb push "$PROJECT_ROOT/third_party/onnxruntime/build/Android/$BUILD_TYPE/libonnxruntime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 fi
@@ -143,11 +143,11 @@ MNN_SO="$MNN_SO_DIR/third_party/MNN/OFF/arm64-v8a/libMNN.so"
 if [ -f "$MNN_SO" ]; then
     adb push "$MNN_SO" /data/local/tmp/benchmark/ 2>/dev/null || true
 fi
-# libTNN.so（共享库版）
-TNN_SO="$MNN_SO_DIR/third_party/TNN/libTNN.so"
-if [ -f "$TNN_SO" ]; then
-    adb push "$TNN_SO" /data/local/tmp/benchmark/ 2>/dev/null || true
-fi
+# TNN — 已停用（共享库版，恢复时取消注释）
+# TNN_SO="$MNN_SO_DIR/third_party/TNN/libTNN.so"
+# if [ -f "$TNN_SO" ]; then
+#     adb push "$TNN_SO" /data/local/tmp/benchmark/ 2>/dev/null || true
+# fi
 # adb push "$PROJECT_ROOT/third_party/tvm/build-android/libtvm_runtime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 
 echo "=== Starting benchmark ==="

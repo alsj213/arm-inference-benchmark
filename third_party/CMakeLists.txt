@@ -54,7 +54,7 @@ if(BENCHMARK_TFLITE)
     endif()
 endif()
 
-# TNN
+# TNN — 已停用
 if(BENCHMARK_TNN)
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/TNN)
         set(TNN_ARM_ENABLE ON CACHE BOOL "" FORCE)
