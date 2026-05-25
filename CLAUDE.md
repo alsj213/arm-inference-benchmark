@@ -33,11 +33,7 @@ benchmark/
 ├── models/               # 模型文件（onnx/mnn/tflite/ncnn/tnn/tvm）
 ├── third_party/          # 第三方依赖（git子模块 / 手动下载）
 ├── cmake/                # Android NDK 工具链
-├── skills/               # 项目技能（4 个，MNN/ORT 工作流）
-│   │   ├── benchmark-run/
-│   │   ├── benchmark-model-prep/
-│   │   ├── benchmark-profiling/
-│   │   └── benchmark-integrate/
+├── .benchmarkrc.yml      # mobile-bench 插件配置
 ├── docs/                 # 文档 + 测试结果
 ├── results/              # 测试结果输出
 ├── tools/                # 转换工具（MNNConvert、FlameGraph）
@@ -150,7 +146,7 @@ export ANDROID_NDK=/home/liu/android-ndk
 
 **Step 6: 输出结果摘要** — 直接从日志中提取真实数据，不得凭空填写
 
-**Step 7: 生成 HTML 报告** — 按 `skills/benchmark-run/SKILL.md` 中的 HTML 生成流程
+**Step 7: 生成 HTML 报告** — 按插件的 `mobile-bench-run` skill 中的 HTML 生成流程
 
 ### 协议红线
 - ❌ **不得伪造 adb 输出、模型数据、性能数字**
@@ -169,9 +165,4 @@ Benchmark agent 由 `claude-code-mobile-bench` 插件提供（`mobile-bench-agen
 
 ## 项目技能
 
-本项目包含以下技能，存储在 `skills/` 目录下：
-
-- [benchmark-run](skills/benchmark-run/SKILL.md) — 完整 benchmark 流程：设备握手、环境控制、执行测试、结果解析与报告
-- [benchmark-model-prep](skills/benchmark-model-prep/SKILL.md) — 模型下载、格式转换（MNN/ORT）、NDK 交叉编译
-- [benchmark-profiling](skills/benchmark-profiling/SKILL.md) — 逐算子 profiling、火焰图、系统 trace
-- [benchmark-integrate](skills/benchmark-integrate/SKILL.md) — 添加新推理框架后端的完整步骤
+Benchmark 工作流技能由 `claude-code-mobile-bench` 插件提供（`mobile-bench-run` / `mobile-bench-model-prep` / `mobile-bench-profiling` / `mobile-bench-integrate`）。安装插件后即可使用，所有配置从 `.benchmarkrc.yml` 读取。
