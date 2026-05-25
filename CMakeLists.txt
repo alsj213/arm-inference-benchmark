@@ -30,9 +30,9 @@ endif()
 #
 # 完整的多后端配置见 backup/all-backends 分支
 # =============================================================================
-option(BENCHMARK_NCNN "Enable ncnn benchmark" OFF)       # 已停用，可恢复
+option(BENCHMARK_NCNN "Enable ncnn benchmark" ON)
 option(BENCHMARK_MNN "Enable MNN benchmark" ON)
-option(BENCHMARK_TFLITE "Enable TensorFlow Lite benchmark" OFF)  # 已停用，可恢复
+option(BENCHMARK_TFLITE "Enable TensorFlow Lite benchmark" ON)
 option(BENCHMARK_TNN "Enable TNN benchmark" OFF)          # 已停用，可恢复
 option(BENCHMARK_ORT "Enable ONNX Runtime benchmark" ON)
 option(BENCHMARK_QNN "Enable QNN benchmark" OFF)          # 已停用，可恢复
