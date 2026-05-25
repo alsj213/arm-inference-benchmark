@@ -102,7 +102,29 @@ adb shell chmod +x /data/local/tmp/benchmark/benchmark_inference
 
 # Push models
 echo "Pushing models..."
-adb push "$PROJECT_ROOT/models/classification" /data/local/tmp/benchmark/models/classification
+# Parse --model from remaining args to decide which model dirs to push
+MODEL_ARG="all"
+prev=""
+for arg in "$@"; do
+    [ "$prev" = "--model" ] && MODEL_ARG="$arg" && break
+    prev="$arg"
+done
+
+if [ "$MODEL_ARG" = "all" ]; then
+    for dir in "$PROJECT_ROOT/models/"*/; do
+        cat=$(basename "$dir")
+        adb push "$dir" "/data/local/tmp/benchmark/models/$cat"
+    done
+else
+    found=$(find "$PROJECT_ROOT/models" -type d -name "$MODEL_ARG" 2>/dev/null | head -1)
+    if [ -n "$found" ]; then
+        cat=$(echo "$found" | rev | cut -d/ -f2 | rev)
+        adb push "$found" "/data/local/tmp/benchmark/models/$cat/$MODEL_ARG"
+    else
+        echo "WARNING: model dir not found for '$MODEL_ARG', pushing all"
+        adb push "$PROJECT_ROOT/models" /data/local/tmp/benchmark/
+    fi
+fi
 
 # Push shared libraries (仅当前启用的后端)
 echo "Pushing shared libraries..."
