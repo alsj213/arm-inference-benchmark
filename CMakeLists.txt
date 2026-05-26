@@ -15,7 +15,7 @@ endif()
 
 # Options to enable/disable backends
 # =============================================================================
-# 当前活动后端：MNN (BENCHMARK_MNN) 和 ONNX Runtime (BENCHMARK_ORT)
+# 当前活动后端：MNN (BENCHMARK_MNN)、ONNX Runtime (BENCHMARK_ORT)、NCNN (BENCHMARK_NCNN)、MindSpore Lite (BENCHMARK_MINDSPORE_LITE)
 #
 # 要重新启用已停用的后端，将下方对应选项设为 ON，然后重新编译即可。
 # 所有后端源代码完整保留在 src/backends/ 和 third_party/ 中。
@@ -39,7 +39,7 @@ option(BENCHMARK_ORT "Enable ONNX Runtime benchmark" ON)
 option(BENCHMARK_QNN "Enable QNN benchmark" OFF)          # 已停用，可恢复
 option(BENCHMARK_TVM "Enable Apache TVM benchmark" OFF)   # 已停用，可恢复
 option(BENCHMARK_LLAMACPP "Enable llama.cpp LLM benchmark" OFF)  # 已停用，可恢复
-option(BENCHMARK_MINDSPORE_LITE "Enable MindSpore Lite benchmark" OFF)  # 需手动下载 SDK
+option(BENCHMARK_MINDSPORE_LITE "Enable MindSpore Lite benchmark" ON)
 
 # Enable position independent code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

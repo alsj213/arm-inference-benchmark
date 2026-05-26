@@ -149,6 +149,11 @@ fi
 #     adb push "$TNN_SO" /data/local/tmp/benchmark/ 2>/dev/null || true
 # fi
 # adb push "$PROJECT_ROOT/third_party/tvm/build-android/libtvm_runtime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
+# libmindspore-lite.so
+MS_LITE_SO="$PROJECT_ROOT/third_party/mindspore_lite/lib/libmindspore-lite.so"
+if [ -f "$MS_LITE_SO" ]; then
+    adb push "$MS_LITE_SO" /data/local/tmp/benchmark/ 2>/dev/null || true
+fi
 
 echo "=== Starting benchmark ==="
 echo "Running: ./benchmark_inference $*"

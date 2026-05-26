@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> backends_to_test;
     if (args.backend == "all") {
-        backends_to_test = {"mnn", "onnxrt", "ncnn"};
+        backends_to_test = {"mnn", "onnxrt", "ncnn", "mindspore_lite"};
     } else {
         backends_to_test = {args.backend};
     }

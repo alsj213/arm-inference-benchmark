@@ -43,7 +43,7 @@ target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/.
 target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/llama.cpp/src)
 endif()
 if(BENCHMARK_MINDSPORE_LITE)
-target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/mindspore_lite/include)
+target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/mindspore_lite)
 endif()
 
 # Add compile definitions for enabled backends
