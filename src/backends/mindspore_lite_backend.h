@@ -5,10 +5,10 @@
 #include "common/config.h"
 
 #ifdef BENCHMARK_MINDSPORE_LITE
-#include "include/api/context.h"
 #include "include/api/model.h"
-#include "include/api/status.h"
+#include "include/api/context.h"
 #include "include/api/types.h"
+#include "include/api/status.h"
 #endif
 
 class MindSporeLiteBackend : public BenchmarkBackend {
@@ -23,10 +23,11 @@ private:
 #ifdef BENCHMARK_MINDSPORE_LITE
     std::shared_ptr<mindspore::Model> model_;
     std::shared_ptr<mindspore::Context> context_;
-    std::vector<mindspore::MSTensor> inputs_;
     std::vector<mindspore::MSTensor> outputs_;
-#endif
+    std::vector<int64_t> input_shape_;
     std::string input_name_;
+    std::unique_ptr<char[]> model_buf_;  // must persist for model lifetime
+#endif
 };
 
 #endif // BENCHMARK_BACKENDS_MINDSPORE_LITE_BACKEND_H_
