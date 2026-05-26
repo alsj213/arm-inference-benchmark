@@ -11,7 +11,7 @@
 |------|------|-----------|---------|---------|
 | **ONNX Runtime** | **活跃** | `BENCHMARK_ORT=ON` | git 子模块，单独编译 | `.onnx`（无需转换） |
 | **MNN** | **活跃** | `BENCHMARK_MNN=ON` | git 子模块，add_subdirectory | `.mnn`（MNNConvert 转换） |
-| ncnn | 已停用 | `BENCHMARK_NCNN=OFF` | git 子模块已检出 | ncnn 格式 |
+| **ncnn** | **活跃** | `BENCHMARK_NCNN=ON` | git 子模块，静态链接 | ncnn 格式（onnx2ncnn 转换） |
 | TNN | 已停用 | `BENCHMARK_TNN=OFF` | git 子模块已检出 | TNN 格式 |
 | TFLite | 已停用 | `BENCHMARK_TFLITE=OFF` | AAR 提取 .so | `.tflite` |
 | QNN | 已停用 | `BENCHMARK_QNN=OFF` | 需手动下载 SDK | QNN 格式 |

@@ -73,7 +73,6 @@ done
 cmake_options=()
 if [ "$BACKEND" != "all" ]; then
     # Disable all except selected
-    cmake_options+=("-DBENCHMARK_NCNN=OFF")   # 已停用
     cmake_options+=("-DBENCHMARK_MNN=OFF")
     cmake_options+=("-DBENCHMARK_TNN=OFF")    # 已停用
     cmake_options+=("-DBENCHMARK_TFLITE=OFF") # 已停用
@@ -84,6 +83,9 @@ if [ "$BACKEND" != "all" ]; then
     case "$BACKEND" in
         "mnn")
             cmake_options+=("-DBENCHMARK_MNN=ON")
+            ;;
+        "ncnn")
+            cmake_options+=("-DBENCHMARK_NCNN=ON")
             ;;
         "onnxrt"|"ort")
             cmake_options+=("-DBENCHMARK_ORT=ON")
