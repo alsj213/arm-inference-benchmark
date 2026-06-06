@@ -1,0 +1,97 @@
+=== Building for Android arm64-v8a ===
+ANDROID_NDK: /home/liu/android-ndk
+Project root: /home/liu/project/newwork/benchmark
+Build type: Release
+-- Building for ARM64 with FP16 support
+-- CMAKE_TOOLCHAIN_FILE = /home/liu/android-ndk/build/cmake/android.toolchain.cmake
+-- CMAKE_INSTALL_PREFIX = /usr/local
+-- NCNN_VERSION_STRING = 1.0.20260606
+-- Target arch: arm 64bit
+-- Found ncnn
+-- Use Threadpool, forbid openmp
+-- >>>>>>>>>>>>>
+-- MNN BUILD INFO:
+-- 	System: Android
+-- 	Processor: aarch64
+-- 	Version: 3.5.0
+-- 	Metal: OFF
+-- 	OpenCL: ON
+-- 	OpenGL: OFF
+-- 	Vulkan: OFF
+-- 	ARM82: ON
+-- 	KleidiAI: OFF
+-- 	oneDNN: OFF
+-- 	TensorRT: OFF
+-- 	CoreML: OFF
+-- 	NNAPI: OFF
+-- 	QNN: OFF
+-- 	CUDA: OFF
+-- 	MUSA: OFF
+-- 	OpenMP: OFF
+-- 	BF16: OFF
+-- 	ThreadPool: ON
+-- 	Hidden: TRUE
+-- 	Build Path: /home/liu/project/newwork/benchmark/build_android/third_party/MNN
+-- 	CUDA PROFILE: OFF
+-- WIN_USE_ASM: 
+-- Enabling AArch64 Assemblies
+-- Found MNN
+-- Found ONNX Runtime v1.21.0 (Release): /home/liu/project/newwork/benchmark/third_party/onnxruntime/build/Android/Release/libonnxruntime.so
+-- Found MindSpore Lite: /home/liu/project/newwork/benchmark/third_party/mindspore_lite/lib/libmindspore-lite.so
+-- Git commit: 57cdc49
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/liu/project/newwork/benchmark/build_android
+[  0%] Built target ncnn-generate-spirv
+Consolidate compiler generated dependencies of target MNNMath
+Consolidate compiler generated dependencies of target MNNUtils
+Consolidate compiler generated dependencies of target MNNCV
+[  4%] Built target ncnn-generate-param
+[  4%] Built target generate_models
+Scanning dependencies of target MNNARM64
+Consolidate compiler generated dependencies of target MNNARM64
+[  4%] Built target MNNMath
+[  4%] Built target MNNUtils
+[  4%] Built target MNNCV
+Scanning dependencies of target MNN_Arm82
+Consolidate compiler generated dependencies of target MNN_Arm82
+[ 18%] Built target MNNARM64
+Consolidate compiler generated dependencies of target MNN_Express
+Consolidate compiler generated dependencies of target MNNCore
+[ 21%] Built target MNN_Arm82
+[ 22%] Built target MNN_Express
+[ 25%] Built target MNNCore
+Consolidate compiler generated dependencies of target MNNCPU
+[ 37%] Built target MNNCPU
+Consolidate compiler generated dependencies of target MNNTransform
+Consolidate compiler generated dependencies of target MNN_CL
+[ 52%] Built target MNNTransform
+[ 69%] Built target MNN_CL
+Consolidate compiler generated dependencies of target MNN
+[ 69%] Built target MNN
+Consolidate compiler generated dependencies of target ncnn
+[ 97%] Built target ncnn
+Consolidate compiler generated dependencies of target benchncnn
+[ 97%] Built target benchncnn
+Consolidate compiler generated dependencies of target benchmark_common
+[ 97%] Building CXX object src/CMakeFiles/benchmark_common.dir/backends/mnn_backend.cpp.o
+[ 97%] Building CXX object src/CMakeFiles/benchmark_common.dir/common/benchmark.cpp.o
+[ 97%] Linking CXX static library libbenchmark_common.a
+[ 98%] Built target benchmark_common
+Consolidate compiler generated dependencies of target benchmark_inference
+Consolidate compiler generated dependencies of target single_op_benchmark
+[ 98%] Linking CXX executable benchmark_inference
+[ 98%] Building CXX object src/CMakeFiles/single_op_benchmark.dir/single_op_benchmark.cpp.o
+[ 99%] Built target benchmark_inference
+[100%] Linking CXX executable single_op_benchmark
+[100%] Built target single_op_benchmark
+=== Build complete ===
+Executable: /home/liu/project/newwork/benchmark/build_android/src/benchmark_inference
+
+To run on device:
+  adb push /home/liu/project/newwork/benchmark/build_android/src/benchmark_inference /data/local/tmp/
+  adb push models/ /data/local/tmp/benchmark-models/
+  adb shell
+  cd /data/local/tmp
+  chmod +x ./benchmark_inference
+  ./benchmark_inference --backend mnn --model mobilenetv2 --precision fp32 --threads 1 --warmup 10 --runs 100

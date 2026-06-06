@@ -1,0 +1,75 @@
+=== ARM Inference Benchmark ===
+Backend:  mnn_gpu
+Model:    mobilenetv2
+Precision:fp32
+Threads:  1
+Warmup:   5
+Test runs:20
+Use GPU:  no
+
+
+========================================================
+Model: mobilenetv2
+Input shape: 1 3 224 224 
+========================================================
+
+--- [Step 1] Getting reference output from ONNX Runtime ---
+ONNXRT: loading model: models/classification/mobilenetv2/mobilenetv2.onnx
+ONNXRT: input 0 = input (type 1)
+ONNXRT: output 0 = output
+  ✅ Reference output obtained (1000 elements)
+      Reference stats - Min: -6.1199, Max: 6.0787, Mean: 0.0001
+
+--- [Step 2] Running benchmarks ---
+
+>> Testing mnn_gpu on mobilenetv2...
+[MNN DEBUG] Init: backend_type=8, model_path=models/classification/mobilenetv2/mobilenetv2_MNN.mnn, num_threads=1
+MNN OpenCL GPU backend enabled (CPU fallback, Precision=High/FP32)
+
+--- Accuracy Comparison ---
+[GPU OUTPUT] First 5: -0.996739 1.239025 2.099955 0.944812 2.658974 
+  ✅ [Accuracy] MNN_GPU: PASSED
+      Cosine Similarity:  1.000000 (Excellent)
+      Mean Absolute Error: 0.000003
+      Max Absolute Error:  0.000018
+      Mean Relative Error: 0.0010%
+      Output range: [-6.1199, 6.0787], Mean: 0.0001
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+[GPU] copyFromHostTensor: OK, input[0..2]=-0.2509 0.5931 0.9014
+
+--- Performance Results ---
+  Init time:  905.75 ms
+  Min:    12.30 ms
+  P50:    15.44 ms
+  P90:    17.01 ms
+  P99:    17.27 ms
+  Max:    17.27 ms
+  Mean:   15.46 ms
+  Std:    1.22 ms
+  Throughput: 64.66 FPS
+  Peak mem:   18446744073709551104 KB
+
+=== Done ===

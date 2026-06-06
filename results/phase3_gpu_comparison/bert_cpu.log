@@ -1,0 +1,49 @@
+=== ARM Inference Benchmark ===
+Backend:  mnn
+Model:    bert
+Precision:fp32
+Threads:  1
+Warmup:   50
+Test runs:100
+Use GPU:  no
+
+
+========================================================
+Model: bert
+Input shape: 1 128 
+========================================================
+
+--- [Step 1] Getting reference output from ONNX Runtime ---
+ONNXRT: loading model: models/nlp/bert/bert.onnx
+ONNXRT: input 0 = input_ids (type 7)
+ONNXRT: input 1 = attention_mask (type 7)
+ONNXRT: output 0 = last_hidden_state
+ONNXRT: output 1 = pooler_output
+  ✅ Reference output obtained (98304 elements)
+      Reference stats - Min: -2.4524, Max: 2.2698, Mean: -0.0176
+
+--- [Step 2] Running benchmarks ---
+
+>> Testing mnn on bert...
+
+--- Accuracy Comparison ---
+  ✅ [Accuracy] MNN: PASSED
+      Cosine Similarity:  0.990439 (Good)
+      Mean Absolute Error: 0.068855
+      Max Absolute Error:  0.612349
+      Mean Relative Error: 118.3662%
+      Output range: [-2.4883, 2.1208], Mean: -0.0176
+
+--- Performance Results ---
+  Init time:  960.96 ms
+  Min:    751.46 ms
+  P50:    753.70 ms
+  P90:    846.91 ms
+  P99:    961.16 ms
+  Max:    961.16 ms
+  Mean:   778.82 ms
+  Std:    49.78 ms
+  Throughput: 1.28 FPS
+  Peak mem:   0 KB
+
+=== Done ===

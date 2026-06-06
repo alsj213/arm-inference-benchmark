@@ -1,0 +1,48 @@
+=== ARM Inference Benchmark ===
+Backend:  mnn_gpu
+Model:    mobilenetv2
+Precision:fp32
+Threads:  1
+Warmup:   5
+Test runs:10
+Use GPU:  no
+
+
+========================================================
+Model: mobilenetv2
+Input shape: 1 3 224 224 
+========================================================
+
+--- [Step 1] Getting reference output from ONNX Runtime ---
+ONNXRT: loading model: models/classification/mobilenetv2/mobilenetv2.onnx
+ONNXRT: input 0 = input (type 1)
+ONNXRT: output 0 = output
+  ✅ Reference output obtained (1000 elements)
+      Reference stats - Min: -6.1199, Max: 6.0787, Mean: 0.0001
+
+--- [Step 2] Running benchmarks ---
+
+>> Testing mnn_gpu on mobilenetv2...
+MNN OpenCL GPU backend enabled (CPU fallback, Precision=High/FP32)
+
+--- Accuracy Comparison ---
+  ✅ [Accuracy] MNN_GPU: PASSED
+      Cosine Similarity:  1.000000 (Excellent)
+      Mean Absolute Error: 0.000003
+      Max Absolute Error:  0.000018
+      Mean Relative Error: 0.0010%
+      Output range: [-6.1199, 6.0787], Mean: 0.0001
+
+--- Performance Results ---
+  Init time:  1013.57 ms
+  Min:    15.04 ms
+  P50:    16.39 ms
+  P90:    18.47 ms
+  P99:    18.47 ms
+  Max:    18.47 ms
+  Mean:   16.52 ms
+  Std:    0.95 ms
+  Throughput: 60.54 FPS
+  Peak mem:   18446744073709551500 KB
+
+=== Done ===
