@@ -1,0 +1,13 @@
+=== Single Operator Benchmark ===
+Backend:    mnn
+Model:      /data/local/tmp/single_ops/Conv1x1_K16_C64_M784.mnn
+Input:      1 64 28 28 
+Warmup:     50
+Runs:       200
+Threads:    1
+Precision:  fp32
+
+Warming up...
+Benchmarking...
+
+mean=0.075ms, min=0.072ms, max=0.090ms, std=0.002ms

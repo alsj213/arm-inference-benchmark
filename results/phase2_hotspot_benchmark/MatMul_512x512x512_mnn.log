@@ -1,0 +1,13 @@
+=== Single Operator Benchmark ===
+Backend:    mnn
+Model:      /data/local/tmp/single_ops/MatMul_512x512x512.mnn
+Input:      1 512 
+Warmup:     50
+Runs:       200
+Threads:    1
+Precision:  fp32
+
+Warming up...
+Benchmarking...
+
+mean=0.031ms, min=0.030ms, max=0.040ms, std=0.001ms

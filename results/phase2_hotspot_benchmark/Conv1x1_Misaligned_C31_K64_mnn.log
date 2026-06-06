@@ -1,0 +1,13 @@
+=== Single Operator Benchmark ===
+Backend:    mnn
+Model:      /data/local/tmp/single_ops/Conv1x1_Misaligned_C31_K64.mnn
+Input:      1 31 56 56 
+Warmup:     50
+Runs:       200
+Threads:    1
+Precision:  fp32
+
+Warming up...
+Benchmarking...
+
+mean=0.438ms, min=0.432ms, max=0.496ms, std=0.009ms
