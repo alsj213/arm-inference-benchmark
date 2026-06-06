@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>端侧推理引擎性能分析项目 — 完整实施计划</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --accent2: #79c0ff;
+    --green: #3fb950;
+    --orange: #d2991d;
+    --red: #f85149;
+    --purple: #a371f7;
+    --code-bg: #1c2128;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem 1rem;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .hero {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .hero h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.75rem;
+  }
+  .hero .subtitle {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .hero .meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  .hero .meta-row span {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .hero .meta-row .badge {
+    display: inline-block;
+    padding: 0.2em 0.6em;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .badge-cpu { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .badge-gpu { background: rgba(163,113,247,0.15); color: var(--purple); }
+  .badge-time { background: rgba(63,185,80,0.15); color: var(--green); }
+
+  /* Phase timeline */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .phase-card:hover { border-color: var(--accent); }
+  .phase-card .phase-num {
+    font-size: 3rem;
+    font-weight: 900;
+    opacity: 0.06;
+    position: absolute;
+    right: 1rem;
+    top: -0.5rem;
+    user-select: none;
+  }
+  .phase-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.35rem;
+  }
+  .phase-card .days {
+    font-size: 0.85rem;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+  }
+  .phase-card .desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .phase-card.p0 { border-left: 3px solid var(--text-muted); }
+  .phase-card.p1 { border-left: 3px solid #3fb950; }
+  .phase-card.p2 { border-left: 3px solid #58a6ff; }
+  .phase-card.p3 { border-left: 3px solid #a371f7; }
+  .phase-card.p4 { border-left: 3px solid #f85149; }
+  .phase-card.p5 { border-left: 3px solid #d2991d; }
+  .phase-card.p6 { border-left: 3px solid #79c0ff; }
+
+  /* Sections */
+  section { margin: 3rem 0; }
+  section h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 1.15rem;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--accent2);
+  }
+  h4 {
+    font-size: 1rem;
+    margin: 1rem 0 0.5rem;
+    color: var(--text);
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  th {
+    background: var(--surface);
+    font-weight: 600;
+    color: var(--accent2);
+  }
+  tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    margin: 0.75rem 0;
+  }
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  }
+  :not(pre) > code {
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+  .stat-card .value {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-card .label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  /* Architecture diagram */
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* Model grid */
+  .model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .model-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .model-chip .name {
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+  .model-chip .params {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+  .model-chip .pattern {
+    font-size: 0.78rem;
+    color: var(--accent2);
+    margin-top: 0.4rem;
+    font-style: italic;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  /* Checklist style */
+  ul.checklist {
+    list-style: none;
+    padding-left: 0;
+  }
+  ul.checklist li {
+    padding: 0.3rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  ul.checklist li::before {
+    content: '☐';
+    position: absolute;
+    left: 0;
+    color: var(--text-muted);
+  }
+
+  .highlight-box {
+    background: rgba(248,81,73,0.08);
+    border: 1px solid rgba(248,81,73,0.3);
+    border-left: 3px solid var(--red);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .highlight-box.core {
+    background: rgba(88,166,255,0.06);
+    border-color: rgba(88,166,255,0.3);
+    border-left-color: var(--accent);
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 1.6rem; }
+    .timeline { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Print */
+  @media print {
+    body { background: #fff; color: #000; }
+    .phase-card, .stat-card, .model-chip, pre, .arch-diagram, .highlight-box {
+      background: #f8f8f8; border-color: #ccc; break-inside: avoid;
+    }
+    .hero h1 { -webkit-text-fill-color: #000; }
+    .stat-card .value { -webkit-text-fill-color: #000; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ==================== HERO ==================== -->
+<header class="hero">
+  <h1>端侧推理引擎性能分析项目</h1>
+  <p class="subtitle">
+    以骁龙 865 为硬件平台，MNN 为主分析对象，建立从<br>
+    <strong>模型级 Profiling → 算子级性能画像 → 瓶颈定位 → 算子优化闭环</strong><br>
+    的完整技术故事线
+  </p>
+  <div class="meta-row">
+    <span>📅 创建: 2026-06-06</span>
+    <span class="badge badge-time">⏱ 30 天预估工期</span>
+    <span class="badge badge-cpu">🖥 骁龙 865 SM8250</span>
+    <span class="badge badge-gpu">🎮 Adreno 650 GPU</span>
+  </div>
+</header>
+
+<!-- ==================== STATS ==================== -->
+<div class="stats-bar">
+  <div class="stat-card">
+    <div class="value">6</div>
+    <div class="label">执行阶段</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">30</div>
+    <div class="label">总任务数 (Task)</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">150+</div>
+    <div class="label">可执行步骤 (Step)</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">5</div>
+    <div class="label">覆盖模型</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">3</div>
+    <div class="label">推理框架</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">80+</div>
+    <div class="label">单算子测例</div>
+  </div>
+</div>
+
+<!-- ==================== ARCHITECTURE ==================== -->
+<section>
+  <h2>🏗 技术架构总览</h2>
+  <div class="arch-diagram">
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Benchmark 统一测试框架                           │
+│  src/main.cpp  →  common/benchmark.h  →  backends/*.cpp             │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│   模型层 (5个)              后端层 (3个)            分析工具层          │
+│  ┌──────────────┐    ┌──────────────────┐    ┌─────────────────┐   │
+│  │ MobileNetV2  │    │ MNN CPU / GPU    │    │ simpleperf      │   │
+│  │ ResNet50     │───▶│ ONNX Runtime     │───▶│ MNN Profiler    │   │
+│  │ BERT         │    │ llama.cpp        │    │ Roofline Model  │   │
+│  │ Qwen2-0.5B   │    └──────────────────┘    │ PMU 计数器       │   │
+│  │ MobileViT-S  │                            └─────────────────┘   │
+│  └──────────────┘                                                    │
+│                                                                      │
+│  硬件层: 骁龙 865 → 1×A77@2.84 + 3×A77@2.42 + 4×A55@1.8 + Adreno 650│
+└─────────────────────────────────────────────────────────────────────┘
+  </div>
+</section>
+
+<!-- ==================== MODEL GRID ==================== -->
+<section>
+  <h2>🧠 模型选择 — 覆盖 5 种计算模式</h2>
+  <div class="model-grid">
+    <div class="model-chip">
+      <div class="name">📱 MobileNetV2</div>
+      <div class="params">3.5M 参数</div>
+      <div class="pattern">Conv1x1(GEMM) + DWConv</div>
+    </div>
+    <div class="model-chip">
+      <div class="name">🏗 ResNet50</div>
+      <div class="params">25M 参数</div>
+      <div class="pattern">Conv3×3(Winograd) + GEMM</div>
+    </div>
+    <div class="model-chip">
+      <div class="name">🔤 BERT</div>
+      <div class="params">110M 参数</div>
+      <div class="pattern">MatMul + LayerNorm + GELU</div>
+    </div>
+    <div class="model-chip">
+      <div class="name">🤖 Qwen2-0.5B</div>
+      <div class="params">620M 参数</div>
+      <div class="pattern">KV Cache + RoPE + INT4</div>
+    </div>
+    <div class="model-chip">
+      <div class="name">🔀 MobileViT-S</div>
+      <div class="params">5.6M 参数</div>
+      <div class="pattern">Conv + Attention 混合</div>
+    </div>
+  </div>
+  <p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.5rem;">
+    💡 为什么是这 5 个？MobileNetV2 覆盖 80% 端侧模型计算模式，ResNet50 覆盖大卷积网络，
+    BERT 覆盖 Encoder Transformer，Qwen2-0.5B 覆盖 Decoder LLM，MobileViT-S 覆盖 CNN+Attention 混合架构。
+  </p>
+</section>
+
+<!-- ==================== PHASE TIMELINE ==================== -->
+<section>
+  <h2>📋 六阶段执行路线图</h2>
+  <div class="timeline">
+    <div class="phase-card p0" onclick="document.getElementById('p0').scrollIntoView({behavior:'smooth'})">
+      <div class="phase-num">0</div>
+      <h3>🔧 Phase 0: 环境就绪</h3>
+      <div class="days">⏱ 0.5 天</div>
+      <div class="desc">设备握手验证、编译链确认、MNN Profiler 冒烟测试、模型文件清单</div>
+    </div>
+    <div class="phase-card p1" onclick="document.getElementById('p1').scrollIntoView({behavior:'smooth'})">
+      <div class="phase-num">1</div>
+      <h3>📊 Phase 1: CPU 全量 Profiling</h3>
+      <div class="days">⏱ 2-3 天</div>
+      <div class="desc">5 模型 × MNN/ORT 逐算子耗时 + simpleperf 火焰图 + 热点算子排行</div>
+    </div>
+    <div class="phase-card p2" onclick="document.getElementById('p2').scrollIntoView({behavior:'smooth'})">
+      <div class="phase-num">2</div>
+      <h3>🔬 Phase 2: 热点算子深度测试</h3>
+      <div class="days">⏱ 3-5 天</div>
+      <div class="desc">80+ 单算子测例 + Roofline 模型分析 + 多线程/多精度/形状分桶</div>
+    </div>
+    <div class="phase-card p3" onclick="document.getElementById('p3').scrollIntoView({behavior:'smooth'})">
+      <div class="phase-num">3</div>
+      <h3>🎮 Phase 3: GPU 后端对比</h3>
+      <div class="days">⏱ 3-4 天</div>
+      <div class="desc">MNN OpenCL 启用 + CPU vs GPU 全矩阵对比 + 异构调度规则输出</div>
+    </div>
+    <div class="phase-card p4" onclick="document.getElementById('p4').scrollIntoView({behavior:'smooth'})">
+      <div class="phase-num">4</div>
+      <h3>🔴 Phase 4: BERT 优化闭环</h3>
+      <div class="days">⏱ 7-10 天</div>
+      <div class="desc">MatMul(768) 根因分析 + GEMM 分块调优 + Neon 指令优化 + 效果验证</div>
+    </div>
+    <div class="phase-card p5" onclick="document.getElementById('p5').scrollIntoView({behavior:'smooth'})">
+      <div class="phase-num">5</div>
+      <h3>🧠 Phase 5: LLM 推理专项</h3>
+      <div class="days">⏱ 3-5 天</div>
+      <div class="desc">Qwen2-0.5B Prefill/Decode Profiling + MNN vs llama.cpp + KV Cache 分析</div>
+    </div>
+    <div class="phase-card p6" onclick="document.getElementById('p6').scrollIntoView({behavior:'smooth'})">
+      <div class="phase-num">6</div>
+      <h3>📝 Phase 6: 收尾与面试准备</h3>
+      <div class="days">⏱ 2-3 天</div>
+      <div class="desc">综合报告 + 可视化图表 + 面试话术 + 简历更新</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== DETAILED PHASES ==================== -->
+<section id="p0">
+  <h2>Phase 0: 环境就绪 (0.5 天)</h2>
+  <table>
+    <tr><th>Task</th><th>内容</th><th>关键命令</th></tr>
+    <tr>
+      <td>0.1</td>
+      <td>设备连接验证</td>
+      <td><code>adb devices</code> · <code>adb shell getprop ro.product.model</code> · root 权限检查</td>
+    </tr>
+    <tr>
+      <td>0.2</td>
+      <td>编译工具链验证</td>
+      <td>NDK clang++ 版本确认 · CMake ≥ 3.14 · MNN Profiler 宏检查</td>
+    </tr>
+    <tr>
+      <td>0.3</td>
+      <td>模型文件清单</td>
+      <td>5 模型 .mnn / .onnx 存在性 + MD5 校验和记录 → <code>phase0_model_inventory.txt</code></td>
+    </tr>
+  </table>
+</section>
+
+<section id="p1">
+  <h2>Phase 1: CPU 全量 Profiling (2-3 天)</h2>
+  <table>
+    <tr><th>Task</th><th>产出</th><th>测试规模</th></tr>
+    <tr>
+      <td>1.0</td>
+      <td>准备缺失模型 — MobileViT-S ONNX → MNN 转换 + Qwen2-0.5B GGUF 下载</td>
+      <td>2 个新模型注册到 model_info.h</td>
+    </tr>
+    <tr>
+      <td>1.1</td>
+      <td><strong>MNN CPU Profiling</strong> — 5 模型 × 100 iters × 50 warmup</td>
+      <td>MNN_PROFILING=1 逐算子耗时原始日志</td>
+    </tr>
+    <tr>
+      <td>1.2</td>
+      <td><strong>simpleperf 交叉验证</strong> — stat (PMU 计数器) + record (火焰图)</td>
+      <td>cpu-cycles, cache-misses, branch-misses, IPC</td>
+    </tr>
+    <tr>
+      <td>1.3</td>
+      <td><strong>ORT 基线 Profiling</strong> — 5 模型 ORT 全量 + 全优化开启重测</td>
+      <td>graph_optimization_level=ALL, intra_op_num_threads=4</td>
+    </tr>
+    <tr>
+      <td>1.4</td>
+      <td><strong>热点算子排行</strong> — extract_operator_profile.py 脚本提取</td>
+      <td>累计占比 ≥80% 的算子标记为深度测试对象</td>
+    </tr>
+  </table>
+
+  <h4>预期热点算子清单</h4>
+  <table>
+    <tr><th>模型</th><th>Top 算子</th><th>预计特征</th></tr>
+    <tr><td>MobileNetV2</td><td>Conv1x1 55% + DWConv 25% + Add 8%</td><td>累计 88%</td></tr>
+    <tr><td>ResNet50</td><td>Conv3×3 35% + Conv1×1 30% + BN/Add 15%</td><td>累计 80%</td></tr>
+    <tr><td>BERT</td><td>MatMul(768×768) 38% + MatMul(768×3072) 30% + LayerNorm 10%</td><td>累计 78%</td></tr>
+    <tr><td>YOLOv8n</td><td>Conv1x1(多尺度) + Conv3×3 + Concat</td><td>待实测</td></tr>
+    <tr><td>MobileViT-S</td><td>Conv + MatMul(Attention) 混合</td><td>待实测</td></tr>
+  </table>
+</section>
+
+<section id="p2">
+  <h2>Phase 2: CPU 热点算子深度 Benchmark (3-5 天)</h2>
+  <p>按 <strong>二八原则</strong> 对 Phase 1 识别的热点算子做 <strong>三层覆盖</strong>:</p>
+  <table>
+    <tr><th>层级</th><th>测例数</th><th>说明</th></tr>
+    <tr><td>第一层: 经典网络提取</td><td>15-20</td><td>从 5 个模型直接抽取真实算子块，和实际场景对齐</td></tr>
+    <tr><td>第二层: 形状分桶</td><td>10-15</td><td>沿"计算量"和"矩阵形状"取极端值，覆盖 corner case</td></tr>
+    <tr><td>第三层: 框架特化路径</td><td>5-8</td><td>Winograd、NCHW4c 对齐退化、多线程加速比、量化路径</td></tr>
+  </table>
+
+  <h4>单算子测例统计</h4>
+  <table>
+    <tr><th>算子类型</th><th>测例数</th><th>测试维度</th></tr>
+    <tr><td>Conv1x1 / GEMM</td><td>≈30</td><td>M/56²→M/7² 极端, C/16→C/1024, NCHW4c 对齐退化, 1/2/4/8线程, FP32/FP16</td></tr>
+    <tr><td>DepthwiseConv</td><td>≈10</td><td>C/16→C/960 极端通道, H×W/112²→7², FP32/FP16 带宽对比</td></tr>
+    <tr><td>Conv3×3</td><td>≈10</td><td>Winograd(s=1) vs Im2Col(s=2), 不同通道下的变换开销</td></tr>
+    <tr><td>MatMul</td><td>≈15</td><td>方阵(768²/512²/1024²) + 长矩阵(768×3072) + KV Cache(1→2048)</td></tr>
+    <tr><td>LayerNorm/Softmax/GELU</td><td>≈8</td><td>hidden_size×(512/768/1024) × seq_len×(1/128/512)</td></tr>
+  </table>
+  <p><strong>关键产出:</strong> Roofline 散点图 — 每个算子标注 Compute-Bound vs Memory-Bound + 算力利用率</p>
+</section>
+
+<section id="p3">
+  <h2>Phase 3: GPU OpenCL 后端启用与对比 (3-4 天)</h2>
+  <table>
+    <tr><th>Task</th><th>核心工作</th></tr>
+    <tr><td>3.1</td><td><strong>启用 MNN OpenCL</strong> — CMake MNN_OPENCL=ON + mnn_backend.cpp GPU 路径 + 精度验证 (余弦相似度 ≥0.999)</td></tr>
+    <tr><td>3.2</td><td><strong>5 模型 × CPU vs GPU</strong> — 端到端 Latency + 初始化时间对比 + 加速比计算</td></tr>
+    <tr><td>3.3</td><td><strong>逐算子拆解</strong> — 每个算子 CPU耗时 vs GPU耗时 → 异构调度规则</td></tr>
+    <tr><td>3.4</td><td><strong>数据传输开销</strong> — CPU↔GPU 拷贝时间 + 净收益公式</td></tr>
+  </table>
+
+  <div class="highlight-box core">
+    <strong>🔑 核心发现预设:</strong><br>
+    · 计算密集的 GEMM/Conv → GPU 加速 2-5×<br>
+    · 访存密集的 DWConv/LayerNorm → GPU 几乎无加速甚至更慢<br>
+    · 小算子(Add/Mul/ReLU) → GPU 启动开销 &gt; 计算本身 → 必须留 CPU<br>
+    → 这就是<strong>异构调度</strong>的价值
+  </div>
+</section>
+
+<section id="p4">
+  <h2>🔴 Phase 4: BERT 优化闭环 — 面试核心故事 (7-10 天)</h2>
+
+  <div class="highlight-box">
+    <strong>⚠️ 绝对不能跳过的核心阶段。</strong> 现有数据已显示 BERT 在 MNN 上比 ORT 慢 15%，而 CV 模型 MNN 全面领先——这是最大的"金子"。
+  </div>
+
+  <h4>优化闭环流程</h4>
+  <table>
+    <tr><th>步骤</th><th>工作</th><th>工具</th></tr>
+    <tr><td>① 复现确认</td><td>3 次独立测试确认 BERT MNN 689ms vs ORT 598ms 可复现</td><td>run_benchmark_android.sh × 3</td></tr>
+    <tr><td>② 逐算子拆解</td><td>MNN Profiler → 找出最慢算子 (预计 MatMul 768×768)</td><td>MNN_PROFILING=1</td></tr>
+    <tr><td>③ 根因分析</td><td>Cache Miss 假说 → PMU 计数器验证 → GEMM 分块参数审查</td><td>simpleperf stat + annotate</td></tr>
+    <tr><td>④ 优化实施</td><td>GEMM K_BLOCK 调整 + Neon SDOT 指令重写 (ARMv8.2-A)</td><td>源码修改 + 交叉编译</td></tr>
+    <tr><td>⑤ 效果验证</td><td>Before/After 对比 + CV 模型回归 (确保无退化)</td><td>全模型回归测试</td></tr>
+  </table>
+
+  <h4>优化目标</h4>
+  <table>
+    <tr><th>指标</th><th>优化前</th><th>目标</th></tr>
+    <tr><td>BERT 总耗时</td><td>689 ms</td><td>≤598 ms (追平/反超 ORT)</td></tr>
+    <tr><td>MatMul(768×768)</td><td>待实测</td><td>提升 ≥30%</td></tr>
+    <tr><td>其他 CV 模型</td><td>基线</td><td>无退化 (±3% 内)</td></tr>
+  </table>
+</section>
+
+<section id="p5">
+  <h2>Phase 5: LLM 推理专项 (3-5 天)</h2>
+  <table>
+    <tr><th>Task</th><th>核心工作</th></tr>
+    <tr><td>5.1</td><td>恢复 llama.cpp 后端编译 + Qwen2-0.5B GGUF 加载 + Profiling 钩子</td></tr>
+    <tr><td>5.2</td><td><strong>Prefill vs Decode 分阶段 Profiling</strong> — PMU 计数器量化两种计算特征</td></tr>
+    <tr><td>5.3</td><td>MNN llm.cpp vs llama.cpp 对比 — Prefill 速度 / Decode 速度 / 内存峰值</td></tr>
+    <tr><td>5.4</td><td>LLM 推理优化建议清单 — KV Cache 量化 / FlashAttention / 异构调度</td></tr>
+  </table>
+
+  <div class="highlight-box core">
+    <strong>🔑 核心发现预设:</strong><br>
+    · Prefill (512 tokens): 计算密集 — IPC 高 — 算力利用率 60-80%<br>
+    · Decode (per token): 访存密集 — IPC 极低 — 算力利用率 &lt;5%<br>
+    · Decode 瓶颈 = KV Cache 带宽: Qwen2-0.5B × seq_len=2048 → ~172MB KV Cache / token<br>
+    · 最有效优化: KV Cache INT8 量化 (172MB→86MB, 带宽减半)
+  </div>
+</section>
+
+<section id="p6">
+  <h2>Phase 6: 收尾文档与面试准备 (2-3 天)</h2>
+  <table>
+    <tr><th>Task</th><th>产出物</th></tr>
+    <tr><td>6.1</td><td><strong>综合报告生成</strong> — generate_final_report.py → Markdown + HTML + 5张图表</td></tr>
+    <tr><td>6.2</td><td><strong>5 个模型性能分析卡片</strong> — 每个模型一页: 热点算子/瓶颈/优化建议</td></tr>
+    <tr><td>6.3</td><td><strong>面试话术准备</strong> — 1分钟版 + 3分钟版 + 10个追问应对</td></tr>
+    <tr><td>6.4</td><td><strong>简历更新</strong> — 项目描述 + 核心工作 + 量化成果</td></tr>
+  </table>
+</section>
+
+<!-- ==================== METHODOLOGY ==================== -->
+<section>
+  <h2>📐 Benchmark 方法论文档</h2>
+  <h3>原则一: Profiling 驱动，二八原则</h3>
+  <pre>
+不是人选择测哪些算子 → <strong>Profiling 数据决定哪些算子重要</strong>
+
+每个模型: MNN Profiler + simpleperf 火焰图
+  → 导出逐算子耗时占比
+  → 累计占比 ≥80% 的算子 (通常 3-5 个) → 深度测试
+  → 剩余算子 → 快速通道 (1-2 个测例)</pre>
+
+  <h3>原则二: 覆盖计算模式，不覆盖参数组合</h3>
+  <pre>
+以 Conv 为例 — 不是穷举 Kernel/Stride/Padding 组合，
+而是确保<strong>三条执行路径</strong>各有一个代表性测例:
+
+  路径 A: Im2Col + GEMM (通用卷积，计算密集)
+  路径 B: Winograd (3×3 s=1 d=1，减小乘法次数)
+  路径 C: Depthwise (groups=C，访存密集)</pre>
+
+  <h3>原则三: 控制变量</h3>
+  <pre>
+✅ 同一硬件平台，CPU 固定频率 (关闭 DVFS)
+✅ 同一编译器版本 + 编译选项 (-O3 -march=armv8.2-a)
+✅ 线程绑核 (taskset) 避免核迁移
+✅ 精度模式统一 (FP32/FP16/INT8)
+✅ 100 warmup + 1000 iterations (或调整)</pre>
+
+  <h3>Roofline 模型</h3>
+  <table>
+    <tr><th>参数</th><th>骁龙 865 理论值</th><th>说明</th></tr>
+    <tr><td>FP32 峰值算力</td><td>~45.4 GFLOPS</td><td>4×A77 @ 2.42GHz, 4 FMA/cycle</td></tr>
+    <tr><td>FP16 峰值算力</td><td>~90.8 GFLOPS</td><td>FP16 SIMD 理论翻倍</td></tr>
+    <tr><td>内存带宽</td><td>~34 GB/s (实测)</td><td>LPDDR5 理论 44 GB/s, 实测约 80%</td></tr>
+    <tr><td>Roofline 拐点</td><td>~1.33 FLOPS/Byte</td><td>Compute-Bound vs Memory-Bound 分界线</td></tr>
+  </table>
+</section>
+
+<!-- ==================== PROJECT DELIVERABLES ==================== -->
+<section>
+  <h2>📦 项目产出物清单</h2>
+  <table>
+    <tr><th>产出物</th><th>路径</th><th>说明</th></tr>
+    <tr><td>全量 CPU Profiling 报告</td><td><code>results/phase1_cpu_profiling/</code></td><td>5 模型 × 2 框架逐算子耗时 + 火焰图</td></tr>
+    <tr><td>热点算子深度测试报告</td><td><code>results/phase2_hotspot_benchmark/</code></td><td>80+ 测例 + Roofline 散点图</td></tr>
+    <tr><td>CPU vs GPU 对比报告</td><td><code>results/phase3_gpu_comparison/</code></td><td>全矩阵对比 + 异构调度规则</td></tr>
+    <tr><td>BERT 优化闭环报告</td><td><code>results/phase4_bert_optimization/</code></td><td>根因分析 + 优化方案 + Before/After</td></tr>
+    <tr><td>LLM 推理分析报告</td><td><code>results/phase5_llm_profiling/</code></td><td>Prefill/Decode 分阶段 Profiling</td></tr>
+    <tr><td>综合性能报告</td><td><code>results/final_comprehensive_report.html</code></td><td>全量数据 + 5 张图表 + 面试话术</td></tr>
+    <tr><td>模型性能分析卡片</td><td><code>results/model_cards/</code></td><td>每模型 1 页精华版</td></tr>
+    <tr><td>面试准备包</td><td><code>results/interview_prep/</code></td><td>1min/3min 话术 + 10 追问应对</td></tr>
+  </table>
+</section>
+
+<!-- ==================== RISK ==================== -->
+<section>
+  <h2>⚠️ 风险与缓解</h2>
+  <table>
+    <tr><th>风险</th><th>概率</th><th>影响</th><th>缓解措施</th></tr>
+    <tr>
+      <td>MNN OpenCL 在骁龙865上无法加载</td>
+      <td style="color:var(--orange)">中</td>
+      <td style="color:var(--red)">Phase 3 全阻塞</td>
+      <td>提前验证 libOpenCL.so; 备选: OpenGL ES compute shader</td>
+    </tr>
+    <tr>
+      <td>Qwen2-0.5B GGUF 转换失败</td>
+      <td style="color:var(--green)">低</td>
+      <td style="color:var(--orange)">Phase 5 部分阻塞</td>
+      <td>用 llama.cpp 官方 convert.py; 备选: ONNX + ORT GenAI</td>
+    </tr>
+    <tr>
+      <td>BERT GEMM 优化无法追平 ORT</td>
+      <td style="color:var(--orange)">中</td>
+      <td style="color:var(--orange)">核心故事受损</td>
+      <td>即使追不平，"为什么追不平"同样是好的面试素材</td>
+    </tr>
+    <tr>
+      <td>MobileViT-S ONNX 无现成预训练</td>
+      <td style="color:var(--orange)">中</td>
+      <td style="color:var(--green)">Phase 1 缺一个模型</td>
+      <td>timm/torchvision 导出; 备选: EfficientNet-Lite</td>
+    </tr>
+    <tr>
+      <td>业余投入时间不足</td>
+      <td style="color:var(--red)">高</td>
+      <td style="color:var(--orange)">全局延期</td>
+      <td>Phase 4 (BERT 优化) 最高优先级; Phase 5 可压缩</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ==================== TVM APPENDIX ==================== -->
+<section>
+  <h2>📦 附录: TVM 编译器基线（可选扩展）</h2>
+  <div class="highlight-box">
+    <strong>⚠️ 已从主线移除。</strong> TVM 需要 AutoTVM 预先调优（单模型数小时~数天），会严重拖慢整体节奏。等到 Phase 0-6 全部完成后，如有余力再考虑。主线聚焦 <strong>MNN/ORT/llama.cpp</strong> 三条优化路线的深度对比。
+  </div>
+
+  <h4>为什么不放在主线</h4>
+  <pre>TVM 工作流: AutoTVM 调优(单模型数小时~数天) → 生成调优日志 → 编译模型 → 推理
+对比:
+  MNN/ORT/llama.cpp: 下载模型 → 直接推理 (分钟级)
+
+TVM 一条模型的时间 ≈ MNN+ORT+llama.cpp 三个框架全部跑完的时间
+且 TVM 调优需要编写调优脚本、调试编译错误、处理算子不支持等问题</pre>
+
+  <h4>如果需要加入（可选路线）</h4>
+  <table>
+    <tr><th>扩展阶段</th><th>内容</th><th>预估天数</th></tr>
+    <tr>
+      <td>D.1</td>
+      <td><strong>TVM 编译瓶颈算子</strong> — 从 Phase 4 已定位的 BERT MatMul(768×768) 开始，AutoTVM 调优 → 导出 .so → 集成到 ORT 作为 Custom OP</td>
+      <td>1-2 天</td>
+    </tr>
+    <tr>
+      <td>D.2</td>
+      <td><strong>TVM 编译整模型</strong> — 编译 MobileNetV2，对比 TVM vs MNN vs ORT</td>
+      <td>1-2 天</td>
+    </tr>
+    <tr>
+      <td>D.3</td>
+      <td><strong>编译器路线分析</strong> — "手写优化 vs 自动代码生成的边界在哪里？"</td>
+      <td>0.5 天</td>
+    </tr>
+  </table>
+
+  <div class="highlight-box core">
+    <strong>💡 面试加分点:</strong><br>
+    "我不仅做了手写优化的 MNN 路线，还探索了 TVM 自动代码生成路线。<br>
+    结论是: 对于 Conv1x1/MatMul 这类规则计算，TVM 自动调优可以达到手写的 85-90%；<br>
+    但对于 DWConv 这种访存密集 + 不规则访问的算子，手写优化仍然有明显优势。<br>
+    这让我理解了编译器自动生成的边界在哪里。"
+  </div>
+</section>
+
+<!-- ==================== INTERVIEW ==================== -->
+<section>
+  <h2>🎤 面试讲述话术模板</h2>
+
+  <h4>1 分钟版（总括）</h4>
+  <pre style="white-space:pre-wrap;">"我基于骁龙 865 搭了一套完整的端侧推理性能分析体系。选了 5 个模型覆盖 CV 到 LLM 的五种计算模式，用 MNN Profiler + simpleperf 做全量 Profiling，按二八原则对热点算子做三层深度的 Benchmark。然后用这个体系发现了 MNN 上 BERT 的异常瓶颈，做了针对性优化。"</pre>
+
+  <h4>3 分钟版（展开）</h4>
+  <pre style="white-space:pre-wrap;">[1 min]  项目目标 + 平台 + 5 模型选择逻辑
+[1 min]  Benchmark 设计方法论: Profiling 驱动 + 二八原则 + 三层覆盖
+[1 min]  核心发现 + 优化闭环 (BERT 从 689ms 降到 XXms)
+         或: CPU vs GPU 异构调度的关键发现</pre>
+
+  <h4>关键追问应对</h4>
+  <table>
+    <tr><th>追问</th><th>应对</th></tr>
+    <tr>
+      <td>"只测了一台手机？"</td>
+      <td>"是的，但我在这台手机上开了 CPU 和 GPU 两个后端做深度对比。多设备的价值在于架构差异分析，而我当前的优先级是把单设备的性能特征挖透——这和写算子是一个思路，先做深再做宽。"</td>
+    </tr>
+    <tr>
+      <td>"为什么不用 ncnn？"</td>
+      <td>"ncnn 和 MNN 的优化路线完全一致——端侧轻量级手写 Neon 优化。加了 ncnn 不会增加分析维度。我选的 4 个框架各代表一种不同的优化哲学：手写极致 × 通用可移植 × LLM 专用 × 编译器自动生成。"</td>
+    </tr>
+    <tr>
+      <td>"Roofline 对你实际优化有什么帮助？"</td>
+      <td>"DWConv 在 Roofline 上落在 Memory-Bound 区域，意味着优化方向应该是减少内存访问而不是调计算指令。反过来 Conv1x1 在 Compute-Bound 区域，应该专注 SIMD 指令利用率和多线程并行。Roofline 帮我避免了方向性的错误。"</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ==================== COMMANDS ==================== -->
+<section>
+  <h2>⚡ 关键命令速查</h2>
+  <pre># === 快速验证 ===
+export ADB=/mnt/e/andorid/adb/adb.exe
+export ANDROID_NDK=/home/liu/android-ndk
+$ADB devices | grep "device$"
+
+# === 编译 ===
+./scripts/build_android.sh 2>&1 | tail -20
+
+# === 单模型快速测试 ===
+./scripts/run_benchmark_android.sh --model mobilenetv2 --backend mnn --iterations 10
+
+# === MNN Profiling ===
+MNN_PROFILING=1 ./scripts/run_benchmark_android.sh --model bert --backend mnn --iterations 100
+
+# === 设备环境 ===
+./scripts/setup_test_environment.sh    # 锁频 + 清缓存
+./scripts/restore_test_environment.sh  # 恢复
+
+# === simpleperf ===
+$ADB shell su -c "/data/local/tmp/simpleperf stat \
+  -e cpu-cycles,cache-misses --duration 10 \
+  /data/local/tmp/benchmark_inference --model mobilenetv2 --backend mnn --iterations 200"
+
+# === 报告生成 ===
+python3 scripts/generate_report.py --input results/phase1/ --output report.md
+python3 scripts/extract_operator_profile.py results/*.log > hotspot.md
+python3 scripts/analyze_roofline.py --input results/ --plot roofline.png</pre>
+</section>
+
+<!-- ==================== DAILY CHECKLIST ==================== -->
+<section>
+  <h2>📋 每日工作检查清单</h2>
+  <table>
+    <tr><th>开始前</th><th>结束后</th></tr>
+    <tr>
+      <td>
+        <ul class="checklist" style="margin:0;padding:0;list-style:none;">
+          <li style="padding:0.2rem 0 0.2rem 1.5rem;"><code>adb devices</code> — 设备在线</li>
+          <li style="padding:0.2rem 0 0.2rem 1.5rem;"><code>adb shell getprop ro.product.model</code> — 型号正确</li>
+          <li style="padding:0.2rem 0 0.2rem 1.5rem;">温度 &lt; 45°C (thermal_zone0/temp)</li>
+          <li style="padding:0.2rem 0 0.2rem 1.5rem;"><code>git status</code> — 确认分支</li>
+          <li style="padding:0.2rem 0 0.2rem 1.5rem;">二进制存在: <code>build_android/src/benchmark_inference</code></li>
+        </ul>
+      </td>
+      <td>
+        <ul class="checklist" style="margin:0;padding:0;list-style:none;">
+          <li style="padding:0.2rem 0 0.2rem 1.5rem;">原始日志已保存到 results/</li>
+          <li style="padding:0.2rem 0 0.2rem 1.5rem;">关键数据已提取到 summary.md</li>
+          <li style="padding:0.2rem 0 0.2rem 1.5rem;">git commit (即使只是 WIP)</li>
+          <li style="padding:0.2rem 0 0.2rem 1.5rem;">设备温度已恢复正常</li>
+          <li style="padding:0.2rem 0 0.2rem 1.5rem;">CPU 调度器已恢复 (如锁了频)</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+</section>
+
+<footer>
+  <p>📄 计划版本 v1.1 · 创建于 2026-06-06 · 最后更新: 2026-06-06 · 基于 <code>ARM推理Benchmark项目指导.md</code> + <code>项目完整计划.md</code></p>
+  <p>🔧 v1.1 变更: TVM 移至附录，主线聚焦 MNN/ORT/llama.cpp 三框架</p>
+  <p>🎯 目标硬件: 骁龙 865 (SM8250) / 红米 K30S · 预估总工期: 28 天 (业余投入)</p>
+  <p style="margin-top:0.5rem;">完整 Markdown 版本: <a href="2026-06-06-benchmark-full-plan.md" style="color:var(--accent)">2026-06-06-benchmark-full-plan.md</a></p>
+</footer>
+
+</div>
+</body>
+</html>
