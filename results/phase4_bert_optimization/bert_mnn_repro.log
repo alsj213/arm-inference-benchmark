@@ -1,0 +1,17 @@
+=== BERT MNN Run 1 (cooler device) ===
+P50:    754.09 ms
+P99:    756.30 ms
+Mean:   754.01 ms
+MAE:    0.068855
+
+=== BERT MNN Run 2 (hot device ~45°C) ===
+P50:    847.49 ms
+P99:    1033.05 ms
+Mean:   841.42 ms
+MAE:    0.068855
+
+=== BERT MNN Run 3 (cooler device ~38.7°C) ===
+P50:    752.89 ms
+P99:    998.17 ms
+Mean:   791.31 ms
+MAE:    0.068855

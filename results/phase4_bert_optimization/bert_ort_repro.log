@@ -1,0 +1,9 @@
+=== BERT ORT Run 1 (hot device ~45°C) ===
+P50:    870.12 ms
+P99:    920.57 ms
+Mean:   820.99 ms
+
+=== BERT ORT Run 2 (cooler device) ===
+P50:    667.96 ms
+P99:    876.29 ms
+Mean:   684.93 ms

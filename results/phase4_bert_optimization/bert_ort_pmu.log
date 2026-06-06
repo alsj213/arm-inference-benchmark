@@ -1,0 +1,67 @@
+=== ARM Inference Benchmark ===
+Backend:  ort
+Model:    bert
+Precision:fp32
+Threads:  1
+Warmup:   5
+Test runs:10
+Use GPU:  no
+
+
+========================================================
+Model: bert
+Input shape: 1 128 
+========================================================
+
+--- [Step 1] Getting reference output from ONNX Runtime ---
+ONNXRT: loading model: models/nlp/bert/bert.onnx
+ONNXRT: input 0 = input_ids (type 7)
+ONNXRT: input 1 = attention_mask (type 7)
+ONNXRT: output 0 = last_hidden_state
+ONNXRT: output 1 = pooler_output
+  ✅ Reference output obtained (98304 elements)
+      Reference stats - Min: -2.4524, Max: 2.2698, Mean: -0.0176
+
+--- [Step 2] Running benchmarks ---
+
+>> Testing ort on bert...
+ONNXRT: loading model: models/nlp/bert/bert.onnx
+ONNXRT: input 0 = input_ids (type 7)
+ONNXRT: input 1 = attention_mask (type 7)
+ONNXRT: output 0 = last_hidden_state
+ONNXRT: output 1 = pooler_output
+
+--- Accuracy Comparison ---
+  ✅ [Accuracy] ONNXRT: PASSED
+      Cosine Similarity:  1.000000 (Excellent)
+      Mean Absolute Error: 0.000000
+      Max Absolute Error:  0.000000
+      Mean Relative Error: 0.0000%
+      Output range: [-2.4524, 2.2698], Mean: -0.0176
+
+--- Performance Results ---
+  Init time:  690.43 ms
+  Min:    670.82 ms
+  P50:    671.78 ms
+  P90:    677.78 ms
+  P99:    677.78 ms
+  Max:    677.78 ms
+  Mean:   672.20 ms
+  Std:    1.93 ms
+  Throughput: 1.49 FPS
+  Peak mem:   18446744073709551596 KB
+
+=== Done ===
+Performance counter statistics:
+
+#          count  event_name         # count / runtime,  runtime / enabled_time
+  19,159,474,499  cpu-cycles         # 2.447168 GHz   (60%)
+  39,468,309,306  instructions       # 5.039 G/sec    (60%)
+     102,014,723  cache-misses       # 13.017 M/sec   (60%)
+  10,201,412,686  cache-references   # 1.302 G/sec    (60%)
+       3,278,481  branch-misses      # 418.659 K/sec  (60%)
+
+Total test time: 13.068495 seconds.
+simpleperf W cmd_stat.cpp:865] Percentages < 100% means some events only run a subset of enabled time,
+probably caused by hardware counter multiplexing (less counters than events).
+Try --use-devfreq-counters if on a rooted device.
