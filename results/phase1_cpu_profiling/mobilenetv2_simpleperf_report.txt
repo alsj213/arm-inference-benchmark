@@ -1,0 +1,523 @@
+Cmdline: /data/local/tmp/simpleperf record -e cpu-cycles -g --duration 10 --call-graph fp -o /data/local/tmp/perf_mbv2.data /data/local/tmp/benchmark/benchmark_inference --model mobilenetv2 --backend mnn --warmup 50 --runs 200
+Arch: arm64
+Event: cpu-cycles (type 0, config 0)
+Samples: 19871
+Event count: 13450907503
+
+Overhead  Command              Shared Object                                   Symbol
+64.00%    benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopL2
+5.19%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L16LoopW
+4.97%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  __memcpy
+2.99%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopE12L4
+2.54%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             E1LoopL
+2.34%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             StoreLH8
+2.20%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L8LoopW
+1.96%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             PostTreatLH8
+1.71%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L1LoopW
+1.05%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L4LoopW
+0.86%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             AddBiasLH8
+0.83%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopH
+0.65%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L1
+0.54%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             E4LoopL
+0.39%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::ConvolutionTiledExecutor::turnIm2ColToBlitInfo(float const**, int*, int, int, MNN::ConvolutionCommon::Im2ColParameter const&, unsigned char const*, int)
+0.35%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             void executeVec<VecBinaryAdd<MNN::Math::Vec<float, 4> >, MNN::Math::Vec<float, 4>, 4, float, float>(void*, void const*, void const*, int, int)
+0.30%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]elf64_sym const* soinfo_do_lookup_impl<true>(char const*, version_info const*, soinfo**, SymbolLookupList const&)
+0.29%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopE12L3
+0.29%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             std::__ndk1::__function::__func<MNN::CPUConvolutionDepthwise::BasicFloatExecution::onResize(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::$_0, std::__ndk1::allocator<MNN::CPUConvolutionDepthwise::BasicFloatExecution::onResize(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::$_0>, void (unsigned char const*, unsigned char*, int)>::operator()(unsigned char const*&&, unsigned char*&&, int&&)
+0.22%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::Pipeline::execute()
+0.21%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             UpL3AreaLoop
+0.20%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]soinfo::elf_lookup(SymbolName&, version_info const*) const
+0.18%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9186690]
+0.17%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             End
+0.17%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L16Loop
+0.17%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             void MNN::poolingAvg<float, MNN::Math::Vec<float, 4>, 4>(float const*, int, int, float*, int, int, int, int, int, int, int, int, MNN::PoolPadType, MNN::AvgPoolCountType)
+0.15%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             std::__ndk1::__function::__func<MNN::StrassenMatrixComputor::_generateTrivalMatMul(int, int, int, MNN::StrassenMatrixComputor::MatrixInfo const&, MNN::StrassenMatrixComputor::MatrixInfo const&, MNN::StrassenMatrixComputor::MatrixInfo const&, MNN::StrassenMatrixComputor::MatrixInfo const&, std::__ndk1::vector<float, std::__ndk1::allocator<float> > const&)::$_0, std::__ndk1::allocator<MNN::StrassenMatrixComputor::_generateTrivalMatMul(int, int, int, MNN::StrassenMatrixComputor::MatrixInfo const&, MNN::StrassenMatrixComputor::MatrixInfo const&, MNN::StrassenMatrixComputor::MatrixInfo const&, MNN::StrassenMatrixComputor::MatrixInfo const&, std::__ndk1::vector<float, std::__ndk1::allocator<float> > const&)::$_0>, void (int)>::operator()(int&&)
+0.13%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L8
+0.12%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopNumber
+0.12%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e808e0]
+0.12%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopE1L3
+0.12%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  memset
+0.11%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]calculate_gnu_hash_neon(char const*)
+0.09%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L1Loop
+0.08%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8cf80]
+0.08%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopE1L4
+0.07%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91a7a9c]
+0.07%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]bool packed_relocate_impl<(RelocMode)1>(Relocator&, sleb128_decoder)
+0.07%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L16
+0.07%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L8Loop
+0.07%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  je_free
+0.07%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9186f60]
+0.06%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNNPackedMatMul
+0.06%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e45bd8]
+0.06%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e3c8c8]
+0.05%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91a7928]
+0.05%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e80e64]
+0.05%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  je_tcache_bin_flush_small
+0.05%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d2939c]
+0.05%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::Convolution1x1Strassen::onExecute(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)
+0.05%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  je_malloc
+0.04%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]memcmp
+0.04%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e3a664]
+0.04%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L4Loop
+0.04%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopL
+0.04%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e43fa8]
+0.04%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9186f44]
+0.04%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  pthread_mutex_unlock
+0.04%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNNDepthwiseConvFastKernel
+0.04%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             std::__ndk1::__function::__func<MNN::DenseConvolutionTiledImpl::onResize(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::$_1, std::__ndk1::allocator<MNN::DenseConvolutionTiledImpl::onResize(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::$_1>, void (int)>::operator()(int&&)
+0.03%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]__strcmp_aarch64
+0.03%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::StrassenMatrixComputor::onExecute(unsigned char const*, unsigned char const*, unsigned char const*, unsigned char*)
+0.03%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  memcpy
+0.03%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::ThreadPool::enqueue(std::__ndk1::pair<std::__ndk1::function<void (int)>, int>*, int)
+0.03%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]elf64_sym const* soinfo_do_lookup_impl<false>(char const*, version_info const*, soinfo**, SymbolLookupList const&)
+0.03%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d329d8]
+0.03%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ca8ef4]
+0.03%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]find_libraries(android_namespace_t*, soinfo*, char const* const*, unsigned long, soinfo**, std::__1::vector<soinfo*, std::__1::allocator<soinfo*> >*, unsigned long, int, android_dlextinfo const*, bool, std::__1::vector<android_namespace_t*, std::__1::allocator<android_namespace_t*> >*)
+0.03%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e7af78]
+0.03%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L4
+0.03%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  arena_dalloc_bin_locked_impl
+0.03%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  pthread_mutex_trylock
+0.03%     benchmark_inference  /data/local/tmp/benchmark/benchmark_inference   utils::fill_random_float(float*, unsigned long, unsigned int)
+0.03%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  pthread_getspecific
+0.03%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d295b0]
+0.03%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L8LoopH
+0.03%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b690]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b5a8]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             @plt
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             StoreLH4x8
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::CPUConvolutionDepthwise::FloatExecution::onExecute(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::CPUConvolutionDepthwise::BasicFloatExecution::onExecute(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4d059c]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNNPackC4ForMatMul_A
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b648]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+bc2654]
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e43fb8]
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9186f54]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopE1End
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7c83654]
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d4e754]
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91a7ae4]
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7c814a4]
+0.02%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]bool plain_relocate_impl<(RelocMode)1>(Relocator&, elf64_rela*, unsigned long)
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7c99d40]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4bf9c]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4be70]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d230f4]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b5b8]
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e4a5e4]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::CPUPool::onResize(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::'lambda0'(int)::operator()(int) const
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d329d4]
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eb00d8]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::Interpreter::runSession(MNN::Session*) const
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             E1LoopH8
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNNConvRunForLineDepthwise
+0.02%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  free
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             E12Body
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             L1LoopH
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eadab8]
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e808f0]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d295dc]
+0.02%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eb0304]
+0.02%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b5b0]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e89370]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  malloc
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d295e8]
+0.01%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]bool plain_relocate_impl<(RelocMode)0>(Relocator&, elf64_rela*, unsigned long)
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e23784]
+0.01%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]find_verdef_version_index(soinfo const*, version_info const*)
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ee3330]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e7af5c]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e7af7c]
+0.01%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]BionicSmallObjectAllocator::alloc()
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b5ac]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b600]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4be74]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4be84]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b604]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e87c8c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4c838]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+e910c4]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4bf58]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::Tensor::getDimensionType() const
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e80e4c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+e90b94]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4c894]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8feec]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d235c8]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  __cxa_finalize
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f80b541c]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eadac0]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  __strlen_aarch64
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b624]
+0.01%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]load_library(android_namespace_t*, LoadTask*, std::__1::vector<LoadTask*, std::__1::allocator<LoadTask*> >*, int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, bool)
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  @plt
+0.01%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]ElfReader::ReadDynamicSection()
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e7b224]
+0.01%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]soinfo::lookup_version_info(VersionTracker const&, unsigned int, char const*, version_info const**)
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d6e55c]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8967c]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7f9757c]
+0.01%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]BionicAllocator::alloc_impl(unsigned long, unsigned long)
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8a638]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  __cxa_atexit
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8a200]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8a1b0]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8a6a4]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eb0ef4]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f8045c7c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d295d8]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b64c]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e87c94]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4bf34]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4bf10]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             std::__ndk1::__function::__func<MNN::CPUConvolutionDepthwise::BasicFloatExecution::onExecute(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::$_0, std::__ndk1::allocator<MNN::CPUConvolutionDepthwise::BasicFloatExecution::onExecute(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::$_0>, void (int)>::operator()(int&&)
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4be7c]
+0.01%     benchmark_inference  /system/lib64/libc++_shared.so                  @plt
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4be80]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b848]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::CPURaster::onExecute(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             E4LoopH8
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4c9ac]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ee96f8]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4c634]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b5d4]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4c158]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::Interpreter::getSessionOutput(MNN::Session const*, char const*)
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4c5ec]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::TensorUtils::getDescribe(MNN::Tensor const*)
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d293ac]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d293c8]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e973fc]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7f5b124]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4bedc]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNNPackedMatMulRemain
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b5b4]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b668]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  je_arena_tcache_fill_small
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d329f0]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8a1d0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::Session::run() const
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9186d4c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d29350]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             std::__ndk1::__function::__func<MNN::Convolution1x1Strassen::onExecute(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::$_0, std::__ndk1::allocator<MNN::Convolution1x1Strassen::onExecute(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::$_0>, void (int)>::operator()(int&&)
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea2e30]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d29394]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e9af40]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b620]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::DenseConvolutionTiledExecutor::onExecute(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d293c0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b5bc]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b78c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4be78]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             PostTreatLH4x8
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::CPUBinary::onExecute(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  je_bitmap_init
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4cc854]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e1e8c0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d230f0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+5045f8]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e84e90]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+e900b4]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4c884]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e84bb4]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4bf5c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4f0770]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+de2598]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea0360]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopE12L1
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e52a7c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+ecba50]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4f1244]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4f261c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4f12b0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+e65180]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+dc0748]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+e90b78]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ca927c]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eb00e0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+e8a1bc]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+f7bad0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+e90ccc]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             E1End
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+f192b4]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91a459c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+e89348]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4c7d68]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+c9e0dc]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNNPackTranspose
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d295d0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::CPUBackend::getBytes(MNN::Backend const*, MNN::Tensor const*)
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             std::__ndk1::__function::__func<MNN::CPURaster::executeFaster(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::$_0, std::__ndk1::allocator<MNN::CPURaster::executeFaster(std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&, std::__ndk1::vector<MNN::Tensor*, std::__ndk1::allocator<MNN::Tensor*> > const&)::$_0>, void (int)>::operator()(int&&)
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+bc26b0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+f7bb34]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d033a0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+e5d0c4]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b7ac]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9186f94]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+c77c80]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e53634]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eac014]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7c80ee4]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+bc26f0]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eaffd0]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea0364]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+e8fd08]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ca9290]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eadad4]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4bf48]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8fc44]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  arena_bin_malloc_hard
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+dc07e8]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8fc80]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d4e674]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4ad3e0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+497df4]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+bc2670]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+dd27d0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d230f8]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea0330]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  je_extent_heap_insert
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7c82bb4]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e528a4]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e46c90]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+cb4010]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+bc26d0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d293b8]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91a4570]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+bc2650]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::CPUBackend::onExecuteBegin() const
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4c820]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+505034]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eaffc8]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eafff4]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d29388]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d234d0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4c870]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             AddBiasLH4x8
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+f37404]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNN::Session::getOutput(char const*) const
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  read
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eadab0]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d4e70c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+51ea74]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             LoopE1
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d234c0]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ee9640]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             E4LoopLComputeEnd
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+f36d98]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d234ac]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  extents_insert_locked
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+fc9f50]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eac050]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  extent_lock_from_addr
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91874cc]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d234dc]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  je_tcache_alloc_small_hard
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libMNN.so             MNNMemoryAllocAlign
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+520efc]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4c7b0]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8104c]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+f195ac]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4bf2e4]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eac208]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  __vfprintf
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  je_extent_heap_remove_first
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+dc0794]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d294ec]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b614]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+506160]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+57c8d8]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91a7918]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+d4b66c]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e83f14]
+0.01%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  madvise
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+f27a40]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/benchmark_inference   MNNBackend::infer(std::__ndk1::vector<float, std::__ndk1::allocator<float> > const&)
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4f262c]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d6e538]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e84d6c]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e43cd0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+57a160]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e82ca0]
+0.01%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+c2bd58]
+0.01%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e7b790]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e3c9ec]
+0.00%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+f9ff24]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f814d8c0]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91a7944]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9199378]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e3a674]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f80aa044]
+0.00%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+bb60a4]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e82168]
+0.00%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+bb1bb8]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eebd14]
+0.00%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+49f0c4]
+0.00%     benchmark_inference  /data/local/tmp/benchmark/libonnxruntime.so     libonnxruntime.so[+4fa0e0]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9194de0]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea2574]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eac040]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e84d30]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91875ac]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ce841c]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e7aed4]
+0.00%     benchmark_inference  /system/lib64/libandroidfw.so                   std::__1::__hash_table<std::__1::__hash_value_type<unsigned int, unsigned char>, std::__1::__unordered_map_hasher<unsigned int, std::__1::__hash_value_type<unsigned int, unsigned char>, std::__1::hash<unsigned int>, true>, std::__1::__unordered_map_equal<unsigned int, std::__1::__hash_value_type<unsigned int, unsigned char>, std::__1::equal_to<unsigned int>, true>, std::__1::allocator<std::__1::__hash_value_type<unsigned int, unsigned char> > >::__rehash(unsigned long)
+0.00%     benchmark_inference  /system/lib64/libcrypto.so                      sha256_block_armv8
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]__openat
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e83f1c]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea49a0]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9186d18]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8cc80]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e3c8d8]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e45a84]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9186d68]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8ea88]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]__memcpy
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e310c4]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]BionicAllocator::free(void*)
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]BionicSmallObjectAllocator::free(void*)
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]android::base::Trim(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9195a50]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9192e0c]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ece440]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea2570]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]std::__1::__murmur2_or_cityhash<unsigned long, 64ul>::operator()(void const*, unsigned long)
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]malloc
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7f975f0]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e45960]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8a6c0]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e23778]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8a664]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e89858]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7f86e08]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9187500]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e31440]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]soinfo::get_soname() const
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]mmap
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f80a69b8]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ee9648]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ee8f8c]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f80aab08]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7cce1e4]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e895e0]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]LinkerBlockAllocator::alloc()
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e31450]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]open_library_at_path(ZipArchiveCache*, char const*, long*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >*)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ebb698]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f919a270]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e88d68]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8a654]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f80aac54]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d6e510]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f80af470]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d6e548]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]LoadTask::get_elf_reader()
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f919382c]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e313c8]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f80aa0ec]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e83440]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ec448c]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ed610c]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]getpid
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ce840c]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9199a74]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7c90724]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]soinfo::find_symbol_by_name(SymbolName&, version_info const*) const
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]memset
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ebb658]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]soinfo_alloc(android_namespace_t*, char const*, stat const*, long, unsigned int)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f88b9aa0]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]ConfigParser::next_token(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >*, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >*)
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::basic_string(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, unsigned long, unsigned long, std::__1::allocator<char> const&)
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]std::__1::pair<std::__1::__hash_iterator<std::__1::__hash_node<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, void*>*>, bool> std::__1::__hash_table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >::__emplace_unique_key_args<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8c7b8]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea24e4]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8d7ac]
+0.00%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  SystemProperties::Init(char const*)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f8ad4e7c]
+0.00%     benchmark_inference  /apex/com.android.runtime/lib64/bionic/libc.so  je_base_boot
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e3cacc]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91a7a60]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e2b73c]
+0.00%     benchmark_inference  /system/lib64/libc++.so                         @plt
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ee2c40]
+0.00%     benchmark_inference  /system/lib64/libEGL.so                         @plt
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]__strlen_aarch64
+0.00%     benchmark_inference  /system/lib64/libinput.so                       std::__1::__hash_table<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, int>, std::__1::__unordered_map_hasher<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, int>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, true>, std::__1::__unordered_map_equal<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, int>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, true>, std::__1::allocator<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, int> > >::__rehash(unsigned long)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e8c5ec]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e3c904]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e82e90]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]soinfo::call_constructors()
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          linker64[+11f998]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e89f74]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e31164]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7c80f58]
+0.00%     benchmark_inference  /system/lib64/libc++.so                         std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::basic_string(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0.00%     benchmark_inference  /system/lib64/libcodec2_vndk.so                 void std::__1::vector<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, C2Value::Primitive>, std::__1::allocator<std::__1::pair<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, C2Value::Primitive> > >::__emplace_back_slow_path<char const*&, C2Config::level_t&>(char const*&, C2Config::level_t&)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ed5a94]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]Properties::get_strings(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, unsigned long*) const
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d6e520]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]std::__1::__hash_iterator<std::__1::__hash_node<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, android_namespace_t*>, void*>*> std::__1::__hash_table<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, android_namespace_t*>, std::__1::__unordered_map_hasher<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, android_namespace_t*>, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, true>, std::__1::__unordered_map_equal<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, android_namespace_t*>, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, true>, std::__1::allocator<std::__1::__hash_value_type<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, android_namespace_t*> > >::find<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e21964]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]Properties::get_paths(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, bool, unsigned long*)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f8155324]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]android::base::Split(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::basic_string(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ed6598]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]Properties::~Properties()
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]__memchr_aarch64
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]fstatat64
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::append(char const*)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f816f818]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::find(char, unsigned long) const
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f80aa070]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e88a04]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e31398]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e52774]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea2650]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]void for_each_dt_needed<load_library(android_namespace_t*, LoadTask*, std::__1::vector<LoadTask*, std::__1::allocator<LoadTask*> >*, int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, bool)::$_14>(ElfReader const&, load_library(android_namespace_t*, LoadTask*, std::__1::vector<LoadTask*, std::__1::allocator<LoadTask*> >*, int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, bool)::$_14)
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > std::__1::operator+<char, std::__1::char_traits<char>, std::__1::allocator<char> >(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ee03c0]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f919a340]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea2fbc]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ee3364]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ed5c18]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91874f8]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d6e530]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d4e6f0]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea24f8]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d585b8]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d4e708]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d6e528]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f8133e8c]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e7ae8c]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ed5360]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e23da0]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]std::__1::__hash_table<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::hash<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::equal_to<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >::__rehash(unsigned long)
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7d4e664]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f91a4564]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ed6100]
+0.00%     benchmark_inference  /apex/com.android.runtime/bin/linker64          [linker]android_fdsan_close_with_tag
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e89334]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f80aaa2c]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7c80ea0]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e66d20]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9187504]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e21998]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e313a8]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e2b6cc]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e88714]
+0.00%     simpleperf           [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7eca458]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7c8f678]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9186ef0]
+0.00%     simpleperf           [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e23100]
+0.00%     simpleperf           [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e230e4]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7ea2a88]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f9186ee4]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e46f50]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e52568]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7caa478]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e3a704]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e3b8ac]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e43cbc]
+0.00%     benchmark_inference  [kernel.kallsyms]                               [kernel.kallsyms][+ffffffa8f7e46ee4]
