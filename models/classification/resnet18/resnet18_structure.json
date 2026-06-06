@@ -1,0 +1,687 @@
+{
+  "bizCode": "MNNTest",
+  "sourceType": "ONNX",
+  "forwardType": "CPU",
+  "usage": "INFERENCE",
+  "outputName": [
+    "output"
+  ],
+  "extraInfo": {
+    "version": "3.5.0"
+  },
+  "oplists": [
+    {
+      "name": "input",
+      "type": "Input",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dims": [
+          1,
+          3,
+          224,
+          224
+        ],
+        "dtype": "DT_FLOAT",
+        "dformat": "NCHW"
+      }
+    },
+    {
+      "name": "input___tr4getitem",
+      "type": "ConvertTensor",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "source": "NCHW",
+        "dest": "NC4HW4"
+      }
+    },
+    {
+      "name": "getitem",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "max_pool2d",
+      "type": "Pooling",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "MAXPOOL",
+        "padX": 1,
+        "padY": 1,
+        "isGlobal": false,
+        "kernelX": 3,
+        "kernelY": 3,
+        "strideX": 2,
+        "strideY": 2,
+        "padType": "CAFFE",
+        "dataType": "DT_FLOAT",
+        "ceilModel": false,
+        "pads": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "countType": "DEFAULT"
+      }
+    },
+    {
+      "name": "getitem_3",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_6",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "add_65",
+      "type": "BinaryOp",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "opType": "ADD",
+        "T": "DT_FLOAT",
+        "activationType": 1
+      }
+    },
+    {
+      "name": "getitem_9",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_12",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "add_121",
+      "type": "BinaryOp",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "opType": "ADD",
+        "T": "DT_FLOAT",
+        "activationType": 1
+      }
+    },
+    {
+      "name": "getitem_15",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_18",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_21",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "add_187",
+      "type": "BinaryOp",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "opType": "ADD",
+        "T": "DT_FLOAT",
+        "activationType": 1
+      }
+    },
+    {
+      "name": "getitem_24",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_27",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "add_243",
+      "type": "BinaryOp",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "opType": "ADD",
+        "T": "DT_FLOAT",
+        "activationType": 1
+      }
+    },
+    {
+      "name": "getitem_30",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_33",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_36",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "add_309",
+      "type": "BinaryOp",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "opType": "ADD",
+        "T": "DT_FLOAT",
+        "activationType": 1
+      }
+    },
+    {
+      "name": "getitem_39",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_42",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "add_365",
+      "type": "BinaryOp",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "opType": "ADD",
+        "T": "DT_FLOAT",
+        "activationType": 1
+      }
+    },
+    {
+      "name": "getitem_45",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_48",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_51",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "add_431",
+      "type": "BinaryOp",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "opType": "ADD",
+        "T": "DT_FLOAT",
+        "activationType": 1
+      }
+    },
+    {
+      "name": "getitem_54",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "getitem_57",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "add_487",
+      "type": "BinaryOp",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "opType": "ADD",
+        "T": "DT_FLOAT",
+        "activationType": 1
+      }
+    },
+    {
+      "name": "relu_16___tr4mean",
+      "type": "ConvertTensor",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "source": "NC4HW4",
+        "dest": "NCHW"
+      }
+    },
+    {
+      "name": "val_227",
+      "type": "Const",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dims": [
+          2
+        ],
+        "dataFormat": "NCHW",
+        "dataType": "DT_INT32",
+        "int32s": [
+          -1,
+          -2
+        ]
+      }
+    },
+    {
+      "name": "mean",
+      "type": "Reduction",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "operation": "MEAN",
+        "coeff": 0.0,
+        "keepDims": true,
+        "dType": "DT_FLOAT"
+      }
+    },
+    {
+      "name": "val_0",
+      "type": "Shape",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "hasStart": true,
+        "start": 0,
+        "hasEnd": true,
+        "end": 1
+      }
+    },
+    {
+      "name": "val_230",
+      "type": "Const",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dims": [
+          1
+        ],
+        "dataFormat": "NCHW",
+        "dataType": "DT_INT32",
+        "int32s": [
+          512
+        ]
+      }
+    },
+    {
+      "name": "val_231",
+      "type": "Concat",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "axis": 0
+      }
+    },
+    {
+      "name": "view",
+      "type": "Reshape",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dimType": "NCHW"
+      }
+    },
+    {
+      "name": "Concat44",
+      "type": "Const",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dims": [
+          4
+        ],
+        "dataFormat": "NCHW",
+        "dataType": "DT_INT32",
+        "int32s": [
+          -1,
+          512,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "name": "Reshape45",
+      "type": "Reshape",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dimType": "NCHW"
+      }
+    },
+    {
+      "name": "Reshape45___tr4output__matmul_converted",
+      "type": "ConvertTensor",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "source": "NCHW",
+        "dest": "NC4HW4"
+      }
+    },
+    {
+      "name": "output__matmul_converted",
+      "type": "Convolution",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": ""
+      }
+    },
+    {
+      "name": "ConvertTensor47",
+      "type": "ConvertTensor",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "source": "NC4HW4",
+        "dest": "NCHW"
+      }
+    },
+    {
+      "name": "Shape48",
+      "type": "Shape",
+      "inputIndex": [],
+      "outputIndex": []
+    },
+    {
+      "name": "Unsqueeze50",
+      "type": "Const",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dims": [
+          1
+        ],
+        "dataFormat": "NCHW",
+        "dataType": "DT_INT32",
+        "int32s": [
+          0
+        ]
+      }
+    },
+    {
+      "name": "Rank51",
+      "type": "Rank",
+      "inputIndex": [],
+      "outputIndex": []
+    },
+    {
+      "name": "Const52",
+      "type": "Const",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dataFormat": "NCHW",
+        "dataType": "DT_INT32",
+        "int32s": [
+          2
+        ]
+      }
+    },
+    {
+      "name": "BinaryOp53",
+      "type": "BinaryOp",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "opType": "SUB",
+        "T": "DT_FLOAT",
+        "activationType": 0
+      }
+    },
+    {
+      "name": "Unsqueeze54",
+      "type": "Unsqueeze",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "squeezeDims": [
+          0
+        ]
+      }
+    },
+    {
+      "name": "SliceTf55",
+      "type": "SliceTf",
+      "inputIndex": [],
+      "outputIndex": []
+    },
+    {
+      "name": "Unsqueeze57",
+      "type": "Const",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dims": [
+          1
+        ],
+        "dataFormat": "NCHW",
+        "dataType": "DT_INT32",
+        "int32s": [
+          1
+        ]
+      }
+    },
+    {
+      "name": "SliceTf58",
+      "type": "SliceTf",
+      "inputIndex": [],
+      "outputIndex": []
+    },
+    {
+      "name": "Const59",
+      "type": "Const",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dims": [
+          1
+        ],
+        "dataFormat": "NCHW",
+        "dataType": "DT_INT32",
+        "int32s": [
+          1000
+        ]
+      }
+    },
+    {
+      "name": "Concat60",
+      "type": "Concat",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "axis": 0
+      }
+    },
+    {
+      "name": "output",
+      "type": "Reshape",
+      "inputIndex": [],
+      "outputIndex": [],
+      "main": {
+        "type": "",
+        "dimType": "NCHW"
+      }
+    }
+  ],
+  "tensorName": [
+    "input",
+    "input___tr4getitem",
+    "relu",
+    "max_pool2d",
+    "relu_1",
+    "getitem_6",
+    "relu_2",
+    "relu_3",
+    "getitem_12",
+    "relu_4",
+    "relu_5",
+    "getitem_18",
+    "getitem_21",
+    "relu_6",
+    "relu_7",
+    "getitem_27",
+    "relu_8",
+    "relu_9",
+    "getitem_33",
+    "getitem_36",
+    "relu_10",
+    "relu_11",
+    "getitem_42",
+    "relu_12",
+    "relu_13",
+    "getitem_48",
+    "getitem_51",
+    "relu_14",
+    "relu_15",
+    "getitem_57",
+    "relu_16",
+    "relu_16___tr4mean",
+    "val_227",
+    "mean",
+    "val_0",
+    "val_230",
+    "val_231",
+    "view",
+    "Concat44",
+    "Reshape45",
+    "Reshape45___tr4output__matmul_converted",
+    "output__matmul_converted",
+    "ConvertTensor47",
+    "Shape48",
+    "Unsqueeze50",
+    "Rank51",
+    "Const52",
+    "BinaryOp53",
+    "Unsqueeze54",
+    "SliceTf55",
+    "Unsqueeze57",
+    "SliceTf58",
+    "Const59",
+    "Concat60",
+    "output"
+  ]
+}
