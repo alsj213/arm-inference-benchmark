@@ -31,6 +31,9 @@
 #ifdef BENCHMARK_MINDSPORE_LITE
 #include "backends/mindspore_lite_backend.h"
 #endif
+#ifdef BENCHMARK_LLAMACPP
+#include "backends/llamacpp_backend.h"
+#endif
 
 // Calculate cosine similarity between two vectors
 double cosine_similarity(const std::vector<float>& a, const std::vector<float>& b) {
@@ -248,6 +251,10 @@ std::unique_ptr<BenchmarkBackend> create_backend(BackendType type) {
 #ifdef BENCHMARK_MINDSPORE_LITE
         case BackendType::MINDSPORE_LITE:
             return std::make_unique<MindSporeLiteBackend>();
+#endif
+#ifdef BENCHMARK_LLAMACPP
+        case BackendType::LLAMACPP:
+            return std::make_unique<LlamaCppBackend>();
 #endif
         default:
             return nullptr;

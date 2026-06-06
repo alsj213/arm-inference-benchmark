@@ -10,7 +10,7 @@ struct ModelInfo {
     std::string base_path;
 
     std::string get_model_path(const std::string& backend) const {
-        if (backend == "mnn" || backend == "MNN") {
+        if (backend == "mnn" || backend == "MNN" || backend == "mnn_gpu" || backend == "MNN_GPU") {
             return base_path + "/" + name + "_MNN.mnn";
         }
         if (backend == "ncnn" || backend == "NCNN") {
@@ -30,6 +30,9 @@ struct ModelInfo {
         }
         if (backend == "mindspore_lite" || backend == "mslite") {
             return base_path + "/" + name + ".ms";
+        }
+        if (backend == "llamacpp" || backend == "llama") {
+            return base_path + "/" + name + ".gguf";
         }
         return base_path + "/" + name + "_" + backend + ".model";
     }

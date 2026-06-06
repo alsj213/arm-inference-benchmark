@@ -20,6 +20,8 @@ enum class BackendType {
     ONNXRT,
     TVM,        // 已停用，可恢复
     MINDSPORE_LITE,  // 待下载 SDK
+    MNN_GPU,        // MNN OpenCL GPU 后端
+    LLAMACPP,       // llama.cpp LLM 推理引擎 (GGUF)
 };
 
 struct BenchmarkConfig {
