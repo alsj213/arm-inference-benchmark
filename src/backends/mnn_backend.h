@@ -11,14 +11,16 @@ public:
     bool infer(const std::vector<float>& input) override;
     bool infer_with_output(const std::vector<float>& input, std::vector<float>& output) override;
     void deinit() override;
-    std::string name() const override { return "MNN"; }
+    std::string name() const override { return use_gpu_ ? "MNN_GPU" : "MNN"; }
 
 private:
     std::unique_ptr<MNN::Interpreter> net_;
     MNN::Session* session_ = nullptr;
     MNN::Tensor* input_tensor_ = nullptr;
+    std::unique_ptr<MNN::Tensor> host_input_tensor_;  // CPU staging buffer for GPU mode
     bool profiling_enabled_ = false;
     std::string profile_file_;
+    bool use_gpu_ = false;
 };
 
 #endif // BENCHMARK_BACKENDS_MNN_BACKEND_H_
