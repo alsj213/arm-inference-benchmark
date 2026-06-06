@@ -33,6 +33,10 @@ bool LlamaCppBackend::init(const BenchmarkConfig& config) {
 
 bool LlamaCppBackend::load_model(const std::string& model_path, int n_ctx, int n_batch) {
 #ifdef BENCHMARK_LLAMACPP
+  if (model_loaded_) {
+    printf("llama.cpp: Model already loaded, skipping\n");
+    return true;
+  }
   printf("llama.cpp: Loading model: %s\n", model_path.c_str());
 
   // Model params
@@ -40,28 +44,36 @@ bool LlamaCppBackend::load_model(const std::string& model_path, int n_ctx, int n
   model_params.n_gpu_layers = 0;  // No GPU on mobile
   model_params.use_mmap = true;
 
-  model_ = llama_load_model_from_file(model_path.c_str(), model_params);
+  model_ = llama_model_load_from_file(model_path.c_str(), model_params);
   if (!model_) {
     printf("llama.cpp: Failed to load model\n");
     return false;
   }
 
+  // Get vocab from model (required for tokenization in new API)
+  vocab_ = llama_model_get_vocab(model_);
+
   // Context params
   llama_context_params ctx_params = llama_context_default_params();
-  ctx_params.seed = 42;
   ctx_params.n_ctx = n_ctx;
   ctx_params.n_batch = n_batch;
   ctx_params.n_threads = 4;
-  ctx_params.flash_attn = true;
+  ctx_params.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_ENABLED;
   ctx_params.offload_kqv = false;
 
-  ctx_ = llama_new_context_with_model(model_, ctx_params);
+  ctx_ = llama_init_from_model(model_, ctx_params);
   if (!ctx_) {
     printf("llama.cpp: Failed to create context\n");
-    llama_free_model(model_);
+    llama_model_free(model_);
     model_ = nullptr;
+    vocab_ = nullptr;
     return false;
   }
+
+  // Create greedy sampler chain
+  auto sparams = llama_sampler_chain_default_params();
+  smpl_ = llama_sampler_chain_init(sparams);
+  llama_sampler_chain_add(smpl_, llama_sampler_init_greedy());
 
   n_ctx_ = n_ctx;
   n_batch_ = n_batch;
@@ -107,14 +119,15 @@ bool LlamaCppBackend::infer(const std::vector<float>& input) {
 
 std::string LlamaCppBackend::generate(const std::string& prompt, int max_tokens, float temperature) {
 #ifdef BENCHMARK_LLAMACPP
-  if (!model_loaded_) {
+  if (!model_loaded_ || !vocab_) {
     return "Error: Model not loaded";
   }
 
-  // Tokenize prompt
-  tokens_.resize(llama_n_ctx(ctx_));
+  // Tokenize prompt (new API: takes vocab instead of context)
+  int n_ctx = llama_n_ctx(ctx_);
+  tokens_.resize(n_ctx);
   int n_tokens = llama_tokenize(
-      ctx_, prompt.c_str(), prompt.size(),
+      vocab_, prompt.c_str(), prompt.size(),
       tokens_.data(), tokens_.size(),
       true, true);
 
@@ -125,13 +138,14 @@ std::string LlamaCppBackend::generate(const std::string& prompt, int max_tokens,
   tokens_.resize(n_tokens);
   printf("llama.cpp: Prompt tokens: %d\n", n_tokens);
 
-  // Reset context
-  llama_kv_cache_clear(ctx_);
+  // Clear KV cache for sequence 0 (new API: llama_memory_seq_rm)
+  llama_memory_t mem = llama_get_memory(ctx_);
+  llama_memory_seq_rm(mem, 0, 0, -1);
   n_past_ = 0;
 
   std::stringstream result;
 
-  // Process prompt in batches
+  // Process prompt in one batch
   int n_batch = std::min(n_batch_, n_tokens);
   llama_batch batch = llama_batch_init(n_batch, 0, 1);
 
@@ -152,17 +166,17 @@ std::string LlamaCppBackend::generate(const std::string& prompt, int max_tokens,
 
   // Generate tokens
   for (int i = 0; i < max_tokens; i++) {
-    // Sample next token
-    llama_token new_token = llama_sample_token_greedy(ctx_);
+    // Sample next token (new API: use sampler chain)
+    llama_token new_token = llama_sampler_sample(smpl_, ctx_, -1);
 
-    // Check for EOS
-    if (new_token == llama_token_eos(model_)) {
+    // Check for EOS (new API: llama_vocab_eos takes vocab)
+    if (new_token == llama_vocab_eos(vocab_)) {
       break;
     }
 
-    // Convert token to text
+    // Convert token to text (new API: llama_token_to_piece takes vocab)
     char buf[32] = {0};
-    int n = llama_token_to_piece(model_, new_token, buf, sizeof(buf), 0, false);
+    int n = llama_token_to_piece(vocab_, new_token, buf, sizeof(buf), 0, false);
     if (n > 0) {
       result << std::string(buf, n);
     }
@@ -193,14 +207,19 @@ std::string LlamaCppBackend::generate(const std::string& prompt, int max_tokens,
 
 void LlamaCppBackend::deinit() {
 #ifdef BENCHMARK_LLAMACPP
+  if (smpl_) {
+    llama_sampler_free(smpl_);
+    smpl_ = nullptr;
+  }
   if (ctx_) {
     llama_free(ctx_);
     ctx_ = nullptr;
   }
   if (model_) {
-    llama_free_model(model_);
+    llama_model_free(model_);
     model_ = nullptr;
   }
+  vocab_ = nullptr;
   llama_backend_free();
 #endif
   model_loaded_ = false;
