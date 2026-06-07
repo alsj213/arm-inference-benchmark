@@ -88,7 +88,7 @@ BackendType parse_backend(const std::string& b) {
     // if (b == "tflite" || b == "TFLite" || b == "TFLITE") return BackendType::TFLITE;  // TFLite — 已停用
     // if (b == "qnn" || b == "QNN") return BackendType::QNN;
     if (b == "onnxrt" || b == "ort" || b == "ONNXRT" || b == "ORT") return BackendType::ONNXRT;
-    // if (b == "tvm" || b == "TVM") return BackendType::TVM;
+    if (b == "tvm" || b == "TVM") return BackendType::TVM;
     if (b == "mindspore_lite" || b == "mslite") return BackendType::MINDSPORE_LITE;
     if (b == "llama" || b == "llamacpp") return BackendType::LLAMACPP;
     return (BackendType)-1;
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> backends_to_test;
     if (args.backend == "all") {
-        backends_to_test = {"mnn", "onnxrt", "ncnn", "mindspore_lite"};
+        backends_to_test = {"mnn", "onnxrt", "ncnn", "mindspore_lite", "tvm"};
     } else {
         backends_to_test = {args.backend};
     }
