@@ -8,8 +8,10 @@
 bool ONNXRTBackend::init(const BenchmarkConfig& config) {
     session_options_ = std::make_unique<Ort::SessionOptions>();
     session_options_->SetIntraOpNumThreads(config.num_threads);
-    session_options_->SetInterOpNumThreads(1);
+    session_options_->SetInterOpNumThreads(2);  // 允许算子间并行
     session_options_->SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
+    session_options_->EnableCpuMemArena();       // Arena 内存池, 减少分配 + 提高 cache 命中
+    session_options_->SetExecutionMode(ExecutionMode::ORT_PARALLEL);  // 算子间并行执行
 
     // Enable profiling if configured
     if (config.enable_profiling && !config.profile_file.empty()) {

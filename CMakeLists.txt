@@ -37,7 +37,7 @@ option(BENCHMARK_TFLITE "Enable TensorFlow Lite benchmark" OFF)  # 已停用，�
 option(BENCHMARK_TNN "Enable TNN benchmark" OFF)          # 已停用，可恢复
 option(BENCHMARK_ORT "Enable ONNX Runtime benchmark" ON)
 option(BENCHMARK_QNN "Enable QNN benchmark" OFF)          # 已停用，可恢复
-option(BENCHMARK_TVM "Enable Apache TVM benchmark" OFF)   # 已停用，可恢复
+option(BENCHMARK_TVM "Enable Apache TVM benchmark" ON)
 option(BENCHMARK_LLAMACPP "Enable llama.cpp LLM benchmark" OFF)  # 已停用，可恢复
 option(BENCHMARK_MINDSPORE_LITE "Enable MindSpore Lite benchmark" ON)
 

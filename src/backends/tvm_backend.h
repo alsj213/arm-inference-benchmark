@@ -2,35 +2,30 @@
 #define BENCHMARK_BACKENDS_TVM_BACKEND_H_
 
 #include "../common/benchmark.h"
+#include <string>
 #include <vector>
 
-/*!
- * \brief TVM Backend - Apache TVM Integration
- *
- * \note 当前实现：手工实现 MobileNetV2 的完整推理流程
- *       - 包含所有关键层: Conv2D, DepthwiseConv, PointwiseConv, ReLU, AvgPool
- *       - 完整的 Bottleneck 结构 x17
- *       - 目的: 提供真实的、可复现的性能基准
- *
- *       真实的 TVM 编译流程需要:
- *       1. 完整编译 TVM 主机版 (含 LLVM, Relay 编译器)
- *       2. Python 前端: ONNX -> TVM Relay -> 交叉编译 ARM64
- *       3. 生成 .so 动态库文件
- *
- *       当前实现性能基线: 纯手工实现，无 NEON 优化，无 AutoTVM 调度
- */
+// 前向声明 — 实际 TVM 类型只在 .cpp 中使用
 class TVMBackend : public BenchmarkBackend {
- public:
-  bool init(const BenchmarkConfig& config) override;
-  bool infer(const std::vector<float>& input) override;
-  void deinit() override;
-  std::string name() const override { return "TVM"; }
+public:
+    TVMBackend() = default;
+    ~TVMBackend() override;
+    bool init(const BenchmarkConfig& config) override;
+    bool infer(const std::vector<float>& input) override;
+    bool infer_with_output(const std::vector<float>& input, std::vector<float>& output) override;
+    void deinit() override;
+    std::string name() const override { return "TVM"; }
 
- private:
-  std::vector<float> input_buffer_;
-  std::vector<float> intermediate_buffer_;
-  int input_size_ = 0;
-  bool use_real_inference_ = false;
+private:
+    void* mod_ = nullptr;          // ffi::Module*
+    void* vm_ = nullptr;           // ffi::Module*
+    void* set_input_ = nullptr;    // ffi::Function*
+    void* invoke_ = nullptr;       // ffi::Function*
+    void* get_outputs_ = nullptr;  // ffi::Function*
+    std::string func_name_{"main"};
+    std::vector<int64_t> input_shape_;
+    size_t input_size_ = 0;
+    bool initialized_ = false;
 };
 
-#endif  // BENCHMARK_BACKENDS_TVM_BACKEND_H_
+#endif

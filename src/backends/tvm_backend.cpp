@@ -1,208 +1,155 @@
 #include "tvm_backend.h"
-
-#include <algorithm>
 #include <cstdio>
 #include <cstring>
-#include <fstream>
-#include <vector>
+#include <cstdlib>
+#include <dlfcn.h>
+#include <tvm/ffi/extra/module.h>
+#include <tvm/ffi/function.h>
+#include <tvm/ffi/container/tensor.h>
 
-// 简化版 TVM 后端：使用本地实现 MobileNetV2
-// 完整的 Conv + Pooling + FC 算子实现
-// 用于模拟 TVM codegen 的性能基线
-
-// static std::vector<float> g_intermediate; - removed to avoid static init issues
-
-// 简单的 3x3 Conv (stride=2, padding=1)
-static void conv3x3s2(const float* input, float* output, int in_c, int in_h, int in_w, int out_c) {
-  int out_h = in_h / 2;
-  int out_w = in_w / 2;
-
-  for (int oc = 0; oc < out_c; ++oc) {
-    for (int oh = 0; oh < out_h; ++oh) {
-      for (int ow = 0; ow < out_w; ++ow) {
-        float sum = 0.0f;
-        for (int ic = 0; ic < in_c; ++ic) {
-          for (int kh = 0; kh < 3; ++kh) {
-            for (int kw = 0; kw < 3; ++kw) {
-              int ih = oh * 2 + kh - 1;
-              int iw = ow * 2 + kw - 1;
-              if (ih >= 0 && ih < in_h && iw >= 0 && iw < in_w) {
-                int idx = ic * in_h * in_w + ih * in_w + iw;
-                sum += input[idx] * 0.1f;
-              }
-            }
-          }
-        }
-        output[oc * out_h * out_w + oh * out_w + ow] = std::max(0.0f, sum);
-      }
-    }
-  }
-}
-
-// Depthwise Conv 3x3
-static void dwconv3x3(const float* input, float* output, int channels, int height, int width) {
-  for (int c = 0; c < channels; ++c) {
-    for (int h = 0; h < height; ++h) {
-      for (int w = 0; w < width; ++w) {
-        float sum = 0.0f;
-        for (int kh = 0; kh < 3; ++kh) {
-          for (int kw = 0; kw < 3; ++kw) {
-            int ih = h + kh - 1;
-            int iw = w + kw - 1;
-            if (ih >= 0 && ih < height && iw >= 0 && iw < width) {
-              sum += input[c * height * width + ih * width + iw] * 0.1f;
-            }
-          }
-        }
-        output[c * height * width + h * width + w] = std::max(0.0f, sum);
-      }
-    }
-  }
-}
-
-// Pointwise Conv 1x1
-static void pwconv1x1(const float* input, float* output, int in_c, int out_c, int height, int width) {
-  for (int oc = 0; oc < out_c; ++oc) {
-    for (int h = 0; h < height; ++h) {
-      for (int w = 0; w < width; ++w) {
-        float sum = 0.0f;
-        for (int ic = 0; ic < in_c; ++ic) {
-          sum += input[ic * height * width + h * width + w] * 0.1f;
-        }
-        output[oc * height * width + h * width + w] = std::max(0.0f, sum);
-      }
-    }
-  }
-}
+TVMBackend::~TVMBackend() { deinit(); }
 
 bool TVMBackend::init(const BenchmarkConfig& config) {
-  input_size_ = 1;
-  for (int dim : config.input_shape) {
-    input_size_ *= dim;
-  }
-  input_buffer_.resize(input_size_);
-  intermediate_buffer_.resize(2000000);  // 2M floats = 8MB
-  use_real_inference_ = true;
-  return true;
+    const std::string& so_path = config.model_path;
+    printf("TVM: loading: %s\n", so_path.c_str());
+
+    // ── 0. 确保 TVM 运行时符号全局可见 ──
+    void* h1 = dlopen("libtvm_ffi.so", RTLD_NOW | RTLD_GLOBAL);
+    if (!h1) printf("TVM: WARNING dlopen(libtvm_ffi.so) failed: %s\n", dlerror());
+    void* h2 = dlopen("libtvm_runtime.so", RTLD_NOW | RTLD_GLOBAL);
+    if (!h2) printf("TVM: WARNING dlopen(libtvm_runtime.so) failed: %s\n", dlerror());
+
+    // ── 1. Load model .so ──
+    try {
+        auto* pmod = new tvm::ffi::Module(tvm::ffi::Module::LoadFromFile(so_path));
+        if (!pmod->defined()) { delete pmod; printf("TVM: ERROR LoadFromFile\n"); return false; }
+        mod_ = pmod;
+    } catch (const std::exception& e) {
+        printf("TVM: LoadFromFile exception: %s\n", e.what());
+        return false;
+    }
+
+    // ── 2. Create VM ──
+    try {
+        auto* pmod = (tvm::ffi::Module*)mod_;
+        auto vm_load_opt = (*pmod)->GetFunction("vm_load_executable");
+        if (!vm_load_opt.defined()) { printf("TVM: vm_load_executable not found\n"); return false; }
+
+        auto vm_result = vm_load_opt.value()();
+        auto vm_opt = std::move(vm_result).as<tvm::ffi::Module>();
+        if (!vm_opt.has_value()) { printf("TVM: VM result is not Module\n"); return false; }
+
+        auto* pvm = new tvm::ffi::Module(std::move(vm_opt.value()));
+        if (!pvm->defined()) { delete pvm; printf("TVM: VM invalid\n"); return false; }
+        vm_ = pvm;
+    } catch (const std::exception& e) {
+        printf("TVM: VM creation exception: %s\n", e.what());
+        return false;
+    }
+
+    // ── 3. vm_initialization — 必须最先调用，初始化设备/内存分配器 ──
+    try {
+        auto* pvm = (tvm::ffi::Module*)vm_;
+        auto init_fn_opt = (*pvm)->GetFunction("vm_initialization");
+        if (!init_fn_opt.defined()) {
+            printf("TVM: ERROR vm_initialization not found\n");
+            return false;
+        }
+        // vm_initialization(kDLCPU=1, device_id=0, POOLED_ALLOCATOR=2)
+        init_fn_opt.value()(1, 0, 2);
+    } catch (const std::exception& e) {
+        printf("TVM: vm_initialization exception: %s\n", e.what());
+        return false;
+    }
+
+    // ── 4. Get VM stateful API functions ──
+    try {
+        auto* pvm = (tvm::ffi::Module*)vm_;
+
+        auto si_fn = (*pvm)->GetFunction("set_input");
+        if (!si_fn.defined()) { printf("TVM: set_input not found\n"); return false; }
+        set_input_ = new tvm::ffi::Function(si_fn.value());
+
+        auto is_fn = (*pvm)->GetFunction("invoke_stateful");
+        if (!is_fn.defined()) { printf("TVM: invoke_stateful not found\n"); return false; }
+        invoke_ = new tvm::ffi::Function(is_fn.value());
+
+        auto go_fn = (*pvm)->GetFunction("get_output");
+        if (!go_fn.defined()) go_fn = (*pvm)->GetFunction("get_outputs");
+        if (!go_fn.defined()) { printf("TVM: get_output not found\n"); return false; }
+        get_outputs_ = new tvm::ffi::Function(go_fn.value());
+    } catch (const std::exception& e) {
+        printf("TVM: GetFunction exception: %s\n", e.what());
+        return false;
+    }
+
+    // ── 5. Setup input shape ──
+    input_size_ = 1;
+    input_shape_.clear();
+    for (auto s : config.input_shape) {
+        input_shape_.push_back(static_cast<int64_t>(s));
+        input_size_ *= s;
+    }
+    printf("TVM: init OK, model=%s input=%zu floats\n", so_path.c_str(), input_size_);
+    initialized_ = true;
+    return true;
 }
 
 bool TVMBackend::infer(const std::vector<float>& input) {
-  if (input.size() != static_cast<size_t>(input_size_)) {
-    printf("TVM: Input size mismatch\n");
-    return false;
-  }
+    std::vector<float> unused_output;
+    return infer_with_output(input, unused_output);
+}
 
-  float* buf = intermediate_buffer_.data();
-  int ptr = 0;
+bool TVMBackend::infer_with_output(const std::vector<float>& input, std::vector<float>& output) {
+    if (!initialized_) return false;
+    if (input.size() != input_size_) return false;
 
-  // Stage 1: Conv 3x3, 3 -> 32, stride 2
-  float* conv1_out = buf + ptr;
-  ptr += 32 * 112 * 112;
-  conv3x3s2(input.data(), conv1_out, 3, 224, 224, 32);
+    // 构建 DLTensor 视图 — 引用外部 buffer（无拷贝）
+    DLTensor dlt;
+    dlt.data = const_cast<float*>(input.data());
+    dlt.device = {kDLCPU, 0};
+    dlt.ndim = static_cast<int>(input_shape_.size());
+    dlt.dtype = {kDLFloat, 32, 1};
+    dlt.shape = const_cast<int64_t*>(input_shape_.data());
+    dlt.strides = nullptr;
+    dlt.byte_offset = 0;
 
-  // Stage 2: Bottleneck 1 (32 -> 16)
-  float* dw2_out = buf + ptr;
-  ptr += 32 * 112 * 112;
-  dwconv3x3(conv1_out, dw2_out, 32, 112, 112);
+    tvm::ffi::TensorView tv(&dlt);
 
-  float* pw2_out = buf + ptr;
-  ptr += 16 * 112 * 112;
-  pwconv1x1(dw2_out, pw2_out, 32, 16, 112, 112);
+    try {
+        auto& si = *(tvm::ffi::Function*)set_input_;
+        auto& is = *(tvm::ffi::Function*)invoke_;
+        auto& go = *(tvm::ffi::Function*)get_outputs_;
 
-  // Stage 3: Bottleneck 2 (16 -> 24)
-  float* dw3_out = buf + ptr;
-  ptr += 16 * 56 * 56;
-  conv3x3s2(pw2_out, dw3_out, 16, 112, 112, 16);
+        // set_input → invoke_stateful → get_output(func_name, 0)
+        si("main", tv);
+        is("main");
 
-  float* pw3_out = buf + ptr;
-  ptr += 24 * 56 * 56;
-  pwconv1x1(dw3_out, pw3_out, 16, 24, 56, 56);
+        // PyTorch export 输出是 tuple，用索引 0 取第一个 Tensor
+        auto result = go("main", 0);
+        auto tensor_opt = std::move(result).as<tvm::ffi::Tensor>();
+        if (!tensor_opt.has_value()) return false;
 
-  // Stage 4: Bottleneck 3-4 (24 -> 32)
-  float* dw4_out = buf + ptr;
-  ptr += 24 * 28 * 28;
-  conv3x3s2(pw3_out, dw4_out, 24, 56, 56, 24);
-
-  float* pw4_out = buf + ptr;
-  ptr += 32 * 28 * 28;
-  pwconv1x1(dw4_out, pw4_out, 24, 32, 28, 28);
-
-  // Stage 5: Bottlenecks 5-7 (32 -> 64)
-  float* dw5_out = buf + ptr;
-  ptr += 32 * 14 * 14;
-  conv3x3s2(pw4_out, dw5_out, 32, 28, 28, 32);
-
-  float* pw5_out = buf + ptr;
-  ptr += 64 * 14 * 14;
-  pwconv1x1(dw5_out, pw5_out, 32, 64, 14, 14);
-
-  // Stage 6: Bottlenecks 8-10 (64 -> 96)
-  float* dw6_out = buf + ptr;
-  ptr += 64 * 14 * 14;
-  dwconv3x3(pw5_out, dw6_out, 64, 14, 14);
-
-  float* pw6_out = buf + ptr;
-  ptr += 96 * 14 * 14;
-  pwconv1x1(dw6_out, pw6_out, 64, 96, 14, 14);
-
-  // Stage 7: Bottlenecks 11-13 (96 -> 160)
-  float* dw7_out = buf + ptr;
-  ptr += 96 * 7 * 7;
-  conv3x3s2(pw6_out, dw7_out, 96, 14, 14, 96);
-
-  float* pw7_out = buf + ptr;
-  ptr += 160 * 7 * 7;
-  pwconv1x1(dw7_out, pw7_out, 96, 160, 7, 7);
-
-  // Stage 8: Bottleneck 14 (160 -> 320)
-  float* dw8_out = buf + ptr;
-  ptr += 160 * 7 * 7;
-  dwconv3x3(pw7_out, dw8_out, 160, 7, 7);
-
-  float* pw8_out = buf + ptr;
-  ptr += 320 * 7 * 7;
-  pwconv1x1(dw8_out, pw8_out, 160, 320, 7, 7);
-
-  // Final Conv 1x1: 320 -> 1280
-  float* conv_final = buf + ptr;
-  ptr += 1280 * 7 * 7;
-  pwconv1x1(pw8_out, conv_final, 320, 1280, 7, 7);
-
-  // Global Average Pool
-  float* pool_out = buf + ptr;
-  ptr += 1280;
-  for (int c = 0; c < 1280; ++c) {
-    float sum = 0.0f;
-    for (int h = 0; h < 7; ++h) {
-      for (int w = 0; w < 7; ++w) {
-        sum += conv_final[c * 7 * 7 + h * 7 + w];
-      }
+        auto& t = tensor_opt.value();
+        size_t n = static_cast<size_t>(t.numel());
+        output.resize(n);
+        std::memcpy(output.data(), t.data_ptr(), n * sizeof(float));
+        return true;
+    } catch (const std::exception& e) {
+        printf("TVM: infer exception: %s\n", e.what());
+        return false;
+    } catch (...) {
+        printf("TVM: infer unknown exception\n");
+        return false;
     }
-    pool_out[c] = sum / 49.0f;
-  }
-
-  // Final FC: 1280 -> 1000
-  float* logits = buf + ptr;
-  for (int oc = 0; oc < 1000; ++oc) {
-    float sum = 0.0f;
-    for (int ic = 0; ic < 1280; ++ic) {
-      sum += pool_out[ic] * 0.01f;
-    }
-    logits[oc] = sum;
-  }
-
-  // 确保编译器不会优化掉所有计算
-  volatile float verify_sum = 0.0f;
-  for (int i = 0; i < 1000; ++i) {
-    verify_sum += logits[i];
-  }
-  (void)verify_sum;
-
-  return true;
 }
 
 void TVMBackend::deinit() {
-  input_size_ = 0;
-  input_buffer_.clear();
-  intermediate_buffer_.clear();
+    delete (tvm::ffi::Function*)get_outputs_;
+    delete (tvm::ffi::Function*)invoke_;
+    delete (tvm::ffi::Function*)set_input_;
+    delete (tvm::ffi::Module*)vm_;
+    delete (tvm::ffi::Module*)mod_;
+    set_input_ = invoke_ = get_outputs_ = vm_ = mod_ = nullptr;
+    initialized_ = false;
 }

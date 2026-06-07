@@ -23,7 +23,8 @@ struct ModelInfo {
             return base_path + "/" + name + "_TNN.tnnproto";
         }
         if (backend == "tvm" || backend == "TVM") {
-            return base_path + "/" + name + "_TVM.so";
+            // TVM 编译产物统一放在 tools/tvm/compiled_models/
+            return "tools/tvm/compiled_models/" + name + "_tvm.so";
         }
         if (backend == "tflite" || backend == "TFLite") {
             return base_path + "/" + name + ".tflite";
