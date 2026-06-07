@@ -16,8 +16,8 @@
 void print_usage() {
     printf("Usage: ./benchmark_inference [options]\n");
     printf("Options:\n");
-    printf("  --backend <mnn|onnxrt|ort>  Backend to test (default: all)\n");
-    printf("  --model <mobilenetv2|resnet50|yolov8n|bert>  Model to test (default: all)\n");
+    printf("  --backend <mnn|onnxrt|ort|tvm|llamacpp>  Backend to test (default: all)\n");
+    printf("  --model <mobilenetv2|resnet50|yolov8n|bert|qwen2_05b|mobilevit_s>  Model to test (default: all)\n");
     printf("  --precision <fp32|fp16|int8>                  Precision (default: fp32)\n");
     printf("  --threads <num>                                Number of threads (default: 1)\n");
     printf("  --warmup <num>                                 Number of warmup runs (default: 10)\n");
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 
     std::vector<std::string> backends_to_test;
     if (args.backend == "all") {
-        backends_to_test = {"mnn", "onnxrt", "ncnn", "mindspore_lite", "tvm"};
+        backends_to_test = {"mnn", "onnxrt", "tvm", "llamacpp"};
     } else {
         backends_to_test = {args.backend};
     }

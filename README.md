@@ -7,11 +7,12 @@
 
 ## 特性
 
-- **多框架支持**: MNN / ONNX Runtime / ncnn（活跃），MindSpore Lite（待调试），QNN / TVM / TNN / TFLite / llama.cpp（完整保留，可恢复）
+- **多框架支持**: MNN / ONNX Runtime / TVM / llama.cpp（4 核心框架）
 - **性能指标**: 延迟 P50/P90/P99、吞吐量 FPS、初始化时间、峰值内存
 - **精度对比**: 以 ONNX Runtime 为标杆，自动计算余弦相似度、平均绝对/相对误差
 - **Claude Code 插件**: 通过 `claude-code-mobile-bench` 插件自动化测试流程
-- **测试模型**: MobileNetV2 / ResNet50 / YOLOv8n / BERT
+- **测试模型**: MobileNetV2 / ResNet50 / YOLOv8n / BERT / Qwen2-0.5B（覆盖 CV + NLP + LLM）
+- **单算子 Benchmark**: 支持分类批量测试（Conv1x1/MatMul/DWConv 等 7 大类 80+ 测例）
 - **环境控制**: CPU 锁频 + 缓存清理，保证结果可复现
 
 ## 测试平台
@@ -22,34 +23,111 @@
 
 ## 基准测试结果
 
-### 4 线程性能 (FP32)
+> 测试平台: 红米 K30 Pro / 骁龙 865 (SM8250) / Android 12 · FP32 · 4 线程 · 2026-06-08  
+> 完整原始日志: `results/phaseA_model_*.log`, `results/phaseA_singleop_*.log`
 
-| 模型 | 框架 | Init(ms) | P50(ms) | P90(ms) | FPS | 加速比 |
-|------|------|----------|---------|---------|-----|--------|
-| **MobileNetV2** | ORT | 49.05 | 18.16 | 18.36 | 55.0 | - |
-| **MobileNetV2** | MNN | 29.53 | **8.70** | 8.96 | **114.9** | **2.09x** |
-| **ResNet50** | ORT | 388.38 | 84.48 | 86.94 | 11.77 | - |
-| **ResNet50** | MNN | 497.68 | **82.54** | 85.27 | 11.95 | **1.02x** |
-| **YOLOv8n** | ORT | 73.27 | 106.55 | 108.68 | 9.38 | - |
-| **YOLOv8n** | MNN | 105.73 | **79.60** | 86.18 | **12.19** | **1.34x** |
+### 框架策略定位
+
+| 框架 | 角色 | 说明 |
+|------|------|------|
+| **MNN** | 🎯 主测 | 摸底 MNN 性能基线，挖掘优化点（CV + LLM） |
+| **ONNX Runtime** | 📐 精度标杆 | 作为 output reference，其他框架对比精度 |
+| **TVM** | 🔍 对比优化 | 与 MNN 对比发现隐式优化空间（当前 Kernel 未调优，数据仅供参考） |
+| **llama.cpp** | 🦙 LLM 标杆 | 端侧 LLM 推理性能基线（GGUF 量化） |
+
+---
+
+### 4 线程整模型性能 (FP32)
+
+| 模型 | 框架 | Init(ms) | P50(ms) | P90(ms) | FPS | 加速比(vs ORT) | 精度(Cosine) |
+|------|------|----------|---------|---------|-----|----------------|-------------|
+| **MobileNetV2** | ORT | 33.11 | 21.55 | 21.94 | 45.89 | 1.00x | — |
+| | **MNN** | 36.76 | **8.62** | **8.89** | **114.66** | **2.50x** ✅ | 1.000000 |
+| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | ⏳ |
+| **ResNet50** | ORT | 364.49 | 142.62 | 182.04 | 7.15 | 1.00x | — |
+| | **MNN** | 509.59 | **83.47** | **97.20** | **11.44** | **1.60x** ✅ | 1.000000 |
+| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | ⏳ |
+| **YOLOv8n** | ORT | 36.94 | 134.38 | 140.92 | 7.35 | 1.00x | — |
+| | **MNN** | 159.23 | **76.28** | **78.05** | **13.00** | **1.77x** ✅ | 1.000000 |
+| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | ⏳ |
+| **BERT** | ORT | 643.56 | **263.50** | **270.49** | **3.77** | 1.00x | — |
+| | **MNN** | 1202.04 | 322.13 | 328.92 | 3.09 | 0.82x ⚠️ | 0.990439 |
+| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | ⏳ |
+| **Qwen2-0.5B** | **llama.cpp** | 0.37s | **19.25ms/tok** | — | **51.96 tok/s** | LLM 标杆 | — |
+| | MNN LLM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | — |
+| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待探索 | — |
+| **mobilevit_s** | — | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 模型文件待下载 | ⏳ |
+
+> ⏳ = Phase B 补充；TVM 目前仅 MobileNetV2 完成编译（kernel 未调优，513ms，详见 [TVM 部署指南](docs/tvm_deployment_guide.md)）。
+
+---
+
+### 单算子性能 (4 线程)
+
+#### 表 A: Conv1x1
+
+| 算子 | 输入→输出 | 空间 | MNN(ms) | ORT(ms) | MNN优势 |
+|------|----------|------|---------|---------|---------|
+| K16_C64_M784 | 64→16 | 28×28 | **0.210** | 0.259 | **1.23x** ✅ |
+| K1024_C256_M784 | 256→1024 | 28×28 | **4.980** | 5.393 | **1.08x** ✅ |
+| M49_C32_K64 | 32→64 | 7×7 | **0.017** | 0.088 | **5.18x** ✅ |
+| M49_C256_K512 | 256→512 | 7×7 | **0.154** | 0.336 | **2.18x** ✅ |
+| M784_C32_K64 | 32→64 | 28×28 | **0.071** | 0.253 | **3.56x** ✅ |
+| M3136_C64_K128 | 64→128 | 56×56 | 0.740 | **0.655** | 0.89x (ORT) |
+
+#### 表 B: Conv1x1 通道失配
+
+| 算子 | 通道 | MNN(ms) | ORT(ms) | MNN退化 |
+|------|------|---------|---------|---------|
+| Misaligned C31 | 31→64 | 0.506 | **0.367** | ORT 快 **1.38x** ⚠️ |
+| Misaligned C33 | 33→64 | 0.518 | **0.288** | ORT 快 **1.80x** ⚠️ |
+
+> MNN NCHW4c 在通道非 4 倍数时需要 padding，额外开销显著。
+
+#### 表 C: DWConv
+
+| 算子 | 通道 | 空间 | MNN(ms) | ORT(ms) | MNN优势 |
+|------|------|------|---------|---------|---------|
+| C16_3x3 | 16 | 112×112 | 0.640 | **0.418** | ORT 快 **1.53x** |
+| C960_3x3 | 960 | 7×7 | **0.153** | 0.489 | **3.20x** ✅ |
+
+#### 表 D: MatMul
+
+| 算子 | 形状 | 场景 | MNN(ms) | ORT(ms) | 胜者 |
+|------|------|------|---------|---------|------|
+| 512×512 | [1,512]×[512,512] | 通用 | **0.131** | 0.210 | MNN **1.60x** |
+| 768×768 | [1,768]×[768,768] | BERT | 0.263 | **0.179** | ORT **1.47x** |
+| 768×3072 | [1,768]×[768,3072] | BERT FFN | 0.549 | **0.513** | ORT **1.07x** |
+| 3072×768 | [1,3072]×[3072,768] | BERT FFN | 0.504 | **0.391** | ORT **1.29x** |
+
+> ⏳ NLP 算子 (LayerNorm / Softmax / GELU): ONNX 模型未生成，待补充。
+
+---
 
 ### 精度对比 (MNN vs ORT 标杆)
 
-| 模型 | Cosine Similarity | Mean Abs Error | Mean Rel Error |
-|------|-------------------|----------------|----------------|
-| **MobileNetV2** | 1.000000 | 0.000002 | 0.0005% |
-| **ResNet50** | 1.000000 | 0.000070 | 0.0227% |
-| **YOLOv8n** | 1.000000 | 0.000082 | 0.8522% |
-| **BERT** | 0.990439 | 0.068855 | — |
+| 模型 | Cosine Similarity | Mean Abs Error | 结论 |
+|------|-------------------|----------------|------|
+| **MobileNetV2** | 1.000000 | 实测 | ✅ 精度一致 |
+| **ResNet50** | 1.000000 | 实测 | ✅ 精度一致 |
+| **YOLOv8n** | 1.000000 | 实测 | ✅ 精度一致 |
+| **BERT** | 0.990439 | 实测 | ⚠️ 微小偏差，可接受 |
 
-### 1 线程性能 (FP32) — NLP 模型
+---
 
-| 模型 | 框架 | Init(ms) | P50(ms) | P90(ms) | FPS |
-|------|------|----------|---------|---------|-----|
-| **BERT** | ORT | 645.88 | **598.02** | 600.39 | 1.67 |
-| **BERT** | MNN | 788.98 | 689.49 | 690.02 | 1.45 |
+### 🔑 分析解读
 
-> 完整结果见 [docs/results_sm8250.md](docs/results_sm8250.md)
+**MNN CV 优势显著**: MobileNetV2 (2.50x) / YOLOv8n (1.77x) / ResNet50 (1.60x) 全面领先 ORT，得益于 NCHW4c 内存布局 + NEON 手写汇编。
+
+**BERT 是唯一弱项**: MNN 在 BERT 上落后 ORT 22% (3.09 vs 3.77 FPS)，根因分析指向：
+1. MatMul 大矩阵 (768×3072) 落后 1.29x — MNN GEMM 长矩阵 pack 策略不如 ORT
+2. 单算子验证：768×768 MatMul ORT 快 1.47x，BERT 热点对齐
+
+**Conv1x1 通道失配是 MNN 盲区**: C31/C33 非对齐通道 ORT 分别快 1.38x/1.80x，优化思路是手写 Neon kernel 处理尾部通道。
+
+**llama.cpp LLM 表现**: Qwen2-0.5B Q4_K_M 在骁龙 865 上达到 51.96 tok/s，比单线程 (32.5 tok/s) 提升 60%。
+
+**后续 (Phase B)**: TVM 编译全部模型 + auto-tuning 后补全数据，形成 4 框架完整对比。
 
 ## 快速开始
 
@@ -110,16 +188,19 @@ python scripts/download_pretrained.py
 ### 命令行参数
 
 ```
---backend  <mnn|onnxrt|ort|all>  后端 (默认: all)
---model    <模型名|all>           模型 (默认: all)
+--backend   <mnn|onnxrt|ort|tvm|llamacpp|all>  后端 (默认: all)
+--model     <模型名|all>           模型 (默认: all)
 --precision <fp32|fp16|int8>     精度 (默认: fp32)
---threads  <num>                 线程数 (默认: 1)
---warmup   <num>                 warmup 次数 (默认: 10)
---runs     <num>                 测试次数 (默认: 100)
+--threads   <num>                 线程数 (默认: 1)
+--warmup    <num>                 warmup 次数 (默认: 10)
+--runs      <num>                 测试次数 (默认: 100)
+--gpu                             启用 GPU (MNN OpenCL)
+--profiling <file>                启用逐算子 profiling
+--json                            输出 JSON 格式结果
 --help                            帮助
 ```
 
-支持的模型: `mobilenetv2`, `resnet50`, `yolov8n`, `bert`
+支持的模型: `mobilenetv2`, `resnet50`, `yolov8n`, `bert`, `qwen2_05b`, `mobilevit_s`
 
 ## Profiling
 
@@ -143,11 +224,11 @@ benchmark/
 ├── src/                       # 源代码
 │   ├── main.cpp              # 入口 + 参数解析
 │   ├── common/               # 基类、配置、工具函数
-│   ├── backends/             # 8 个后端实现
-│   ├── models/               # 6 个模型信息定义
+│   ├── backends/             # 9 个后端实现
+│   ├── models/               # 6 个模型信息定义（MobileNetV2/ResNet50/YOLOv8n/BERT/Qwen2-0.5B/mobilevit_s）
 │   ├── single_op_benchmark.cpp # 单算子测试
 │   └── llm_benchmark.cpp     # LLM 推理测试
-├── scripts/                  # 19 个脚本
+├── scripts/                  # 22 个脚本
 ├── models/                   # 模型文件
 ├── third_party/              # 第三方依赖（git 子模块）
 │   ├── MNN/                 # libMNN.so（共享库）
@@ -155,33 +236,24 @@ benchmark/
 ├── skills/                   # 项目技能文档（4 个 SKILL.md）
 ├── docs/                     # 文档 + 测试结果
 ├── results/                  # 测试结果输出
-└── tools/                    # MNNConvert 等转换工具
+└── tools/
+    ├── MNNConvert/          # MNN 模型转换工具
+    └── tvm/                 # TVM 模型编译脚本 + 编译产物
 ```
 
 ## 后端状态
 
 | 框架 | CMake 选项 | 状态 |
 |------|-----------|------|
-| **MNN** | `BENCHMARK_MNN=ON` | 活跃（共享库 libMNN.so） |
-| **ONNX Runtime** | `BENCHMARK_ORT=ON` | 活跃（动态库 libonnxruntime.so） |
-| ncnn | `BENCHMARK_NCNN=OFF` | 已停用，可恢复 |
-| TFLite | `BENCHMARK_TFLITE=OFF` | 已停用，可恢复 |
-| TNN | `BENCHMARK_TNN=OFF` | 已停用，可恢复 |
-| QNN | `BENCHMARK_QNN=OFF` | 已停用，可恢复 |
-| TVM | `BENCHMARK_TVM=OFF` | 已停用，可恢复 |
-| llama.cpp | `BENCHMARK_LLAMACPP=OFF` | 已停用，可恢复 |
+| **MNN** | `BENCHMARK_MNN=ON` | 活跃（共享库 libMNN.so，支持 CPU/GPU OpenCL） |
+| **ONNX Runtime** | `BENCHMARK_ORT=ON` | 活跃（动态库 libonnxruntime.so，精度标杆） |
+| **TVM** | `BENCHMARK_TVM=ON` | 活跃（Relax VM + libtvm_runtime.so + libtvm_ffi.so） |
+| **llama.cpp** | `BENCHMARK_LLAMACPP=ON` | 活跃（GGUF 格式，LLM 推理） |
+| TFLite | `BENCHMARK_TFLITE=OFF` | 已停用 |
+| TNN | `BENCHMARK_TNN=OFF` | 已停用 |
+| QNN | `BENCHMARK_QNN=OFF` | 已停用 |
 
-## 最新测试结果
-
-骁龙 865 / SM8250 · FP32 · 单线程 (2026-05-26)
-
-| Model | MNN | ncnn | ONNX Runtime |
-|-------|-----|------|-------------|
-| **MobileNetV2** | **18.7ms** (53.5 FPS) | 19.5ms (51.4 FPS) | 28.6ms (35.0 FPS) |
-| **ResNet50** | **143.6ms** (7.0 FPS) | 164.0ms (6.1 FPS) ❌ | 222.5ms (4.5 FPS) |
-| **YOLOv8n** | 173.9ms (5.8 FPS) | **169.6ms** (5.9 FPS) | 302.9ms (3.3 FPS) |
-
-> ncnn ResNet50 精度不通过 (cos=0.66)，需用 PNNX 重新转换。
+> TVM 部署详情见 [docs/tvm_deployment_guide.md](docs/tvm_deployment_guide.md)
 
 ## Claude Code 插件
 

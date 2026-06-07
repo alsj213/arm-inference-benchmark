@@ -9,14 +9,13 @@
 
 | 框架 | 状态 | CMake 选项 | 依赖方式 | 模型格式 |
 |------|------|-----------|---------|---------|
-| **ONNX Runtime** | **活跃** | `BENCHMARK_ORT=ON` | git 子模块，单独编译 | `.onnx`（无需转换） |
 | **MNN** | **活跃** | `BENCHMARK_MNN=ON` | git 子模块，add_subdirectory | `.mnn`（MNNConvert 转换） |
-| **ncnn** | **活跃** | `BENCHMARK_NCNN=ON` | git 子模块，静态链接 | ncnn 格式（onnx2ncnn 转换） |
+| **ONNX Runtime** | **活跃** | `BENCHMARK_ORT=ON` | git 子模块，单独编译 | `.onnx`（无需转换） |
+| **TVM** | **活跃** | `BENCHMARK_TVM=ON` | git 子模块已检出 | `_tvm.so`（Relax 编译） |
+| **llama.cpp** | **活跃** | `BENCHMARK_LLAMACPP=ON` | git 子模块已检出 | GGUF |
 | TNN | 已停用 | `BENCHMARK_TNN=OFF` | git 子模块已检出 | TNN 格式 |
 | TFLite | 已停用 | `BENCHMARK_TFLITE=OFF` | AAR 提取 .so | `.tflite` |
 | QNN | 已停用 | `BENCHMARK_QNN=OFF` | 需手动下载 SDK | QNN 格式 |
-| TVM | 已停用 | `BENCHMARK_TVM=OFF` | git 子模块已检出 | TVM .so |
-| llama.cpp | 已停用 | `BENCHMARK_LLAMACPP=OFF` | git 子模块已检出 | GGUF |
 
 ## 项目结构
 
@@ -28,7 +27,7 @@ benchmark/
 │   ├── llm_benchmark.cpp        # LLM 测试（仅 llama.cpp 启用时）
 │   ├── common/           # 公共模块（benchmark基类、配置、工具函数）
 │   ├── backends/         # 8个后端实现（完整保留，停用的用编译宏隔离）
-│   └── models/           # 5个模型信息定义（MobileNetV2/ResNet50/ShuffleNetV2/YOLOv8n/BERT）
+│   └── models/           # 6个模型信息定义（MobileNetV2/ResNet50/YOLOv8n/BERT/Qwen2-0.5B/mobilevit_s）
 ├── scripts/              # 28个脚本（构建/测试/环境管理/模型转换/profiling/报告生成）
 ├── models/               # 模型文件（onnx/mnn/tflite/ncnn/tnn/tvm）
 ├── third_party/          # 第三方依赖（git子模块 / 手动下载）
@@ -102,11 +101,12 @@ benchmark/
 
 ## 强制规则
 
-1. 每个框架在部署前，一定要参考官方教程
-2. 每个框架都有真实的模型转换和在设备上真实的测试数据
-3. 完全部署好一个框架后再部署下一个，不要交叉部署
-4. 停用的后端源代码完整保留，恢复见 `BACKEND_REENABLE_GUIDE.md`
-5. 停用后端的旧完整配置备份在 `backup/all-backends` 分支
+1. **问题解决优先级：官方教程 > 源码 > 社区 > 猜测**。遇到任何框架部署/编译/API 问题，必须先去官方文档/教程/GitHub README 查找答案，不得凭经验猜测
+2. 每个框架在部署前，一定要参考官方教程
+3. 每个框架都有真实的模型转换和在设备上真实的测试数据
+4. 完全部署好一个框架后再部署下一个，不要交叉部署
+5. 停用的后端源代码完整保留，恢复见 `BACKEND_REENABLE_GUIDE.md`
+6. 停用后端的旧完整配置备份在 `backup/all-backends` 分支
 
 ## Benchmark 执行协议（强制性）
 

@@ -58,5 +58,6 @@ ModelInfo get_resnet50_info();
 ModelInfo get_shufflenet_v2_info();
 ModelInfo get_yolov8n_info();
 ModelInfo get_bert_info();
+ModelInfo get_mobilevit_s_info();
 
 #endif // BENCHMARK_MODELS_MODEL_INFO_H_
