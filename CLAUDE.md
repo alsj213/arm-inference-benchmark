@@ -9,14 +9,13 @@
 
 | 框架 | 状态 | CMake 选项 | 依赖方式 | 模型格式 |
 |------|------|-----------|---------|---------|
-| **ONNX Runtime** | **活跃** | `BENCHMARK_ORT=ON` | git 子模块，单独编译 | `.onnx`（无需转换） |
 | **MNN** | **活跃** | `BENCHMARK_MNN=ON` | git 子模块，add_subdirectory | `.mnn`（MNNConvert 转换） |
-| **ncnn** | **活跃** | `BENCHMARK_NCNN=ON` | git 子模块，静态链接 | ncnn 格式（onnx2ncnn 转换） |
+| **ONNX Runtime** | **活跃** | `BENCHMARK_ORT=ON` | git 子模块，单独编译 | `.onnx`（无需转换） |
+| **TVM** | **活跃** | `BENCHMARK_TVM=ON` | git 子模块已检出 | `_tvm.so`（Relax 编译） |
+| **llama.cpp** | **活跃** | `BENCHMARK_LLAMACPP=ON` | git 子模块已检出 | GGUF |
 | TNN | 已停用 | `BENCHMARK_TNN=OFF` | git 子模块已检出 | TNN 格式 |
 | TFLite | 已停用 | `BENCHMARK_TFLITE=OFF` | AAR 提取 .so | `.tflite` |
 | QNN | 已停用 | `BENCHMARK_QNN=OFF` | 需手动下载 SDK | QNN 格式 |
-| TVM | 已停用 | `BENCHMARK_TVM=OFF` | git 子模块已检出 | TVM .so |
-| llama.cpp | 已停用 | `BENCHMARK_LLAMACPP=OFF` | git 子模块已检出 | GGUF |
 
 ## 项目结构
 

@@ -55,6 +55,140 @@ OPERATOR_CONFIGS = {
         "pads": [1, 1, 1, 1],
         "group": 64,  # depthwise
     },
+
+    # ========== Conv1x1 网络提取 (MobileNetV2/YOLOv8n/ResNet50 blocks) ==========
+    "Conv1x1_MBV2_Block0": {
+        "op_type": "Conv",
+        "input_shape": [1, 32, 112, 112],
+        "weight_shape": [16, 32, 1, 1],
+        "kernel_shape": [1, 1],
+        "strides": [1, 1],
+        "pads": [0, 0, 0, 0],
+        "group": 1,
+    },
+    "Conv1x1_MBV2_Block1": {
+        "op_type": "Conv",
+        "input_shape": [1, 72, 56, 56],
+        "weight_shape": [24, 72, 1, 1],
+        "kernel_shape": [1, 1],
+        "strides": [1, 1],
+        "pads": [0, 0, 0, 0],
+        "group": 1,
+    },
+    "Conv1x1_MBV2_Block6": {
+        "op_type": "Conv",
+        "input_shape": [1, 960, 7, 7],
+        "weight_shape": [320, 960, 1, 1],
+        "kernel_shape": [1, 1],
+        "strides": [1, 1],
+        "pads": [0, 0, 0, 0],
+        "group": 1,
+    },
+    "Conv1x1_ResNet50_Bottleneck": {
+        "op_type": "Conv",
+        "input_shape": [1, 256, 56, 56],
+        "weight_shape": [64, 256, 1, 1],
+        "kernel_shape": [1, 1],
+        "strides": [1, 1],
+        "pads": [0, 0, 0, 0],
+        "group": 1,
+    },
+    "Conv1x1_YOLOv8n_Backbone": {
+        "op_type": "Conv",
+        "input_shape": [1, 64, 160, 160],
+        "weight_shape": [128, 64, 1, 1],
+        "kernel_shape": [1, 1],
+        "strides": [2, 2],
+        "pads": [0, 0, 0, 0],
+        "group": 1,
+    },
+
+    # ========== Conv1x1 形状分桶 (M 极端值) ==========
+    "Conv1x1_M49_C512_K256": {
+        "op_type": "Conv",
+        "input_shape": [1, 512, 7, 7],
+        "weight_shape": [256, 512, 1, 1],
+        "kernel_shape": [1, 1],
+        "strides": [1, 1],
+        "pads": [0, 0, 0, 0],
+        "group": 1,
+    },
+    "Conv1x1_M3136_C64_K128": {
+        "op_type": "Conv",
+        "input_shape": [1, 64, 56, 56],
+        "weight_shape": [128, 64, 1, 1],
+        "kernel_shape": [1, 1],
+        "strides": [1, 1],
+        "pads": [0, 0, 0, 0],
+        "group": 1,
+    },
+    "Conv1x1_Misaligned_C31": {
+        "op_type": "Conv",
+        "input_shape": [1, 31, 28, 28],
+        "weight_shape": [64, 31, 1, 1],
+        "kernel_shape": [1, 1],
+        "strides": [1, 1],
+        "pads": [0, 0, 0, 0],
+        "group": 1,
+    },
+    "Conv1x1_Misaligned_C33": {
+        "op_type": "Conv",
+        "input_shape": [1, 33, 28, 28],
+        "weight_shape": [64, 33, 1, 1],
+        "kernel_shape": [1, 1],
+        "strides": [1, 1],
+        "pads": [0, 0, 0, 0],
+        "group": 1,
+    },
+
+    # ========== DWConv 通道极端 ==========
+    "DWConv_C16": {
+        "op_type": "Conv",
+        "input_shape": [1, 16, 112, 112],
+        "weight_shape": [16, 1, 3, 3],
+        "kernel_shape": [3, 3],
+        "strides": [1, 1],
+        "pads": [1, 1, 1, 1],
+        "group": 16,
+    },
+    "DWConv_C64": {
+        "op_type": "Conv",
+        "input_shape": [1, 64, 56, 56],
+        "weight_shape": [64, 1, 3, 3],
+        "kernel_shape": [3, 3],
+        "strides": [2, 2],
+        "pads": [1, 1, 1, 1],
+        "group": 64,
+    },
+    "DWConv_C960": {
+        "op_type": "Conv",
+        "input_shape": [1, 960, 7, 7],
+        "weight_shape": [960, 1, 3, 3],
+        "kernel_shape": [3, 3],
+        "strides": [1, 1],
+        "pads": [1, 1, 1, 1],
+        "group": 960,
+    },
+
+    # ========== Conv3x3 更多变体 ==========
+    "Conv3x3_ResNet50_Bottleneck": {
+        "op_type": "Conv",
+        "input_shape": [1, 64, 56, 56],
+        "weight_shape": [64, 64, 3, 3],
+        "kernel_shape": [3, 3],
+        "strides": [1, 1],
+        "pads": [1, 1, 1, 1],
+        "group": 1,
+    },
+    "Conv3x3_Stride2_YOLO": {
+        "op_type": "Conv",
+        "input_shape": [1, 128, 80, 80],
+        "weight_shape": [256, 128, 3, 3],
+        "kernel_shape": [3, 3],
+        "strides": [2, 2],
+        "pads": [1, 1, 1, 1],
+        "group": 1,
+    },
     "ConvTranspose_2x2": {
         "op_type": "ConvTranspose",
         "input_shape": [1, 64, 28, 28],
@@ -138,6 +272,33 @@ OPERATOR_CONFIGS = {
         "input_shape": [1, 512],
         "normalized_shape": [512],
     },
+    "LayerNorm_BERT_768": {
+        "op_type": "LayerNormalization",
+        "input_shape": [1, 768],
+        "normalized_shape": [768],
+    },
+
+    # ========== Softmax 多种尺寸 ==========
+    "Softmax_512": {
+        "op_type": "Softmax",
+        "input_shape": [1, 512],
+        "axis": -1,
+    },
+    "Softmax_768": {
+        "op_type": "Softmax",
+        "input_shape": [1, 768],
+        "axis": -1,
+    },
+
+    # ========== GELU 多种尺寸 ==========
+    "GELU_512": {
+        "op_type": "Gelu",
+        "input_shape": [1, 512],
+    },
+    "GELU_768": {
+        "op_type": "Gelu",
+        "input_shape": [1, 768],
+    },
 
     # ========== 矩阵运算 ==========
     "MatMul_512x512": {
@@ -145,10 +306,49 @@ OPERATOR_CONFIGS = {
         "a_shape": [1, 512],
         "b_shape": [512, 512],
     },
+    "MatMul_768x768": {
+        "op_type": "MatMul",
+        "a_shape": [1, 768],
+        "b_shape": [768, 768],
+    },
     "MatMul_1024x1024": {
         "op_type": "MatMul",
         "a_shape": [1, 1024],
         "b_shape": [1024, 1024],
+    },
+
+    # ========== MatMul 长矩阵 (FFN) ==========
+    "MatMul_768x3072": {
+        "op_type": "MatMul",
+        "a_shape": [1, 768],
+        "b_shape": [768, 3072],
+    },
+    "MatMul_3072x768": {
+        "op_type": "MatMul",
+        "a_shape": [1, 3072],
+        "b_shape": [3072, 768],
+    },
+
+    # ========== MatMul KV Cache ==========
+    "MatMul_KV_M1": {
+        "op_type": "MatMul",
+        "a_shape": [1, 64],
+        "b_shape": [64, 768],
+    },
+    "MatMul_KV_M128": {
+        "op_type": "MatMul",
+        "a_shape": [128, 64],
+        "b_shape": [64, 768],
+    },
+    "MatMul_KV_M512": {
+        "op_type": "MatMul",
+        "a_shape": [512, 64],
+        "b_shape": [64, 768],
+    },
+    "MatMul_KV_M1024": {
+        "op_type": "MatMul",
+        "a_shape": [1024, 64],
+        "b_shape": [64, 768],
     },
     "Gemm": {
         "op_type": "Gemm",
