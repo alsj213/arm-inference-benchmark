@@ -7,11 +7,12 @@
 
 ## 特性
 
-- **多框架支持**: MNN / ONNX Runtime / ncnn / TVM（活跃），MindSpore Lite（待调试），QNN / TNN / TFLite / llama.cpp（完整保留）
+- **多框架支持**: MNN / ONNX Runtime / TVM / llama.cpp（4 核心框架）
 - **性能指标**: 延迟 P50/P90/P99、吞吐量 FPS、初始化时间、峰值内存
 - **精度对比**: 以 ONNX Runtime 为标杆，自动计算余弦相似度、平均绝对/相对误差
 - **Claude Code 插件**: 通过 `claude-code-mobile-bench` 插件自动化测试流程
-- **测试模型**: MobileNetV2 / ResNet50 / YOLOv8n / BERT
+- **测试模型**: MobileNetV2 / ResNet50 / YOLOv8n / BERT / Qwen2-0.5B（覆盖 CV + NLP + LLM）
+- **单算子 Benchmark**: 支持分类批量测试（Conv1x1/MatMul/DWConv 等 7 大类 80+ 测例）
 - **环境控制**: CPU 锁频 + 缓存清理，保证结果可复现
 
 ## 测试平台
@@ -110,16 +111,19 @@ python scripts/download_pretrained.py
 ### 命令行参数
 
 ```
---backend  <mnn|onnxrt|ort|tvm|all>  后端 (默认: all)
---model    <模型名|all>           模型 (默认: all)
+--backend   <mnn|onnxrt|ort|tvm|llamacpp|all>  后端 (默认: all)
+--model     <模型名|all>           模型 (默认: all)
 --precision <fp32|fp16|int8>     精度 (默认: fp32)
---threads  <num>                 线程数 (默认: 1)
---warmup   <num>                 warmup 次数 (默认: 10)
---runs     <num>                 测试次数 (默认: 100)
+--threads   <num>                 线程数 (默认: 1)
+--warmup    <num>                 warmup 次数 (默认: 10)
+--runs      <num>                 测试次数 (默认: 100)
+--gpu                             启用 GPU (MNN OpenCL)
+--profiling <file>                启用逐算子 profiling
+--json                            输出 JSON 格式结果
 --help                            帮助
 ```
 
-支持的模型: `mobilenetv2`, `resnet50`, `yolov8n`, `bert`
+支持的模型: `mobilenetv2`, `resnet50`, `yolov8n`, `bert`, `qwen2_05b`, `mobilevit_s`
 
 ## Profiling
 
@@ -143,11 +147,11 @@ benchmark/
 ├── src/                       # 源代码
 │   ├── main.cpp              # 入口 + 参数解析
 │   ├── common/               # 基类、配置、工具函数
-│   ├── backends/             # 8 个后端实现
+│   ├── backends/             # 9 个后端实现
 │   ├── models/               # 6 个模型信息定义
 │   ├── single_op_benchmark.cpp # 单算子测试
 │   └── llm_benchmark.cpp     # LLM 推理测试
-├── scripts/                  # 19 个脚本
+├── scripts/                  # 22 个脚本
 ├── models/                   # 模型文件
 ├── third_party/              # 第三方依赖（git 子模块）
 │   ├── MNN/                 # libMNN.so（共享库）
@@ -164,15 +168,13 @@ benchmark/
 
 | 框架 | CMake 选项 | 状态 |
 |------|-----------|------|
-| **MNN** | `BENCHMARK_MNN=ON` | 活跃（共享库 libMNN.so） |
-| **ONNX Runtime** | `BENCHMARK_ORT=ON` | 活跃（动态库 libonnxruntime.so） |
-| **TVM** | `BENCHMARK_TVM=ON` | 活跃（Relax VM + libtvm_runtime.so） |
-| ncnn | `BENCHMARK_NCNN=ON` | 活跃（静态链接） |
-| MindSpore Lite | `BENCHMARK_MINDSPORE_LITE=ON` | 活跃（动态库 libmindspore-lite.so） |
-| TFLite | `BENCHMARK_TFLITE=OFF` | 已停用，可恢复 |
-| TNN | `BENCHMARK_TNN=OFF` | 已停用，可恢复 |
-| QNN | `BENCHMARK_QNN=OFF` | 已停用，可恢复 |
-| llama.cpp | `BENCHMARK_LLAMACPP=OFF` | 已停用，可恢复 |
+| **MNN** | `BENCHMARK_MNN=ON` | 活跃（共享库 libMNN.so，支持 CPU/GPU OpenCL） |
+| **ONNX Runtime** | `BENCHMARK_ORT=ON` | 活跃（动态库 libonnxruntime.so，精度标杆） |
+| **TVM** | `BENCHMARK_TVM=ON` | 活跃（Relax VM + libtvm_runtime.so + libtvm_ffi.so） |
+| **llama.cpp** | `BENCHMARK_LLAMACPP=ON` | 活跃（GGUF 格式，LLM 推理） |
+| TFLite | `BENCHMARK_TFLITE=OFF` | 已停用 |
+| TNN | `BENCHMARK_TNN=OFF` | 已停用 |
+| QNN | `BENCHMARK_QNN=OFF` | 已停用 |
 
 > TVM 部署详情见 [docs/tvm_deployment_guide.md](docs/tvm_deployment_guide.md)
 
@@ -180,12 +182,16 @@ benchmark/
 
 骁龙 865 / SM8250 · FP32 · 单线程 (2026-06-07)
 
-| Model | MNN | ncnn | ONNX Runtime | TVM |
-|-------|-----|------|-------------|-----|
-| **MobileNetV2** | **18.7ms** (53.5 FPS) | 19.5ms (51.4 FPS) | 28.6ms (35.0 FPS) | 513.6ms (1.95 FPS) |
+| Model | MNN | ONNX Runtime | TVM | llama.cpp |
+|-------|-----|-------------|-----|-----------|
+| **MobileNetV2** | **18.7ms** (53.5 FPS) | 28.6ms (35.0 FPS) | 513.6ms (1.95 FPS) | — |
+| **ResNet50** | **82.5ms** (12.1 FPS) | 84.5ms (11.8 FPS) | 待编译 | — |
+| **YOLOv8n** | **79.6ms** (12.6 FPS) | 106.6ms (9.4 FPS) | 待编译 | — |
+| **BERT** | 689.5ms (1.45 FPS) | **598.0ms** (1.67 FPS) | 待编译 | — |
+| **Qwen2-0.5B** | — | — | — | 待测试 |
 
-> ncnn ResNet50 精度不通过 (cos=0.66)，需用 PNNX 重新转换。  
-> TVM 当前仅 MobileNetV2 已编译（未调优），ResNet50/YOLOv8n/BERT 待编译。精度 vs ORT: 余弦相似度 1.000000。
+> TVM 当前仅 MobileNetV2 已编译（未调优），精度 vs ORT: 余弦相似度 1.000000。  
+> TVM 部署详情见 [docs/tvm_deployment_guide.md](docs/tvm_deployment_guide.md)。
 
 ## Claude Code 插件
 
