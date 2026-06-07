@@ -1,0 +1,48 @@
+=== ARM Inference Benchmark ===
+Backend:  mnn_gpu
+Model:    resnet50
+Precision:fp32
+Threads:  1
+Warmup:   50
+Test runs:100
+Use GPU:  no
+
+
+========================================================
+Model: resnet50
+Input shape: 1 3 224 224 
+========================================================
+
+--- [Step 1] Getting reference output from ONNX Runtime ---
+ONNXRT: loading model: models/classification/resnet50/resnet50.onnx
+ONNXRT: input 0 = data (type 1)
+ONNXRT: output 0 = resnetv17_dense0_fwd
+  ✅ Reference output obtained (1000 elements)
+      Reference stats - Min: -4.6195, Max: 7.0400, Mean: 0.0001
+
+--- [Step 2] Running benchmarks ---
+
+>> Testing mnn_gpu on resnet50...
+MNN OpenCL GPU backend enabled (CPU fallback, Precision=High/FP32)
+
+--- Accuracy Comparison ---
+  ✅ [Accuracy] MNN_GPU: PASSED
+      Cosine Similarity:  1.000000 (Excellent)
+      Mean Absolute Error: 0.000002
+      Max Absolute Error:  0.000007
+      Mean Relative Error: 0.0006%
+      Output range: [-4.6195, 7.0399], Mean: 0.0001
+
+--- Performance Results ---
+  Init time:  1815.74 ms
+  Min:    53.80 ms
+  P50:    59.66 ms
+  P90:    61.23 ms
+  P99:    63.21 ms
+  Max:    63.21 ms
+  Mean:   59.42 ms
+  Std:    1.59 ms
+  Throughput: 16.83 FPS
+  Peak mem:   18446744073709543216 KB
+
+=== Done ===

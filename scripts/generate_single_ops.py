@@ -249,6 +249,94 @@ OPERATOR_CONFIGS = {
         "pw_channels": 128,
         "input_shape": (1, 64, 56, 56),
     },
+
+    # ===== 形状分桶: Conv1x1 M维极端 =====
+    # 访存密集端：M=49 (7×7) — 数据量很小，kernel launch 开销显著
+    "Conv1x1_M49_C32_K64": {
+        "class": nn.Conv2d, "in_channels": 32, "out_channels": 64,
+        "kernel_size": 1, "stride": 1, "padding": 0,
+        "input_shape": (1, 32, 7, 7),
+    },
+    "Conv1x1_M49_C256_K512": {
+        "class": nn.Conv2d, "in_channels": 256, "out_channels": 512,
+        "kernel_size": 1, "stride": 1, "padding": 0,
+        "input_shape": (1, 256, 7, 7),
+    },
+    # 平衡态：M=784 (28×28) — MobileNetV2 主干
+    "Conv1x1_M784_C32_K64": {
+        "class": nn.Conv2d, "in_channels": 32, "out_channels": 64,
+        "kernel_size": 1, "stride": 1, "padding": 0,
+        "input_shape": (1, 32, 28, 28),
+    },
+    # 计算密集端：M=3136 (56×56) — 大量计算，期望接近峰值算力
+    "Conv1x1_M3136_C64_K128": {
+        "class": nn.Conv2d, "in_channels": 64, "out_channels": 128,
+        "kernel_size": 1, "stride": 1, "padding": 0,
+        "input_shape": (1, 64, 56, 56),
+    },
+
+    # ===== K维极端 =====
+    "Conv1x1_K16_C64_M784": {
+        "class": nn.Conv2d, "in_channels": 64, "out_channels": 16,
+        "kernel_size": 1, "stride": 1, "padding": 0,
+        "input_shape": (1, 64, 28, 28),
+    },
+    "Conv1x1_K1024_C256_M784": {
+        "class": nn.Conv2d, "in_channels": 256, "out_channels": 1024,
+        "kernel_size": 1, "stride": 1, "padding": 0,
+        "input_shape": (1, 256, 28, 28),
+    },
+
+    # ===== NCHW4c 对齐退化 =====
+    # C%4≠0: MNN 的 NCHW4c 布局需要 padding → 额外开销
+    "Conv1x1_Misaligned_C31_K64": {
+        "class": nn.Conv2d, "in_channels": 31, "out_channels": 64,
+        "kernel_size": 1, "stride": 1, "padding": 0,
+        "input_shape": (1, 31, 56, 56),
+    },
+    "Conv1x1_Misaligned_C33_K64": {
+        "class": nn.Conv2d, "in_channels": 33, "out_channels": 64,
+        "kernel_size": 1, "stride": 1, "padding": 0,
+        "input_shape": (1, 33, 56, 56),
+    },
+
+    # ===== DWConv 极端通道 =====
+    # DWConv 大通道（C=960, MobileNetV2 最后一层）
+    "DWConv_C960_3x3": {
+        "class": nn.Conv2d,
+        "in_channels": 960, "out_channels": 960,
+        "kernel_size": 3, "stride": 1, "padding": 1,
+        "input_shape": (1, 960, 7, 7),
+        "groups": 960,
+    },
+    # DWConv 小通道（C=16）
+    "DWConv_C16_3x3": {
+        "class": nn.Conv2d,
+        "in_channels": 16, "out_channels": 16,
+        "kernel_size": 3, "stride": 1, "padding": 1,
+        "input_shape": (1, 16, 112, 112),
+        "groups": 16,
+    },
+
+    # ===== MatMul 方阵 vs 长矩阵对比 =====
+    # BERT Attention MatMul (方阵)
+    "MatMul_768x768x768": {
+        "class": nn.Linear, "in_features": 768, "out_features": 768,
+        "input_shape": (1, 768),
+    },
+    "MatMul_512x512x512": {
+        "class": nn.Linear, "in_features": 512, "out_features": 512,
+        "input_shape": (1, 512),
+    },
+    # BERT FFN MatMul (长矩阵)
+    "MatMul_768x3072": {
+        "class": nn.Linear, "in_features": 768, "out_features": 3072,
+        "input_shape": (1, 768),
+    },
+    "MatMul_3072x768": {
+        "class": nn.Linear, "in_features": 3072, "out_features": 768,
+        "input_shape": (1, 3072),
+    },
 }
 
 

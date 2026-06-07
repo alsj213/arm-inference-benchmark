@@ -1,0 +1,13 @@
+=== Single Operator Benchmark ===
+Backend:    mnn
+Model:      /data/local/tmp/single_ops/DWConv_C16_3x3.mnn
+Input:      1 16 112 112 
+Warmup:     50
+Runs:       200
+Threads:    1
+Precision:  fp32
+
+Warming up...
+Benchmarking...
+
+mean=0.319ms, min=0.313ms, max=0.384ms, std=0.008ms

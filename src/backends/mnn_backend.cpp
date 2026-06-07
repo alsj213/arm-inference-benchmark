@@ -3,10 +3,28 @@
 #include <cstring>
 #include <MNN/Interpreter.hpp>
 #include <MNN/Tensor.hpp>
+#include <MNN/MNNForwardType.h>
 
 bool MNNBackend::init(const BenchmarkConfig& config) {
     MNN::ScheduleConfig schedule_config;
     schedule_config.numThread = config.num_threads;
+
+    // BackendConfig for precision control
+    MNN::BackendConfig backend_config;
+
+    // GPU mode: use OpenCL backend with CPU fallback
+    if (config.backend_type == BackendType::MNN_GPU) {
+        schedule_config.type = MNN_FORWARD_OPENCL;
+        schedule_config.backupType = MNN_FORWARD_CPU;
+        use_gpu_ = true;
+        // Use Precision_High to force FP32 compute (default Precision_Normal uses FP16 on Adreno)
+        backend_config.precision = MNN::BackendConfig::Precision_High;
+        backend_config.memory = MNN::BackendConfig::Memory_High;
+        schedule_config.backendConfig = &backend_config;
+        printf("MNN OpenCL GPU backend enabled (CPU fallback, Precision=High/FP32)\n");
+    } else {
+        schedule_config.type = MNN_FORWARD_CPU;
+    }
 
     // Enable profiling if configured
     if (config.enable_profiling && !config.profile_file.empty()) {
@@ -34,37 +52,50 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         return false;
     }
 
-    // Resize input
+    // Resize input to match config shape (works for both CPU and GPU)
     std::vector<int> shapes = config.input_shape;
-    if (shapes.size() == 4) {
+    if (shapes.size() >= 2) {
         net_->resizeTensor(input_tensor_, shapes);
         net_->resizeSession(session_);
+    }
+
+    // For GPU mode, create a host staging tensor for input data transfer
+    // Use CAFFE (NCHW) dimension type to match ONNX model format
+    if (use_gpu_) {
+        host_input_tensor_.reset(MNN::Tensor::create<float>(shapes, nullptr, MNN::Tensor::CAFFE));
+        if (!host_input_tensor_) {
+            printf("Failed to create host input tensor for GPU mode\n");
+            return false;
+        }
     }
 
     return true;
 }
 
 bool MNNBackend::infer(const std::vector<float>& input) {
-    // Copy input data
-    memcpy(input_tensor_->host<float>(), input.data(), input.size() * sizeof(float));
-
-    // Run inference with profiling if enabled
-    if (profiling_enabled_) {
-        // MNN profiling is controlled via environment variable
-        // Set MNN_PROFILING=1 and MNN_PROFILING_FILE=<file> before running
-        net_->runSession(session_);
+    // Copy input data — GPU uses copyFromHostTensor, CPU uses direct memcpy
+    if (use_gpu_) {
+        memcpy(host_input_tensor_->host<float>(), input.data(), input.size() * sizeof(float));
+        input_tensor_->copyFromHostTensor(host_input_tensor_.get());
     } else {
-        net_->runSession(session_);
+        memcpy(input_tensor_->host<float>(), input.data(), input.size() * sizeof(float));
     }
 
-    MNN::Tensor* output = net_->getSessionOutput(session_, nullptr);
+    // Run inference with profiling if enabled
+    net_->runSession(session_);
 
+    MNN::Tensor* output = net_->getSessionOutput(session_, nullptr);
     return output != nullptr;
 }
 
 bool MNNBackend::infer_with_output(const std::vector<float>& input, std::vector<float>& output) {
-    // Copy input data
-    memcpy(input_tensor_->host<float>(), input.data(), input.size() * sizeof(float));
+    // Copy input data — GPU uses copyFromHostTensor, CPU uses direct memcpy
+    if (use_gpu_) {
+        memcpy(host_input_tensor_->host<float>(), input.data(), input.size() * sizeof(float));
+        input_tensor_->copyFromHostTensor(host_input_tensor_.get());
+    } else {
+        memcpy(input_tensor_->host<float>(), input.data(), input.size() * sizeof(float));
+    }
 
     net_->runSession(session_);
     MNN::Tensor* output_tensor = net_->getSessionOutput(session_, nullptr);
@@ -80,9 +111,28 @@ bool MNNBackend::infer_with_output(const std::vector<float>& input, std::vector<
         output_size *= dim;
     }
 
-    // Copy output data
     output.resize(output_size);
-    memcpy(output.data(), output_tensor->host<float>(), output_size * sizeof(float));
+
+    // Copy output data — GPU uses createHostTensorFromDevice, CPU uses direct memcpy
+    if (use_gpu_) {
+        std::unique_ptr<MNN::Tensor> host_output(
+            MNN::Tensor::createHostTensorFromDevice(output_tensor, true));
+        if (host_output) {
+            memcpy(output.data(), host_output->host<float>(), output_size * sizeof(float));
+        } else {
+            printf("[MNN GPU] createHostTensorFromDevice failed, trying copyToHostTensor\n");
+            std::unique_ptr<MNN::Tensor> host_out(
+                MNN::Tensor::create<float>(output_shape, nullptr, MNN::Tensor::CAFFE));
+            if (host_out && output_tensor->copyToHostTensor(host_out.get())) {
+                memcpy(output.data(), host_out->host<float>(), output_size * sizeof(float));
+            } else {
+                printf("[MNN GPU] copyToHostTensor also failed!\n");
+                return false;
+            }
+        }
+    } else {
+        memcpy(output.data(), output_tensor->host<float>(), output_size * sizeof(float));
+    }
 
     return true;
 }

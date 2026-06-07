@@ -1,0 +1,63 @@
+=== ARM Inference Benchmark ===
+Backend:  mnn
+Model:    mobilenetv2
+Precision:fp32
+Threads:  1
+Warmup:   50
+Test runs:200
+Use GPU:  no
+
+
+========================================================
+Model: mobilenetv2
+Input shape: 1 3 224 224 
+========================================================
+
+--- [Step 1] Getting reference output from ONNX Runtime ---
+ONNXRT: loading model: models/classification/mobilenetv2/mobilenetv2.onnx
+ONNXRT: input 0 = input (type 1)
+ONNXRT: output 0 = output
+  ✅ Reference output obtained (1000 elements)
+      Reference stats - Min: -6.1199, Max: 6.0787, Mean: 0.0001
+
+--- [Step 2] Running benchmarks ---
+
+>> Testing mnn on mobilenetv2...
+
+--- Accuracy Comparison ---
+  ✅ [Accuracy] MNN: PASSED
+      Cosine Similarity:  1.000000 (Excellent)
+      Mean Absolute Error: 0.000002
+      Max Absolute Error:  0.000010
+      Mean Relative Error: 0.0005%
+      Output range: [-6.1199, 6.0787], Mean: 0.0001
+
+--- Performance Results ---
+  Init time:  27.85 ms
+  Min:    18.37 ms
+  P50:    18.55 ms
+  P90:    18.65 ms
+  P99:    18.80 ms
+  Max:    18.81 ms
+  Mean:   18.56 ms
+  Std:    0.08 ms
+  Throughput: 53.89 FPS
+  Peak mem:   18446744073709551460 KB
+
+=== Done ===
+simpleperf W cmd_stat.cpp:948] It seems the number of hardware events are more than the number of
+available CPU PMU hardware counters. That will trigger hardware counter
+multiplexing. As a result, events are not counted all the time processes
+running, and event counts are smaller than what really happen.
+Use --print-hw-counter to show available hardware counters.
+If on a rooted device, try --use-devfreq-counters to get more counters.
+
+Performance counter statistics:
+
+#          count  event_name      # count / runtime
+   9,986,404,311  cpu-cycles      # 2.727685 GHz 
+  21,474,232,393  instructions    # 5.851 G/sec  
+      97,976,042  cache-misses    # 26.677 M/sec 
+       2,773,935  branch-misses   # 757.606 K/sec
+
+Total test time: 4.895397 seconds.

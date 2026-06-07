@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     printf("   LLM Benchmark (llama.cpp backend)   \n");
     printf("========================================\n\n");
 
-    std::string model_path = "models/llm/qwen_0.5b/qwen1_5-0_5b-chat-q4_k_m.gguf";
+    std::string model_path = "models/nlp/qwen2_0.5b/qwen2-0_5b-instruct-q4_k_m.gguf";
     int max_tokens = 128;
     int n_ctx = 1024;
 
@@ -28,10 +28,11 @@ int main(int argc, char* argv[]) {
     printf("Max tokens: %d\n", max_tokens);
     printf("Context size: %d\n\n", n_ctx);
 
-    // Initialize backend
+    // Initialize backend (don't auto-load model - we'll load with custom n_ctx)
     LlamaCppBackend backend;
     BenchmarkConfig config;
-    config.model_path = model_path;
+    // Leave model_path empty so init() only initializes the backend without loading
+    config.model_path = "";
 
     printf("Initializing llama.cpp backend...\n");
     if (!backend.init(config)) {

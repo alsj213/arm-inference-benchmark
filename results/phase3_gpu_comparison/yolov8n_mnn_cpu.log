@@ -1,0 +1,47 @@
+=== ARM Inference Benchmark ===
+Backend:  mnn
+Model:    yolov8n
+Precision:fp32
+Threads:  1
+Warmup:   10
+Test runs:50
+Use GPU:  no
+
+
+========================================================
+Model: yolov8n
+Input shape: 1 3 640 640 
+========================================================
+
+--- [Step 1] Getting reference output from ONNX Runtime ---
+ONNXRT: loading model: models/detection/yolov8n/yolov8n.onnx
+ONNXRT: input 0 = images (type 1)
+ONNXRT: output 0 = output0
+  ✅ Reference output obtained (705600 elements)
+      Reference stats - Min: -0.0000, Max: 638.0135, Mean: 9.8371
+
+--- [Step 2] Running benchmarks ---
+
+>> Testing mnn on yolov8n...
+
+--- Accuracy Comparison ---
+  ✅ [Accuracy] MNN: PASSED
+      Cosine Similarity:  1.000000 (Excellent)
+      Mean Absolute Error: 0.000082
+      Max Absolute Error:  0.038132
+      Mean Relative Error: 0.8559%
+      Output range: [0.0000, 638.0133], Mean: 9.8371
+
+--- Performance Results ---
+  Init time:  111.69 ms
+  Min:    195.15 ms
+  P50:    198.40 ms
+  P90:    201.42 ms
+  P99:    203.35 ms
+  Max:    203.35 ms
+  Mean:   198.32 ms
+  Std:    1.95 ms
+  Throughput: 5.04 FPS
+  Peak mem:   18446744073709551612 KB
+
+=== Done ===

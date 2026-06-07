@@ -35,6 +35,8 @@ class LlamaCppBackend : public BenchmarkBackend {
 #ifdef BENCHMARK_LLAMACPP
   llama_context* ctx_ = nullptr;
   llama_model* model_ = nullptr;
+  const llama_vocab* vocab_ = nullptr;
+  llama_sampler* smpl_ = nullptr;
   llama_batch batch_;
 #endif
   int n_ctx_ = 2048;

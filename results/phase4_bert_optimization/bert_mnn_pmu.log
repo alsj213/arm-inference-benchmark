@@ -1,0 +1,62 @@
+=== ARM Inference Benchmark ===
+Backend:  mnn
+Model:    bert
+Precision:fp32
+Threads:  1
+Warmup:   5
+Test runs:10
+Use GPU:  no
+
+
+========================================================
+Model: bert
+Input shape: 1 128 
+========================================================
+
+--- [Step 1] Getting reference output from ONNX Runtime ---
+ONNXRT: loading model: models/nlp/bert/bert.onnx
+ONNXRT: input 0 = input_ids (type 7)
+ONNXRT: input 1 = attention_mask (type 7)
+ONNXRT: output 0 = last_hidden_state
+ONNXRT: output 1 = pooler_output
+  ✅ Reference output obtained (98304 elements)
+      Reference stats - Min: -2.4524, Max: 2.2698, Mean: -0.0176
+
+--- [Step 2] Running benchmarks ---
+
+>> Testing mnn on bert...
+
+--- Accuracy Comparison ---
+  ✅ [Accuracy] MNN: PASSED
+      Cosine Similarity:  0.990439 (Good)
+      Mean Absolute Error: 0.068855
+      Max Absolute Error:  0.612349
+      Mean Relative Error: 118.3662%
+      Output range: [-2.4883, 2.1208], Mean: -0.0176
+
+--- Performance Results ---
+  Init time:  867.52 ms
+  Min:    755.58 ms
+  P50:    756.24 ms
+  P90:    764.07 ms
+  P99:    764.07 ms
+  Max:    764.07 ms
+  Mean:   757.19 ms
+  Std:    2.41 ms
+  Throughput: 1.32 FPS
+  Peak mem:   0 KB
+
+=== Done ===
+Performance counter statistics:
+
+#          count  event_name         # count / runtime,  runtime / enabled_time
+  21,414,481,483  cpu-cycles         # 2.444922 GHz   (60%)
+  39,366,588,400  instructions       # 4.497 G/sec    (60%)
+     200,451,705  cache-misses       # 22.895 M/sec   (60%)
+   8,720,184,449  cache-references   # 994.949 M/sec  (60%)
+      37,299,171  branch-misses      # 4.256 M/sec    (60%)
+
+Total test time: 14.621347 seconds.
+simpleperf W cmd_stat.cpp:865] Percentages < 100% means some events only run a subset of enabled time,
+probably caused by hardware counter multiplexing (less counters than events).
+Try --use-devfreq-counters if on a rooted device.
