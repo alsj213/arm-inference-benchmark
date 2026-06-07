@@ -7,7 +7,7 @@
 
 ## 特性
 
-- **多框架支持**: MNN / ONNX Runtime / ncnn（活跃），MindSpore Lite（待调试），QNN / TVM / TNN / TFLite / llama.cpp（完整保留，可恢复）
+- **多框架支持**: MNN / ONNX Runtime / ncnn / TVM（活跃），MindSpore Lite（待调试），QNN / TNN / TFLite / llama.cpp（完整保留）
 - **性能指标**: 延迟 P50/P90/P99、吞吐量 FPS、初始化时间、峰值内存
 - **精度对比**: 以 ONNX Runtime 为标杆，自动计算余弦相似度、平均绝对/相对误差
 - **Claude Code 插件**: 通过 `claude-code-mobile-bench` 插件自动化测试流程
@@ -110,7 +110,7 @@ python scripts/download_pretrained.py
 ### 命令行参数
 
 ```
---backend  <mnn|onnxrt|ort|all>  后端 (默认: all)
+--backend  <mnn|onnxrt|ort|tvm|all>  后端 (默认: all)
 --model    <模型名|all>           模型 (默认: all)
 --precision <fp32|fp16|int8>     精度 (默认: fp32)
 --threads  <num>                 线程数 (默认: 1)
@@ -155,7 +155,9 @@ benchmark/
 ├── skills/                   # 项目技能文档（4 个 SKILL.md）
 ├── docs/                     # 文档 + 测试结果
 ├── results/                  # 测试结果输出
-└── tools/                    # MNNConvert 等转换工具
+└── tools/
+    ├── MNNConvert/          # MNN 模型转换工具
+    └── tvm/                 # TVM 模型编译脚本 + 编译产物
 ```
 
 ## 后端状态
@@ -164,24 +166,26 @@ benchmark/
 |------|-----------|------|
 | **MNN** | `BENCHMARK_MNN=ON` | 活跃（共享库 libMNN.so） |
 | **ONNX Runtime** | `BENCHMARK_ORT=ON` | 活跃（动态库 libonnxruntime.so） |
-| ncnn | `BENCHMARK_NCNN=OFF` | 已停用，可恢复 |
+| **TVM** | `BENCHMARK_TVM=ON` | 活跃（Relax VM + libtvm_runtime.so） |
+| ncnn | `BENCHMARK_NCNN=ON` | 活跃（静态链接） |
+| MindSpore Lite | `BENCHMARK_MINDSPORE_LITE=ON` | 活跃（动态库 libmindspore-lite.so） |
 | TFLite | `BENCHMARK_TFLITE=OFF` | 已停用，可恢复 |
 | TNN | `BENCHMARK_TNN=OFF` | 已停用，可恢复 |
 | QNN | `BENCHMARK_QNN=OFF` | 已停用，可恢复 |
-| TVM | `BENCHMARK_TVM=OFF` | 已停用，可恢复 |
 | llama.cpp | `BENCHMARK_LLAMACPP=OFF` | 已停用，可恢复 |
+
+> TVM 部署详情见 [docs/tvm_deployment_guide.md](docs/tvm_deployment_guide.md)
 
 ## 最新测试结果
 
-骁龙 865 / SM8250 · FP32 · 单线程 (2026-05-26)
+骁龙 865 / SM8250 · FP32 · 单线程 (2026-06-07)
 
-| Model | MNN | ncnn | ONNX Runtime |
-|-------|-----|------|-------------|
-| **MobileNetV2** | **18.7ms** (53.5 FPS) | 19.5ms (51.4 FPS) | 28.6ms (35.0 FPS) |
-| **ResNet50** | **143.6ms** (7.0 FPS) | 164.0ms (6.1 FPS) ❌ | 222.5ms (4.5 FPS) |
-| **YOLOv8n** | 173.9ms (5.8 FPS) | **169.6ms** (5.9 FPS) | 302.9ms (3.3 FPS) |
+| Model | MNN | ncnn | ONNX Runtime | TVM |
+|-------|-----|------|-------------|-----|
+| **MobileNetV2** | **18.7ms** (53.5 FPS) | 19.5ms (51.4 FPS) | 28.6ms (35.0 FPS) | 513.6ms (1.95 FPS) |
 
-> ncnn ResNet50 精度不通过 (cos=0.66)，需用 PNNX 重新转换。
+> ncnn ResNet50 精度不通过 (cos=0.66)，需用 PNNX 重新转换。  
+> TVM 当前仅 MobileNetV2 已编译（未调优），ResNet50/YOLOv8n/BERT 待编译。精度 vs ORT: 余弦相似度 1.000000。
 
 ## Claude Code 插件
 
