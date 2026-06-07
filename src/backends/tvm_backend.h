@@ -25,6 +25,7 @@ private:
     std::string func_name_{"main"};
     std::vector<int64_t> input_shape_;
     size_t input_size_ = 0;
+    int num_model_inputs_ = 1;
     bool initialized_ = false;
 };
 
