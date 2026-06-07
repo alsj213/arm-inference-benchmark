@@ -108,6 +108,38 @@ BackendType parse_backend(const std::string& b) {
     return BackendType::MNN;  // fallback
 }
 
+// 从模型文件名中提取正确的 input_shape
+static std::vector<int> parse_shape_from_name(const std::string& fname) {
+    // MatMul (Linear → 2D input)
+    if (fname.find("MatMul_512x512x512") != std::string::npos) return {1, 512};
+    if (fname.find("MatMul_768x768x768") != std::string::npos) return {1, 768};
+    if (fname.find("MatMul_768x3072") != std::string::npos)     return {1, 768};
+    if (fname.find("MatMul_3072x768") != std::string::npos)     return {1, 3072};
+
+    // DWConv: 通道数决定空间尺寸
+    if (fname.find("DWConv_C16_3x3") != std::string::npos)  return {1, 16, 112, 112};
+    if (fname.find("DWConv_C960_3x3") != std::string::npos) return {1, 960, 7, 7};
+
+    // Misaligned: C=31/33, spatial=56
+    if (fname.find("Misaligned_C31") != std::string::npos) return {1, 31, 56, 56};
+    if (fname.find("Misaligned_C33") != std::string::npos) return {1, 33, 56, 56};
+
+    // Conv1x1: 从 _M 和 _C 字段解析
+    int C = 64, M = 784;
+    size_t cp = fname.rfind("_C");
+    if (cp != std::string::npos) {
+        size_t ce = fname.find_first_of("._", cp + 2);
+        C = std::stoi(fname.substr(cp + 2, ce - cp - 2));
+    }
+    size_t mp = fname.rfind("_M");
+    if (mp != std::string::npos) {
+        size_t me = fname.find_first_of("._", mp + 2);
+        M = std::stoi(fname.substr(mp + 2, me - mp - 2));
+    }
+    int HW = (int)std::sqrt(M);
+    return {1, C, HW, HW};
+}
+
 static bool run_single_op(const std::string& backend_name, const std::string& model_path,
                           const std::vector<int>& input_shape,
                           int warmup, int runs, int threads, const std::string& precision) {
@@ -128,8 +160,18 @@ static bool run_single_op(const std::string& backend_name, const std::string& mo
     config.use_gpu = false;
     config.precision = (precision == "fp16") ? Precision::FP16 : Precision::FP32;
 
-    std::unique_ptr<BenchmarkBackend> infer;
+    // MNN 后端需要 .mnn 文件，自动替换扩展名
+    std::string actual_model_path = model_path;
     BackendType bt = parse_backend(backend_name);
+    if (bt == BackendType::MNN) {
+        size_t pos = actual_model_path.rfind(".onnx");
+        if (pos != std::string::npos) {
+            actual_model_path.replace(pos, 5, ".mnn");
+        }
+    }
+    config.model_path = actual_model_path;
+
+    std::unique_ptr<BenchmarkBackend> infer;
     switch (bt) {
         case BackendType::MNN:
             infer = std::make_unique<MNNBackend>();
@@ -236,7 +278,14 @@ int main(int argc, char** argv) {
         }
         printf("Category: %s (%zu models)\n\n", category.c_str(), it->second.size());
         for (const auto& mp : it->second) {
-            if (run_single_op(backend, mp, input_shape, warmup, runs, threads, precision))
+            auto shape = parse_shape_from_name(mp);
+            printf("  [auto shape: ");
+            for (size_t i = 0; i < shape.size(); i++) {
+                if (i) printf(",");
+                printf("%d", shape[i]);
+            }
+            printf("] ");
+            if (run_single_op(backend, mp, shape, warmup, runs, threads, precision))
                 total_ok++;
             else
                 total_fail++;

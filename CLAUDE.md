@@ -27,7 +27,7 @@ benchmark/
 │   ├── llm_benchmark.cpp        # LLM 测试（仅 llama.cpp 启用时）
 │   ├── common/           # 公共模块（benchmark基类、配置、工具函数）
 │   ├── backends/         # 8个后端实现（完整保留，停用的用编译宏隔离）
-│   └── models/           # 5个模型信息定义（MobileNetV2/ResNet50/ShuffleNetV2/YOLOv8n/BERT）
+│   └── models/           # 6个模型信息定义（MobileNetV2/ResNet50/YOLOv8n/BERT/Qwen2-0.5B/mobilevit_s）
 ├── scripts/              # 28个脚本（构建/测试/环境管理/模型转换/profiling/报告生成）
 ├── models/               # 模型文件（onnx/mnn/tflite/ncnn/tnn/tvm）
 ├── third_party/          # 第三方依赖（git子模块 / 手动下载）
@@ -101,11 +101,12 @@ benchmark/
 
 ## 强制规则
 
-1. 每个框架在部署前，一定要参考官方教程
-2. 每个框架都有真实的模型转换和在设备上真实的测试数据
-3. 完全部署好一个框架后再部署下一个，不要交叉部署
-4. 停用的后端源代码完整保留，恢复见 `BACKEND_REENABLE_GUIDE.md`
-5. 停用后端的旧完整配置备份在 `backup/all-backends` 分支
+1. **问题解决优先级：官方教程 > 源码 > 社区 > 猜测**。遇到任何框架部署/编译/API 问题，必须先去官方文档/教程/GitHub README 查找答案，不得凭经验猜测
+2. 每个框架在部署前，一定要参考官方教程
+3. 每个框架都有真实的模型转换和在设备上真实的测试数据
+4. 完全部署好一个框架后再部署下一个，不要交叉部署
+5. 停用的后端源代码完整保留，恢复见 `BACKEND_REENABLE_GUIDE.md`
+6. 停用后端的旧完整配置备份在 `backup/all-backends` 分支
 
 ## Benchmark 执行协议（强制性）
 
