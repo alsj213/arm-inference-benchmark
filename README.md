@@ -188,7 +188,7 @@ benchmark/
 | **ResNet50** | **82.5ms** (12.1 FPS) | 84.5ms (11.8 FPS) | 待编译 | — |
 | **YOLOv8n** | **79.6ms** (12.6 FPS) | 106.6ms (9.4 FPS) | 待编译 | — |
 | **BERT** | 689.5ms (1.45 FPS) | **598.0ms** (1.67 FPS) | 待编译 | — |
-| **Qwen2-0.5B** | — | — | — | 待测试 |
+| **Qwen2-0.5B** | — | — | — | **30.76ms/tok** (32.5 tok/s) |
 
 > TVM 当前仅 MobileNetV2 已编译（未调优），精度 vs ORT: 余弦相似度 1.000000。  
 > TVM 部署详情见 [docs/tvm_deployment_guide.md](docs/tvm_deployment_guide.md)。
