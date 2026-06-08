@@ -55,7 +55,7 @@
 | | **MNN** | 1202.04 | 322.13 | 328.92 | 3.09 | 0.82x ⚠️ | 0.990439 |
 | | TVM | 901.81 | 39540.2 | 39640.3 | 0.025 | 0.0004x ⚠️ | 1.000000 |
 | **Qwen2-0.5B** | **llama.cpp** | 0.37s | **19.25ms/tok** | — | **51.96 tok/s** | LLM 标杆 | — |
-| | MNN LLM | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ 模型导出成功，生成调试中 | — |
+| | **MNN LLM** | ⚡ | **15.90ms/tok** | — | **62.22 tok/s** | **1.20x** 🏆 | — |
 | | TVM | — | — | — | — | ⸺ 需 MLC-LLM 管线 | — |
 | **mobilevit_s** | ORT | 98.57 | 92.64 | 97.01 | 10.67 | 1.00x | — |
 | | **MNN** | 92.77 | **59.95** | **61.83** | **16.50** | **1.55x** ✅ | 1.000000 |
@@ -162,7 +162,7 @@
 
 **Conv1x1 通道失配是 MNN 盲区**: C31/C33 非对齐通道 ORT 分别快 1.38x/1.80x，优化思路是手写 Neon kernel 处理尾部通道。
 
-**llama.cpp LLM 表现**: Qwen2-0.5B Q4_K_M 在骁龙 865 上达到 51.96 tok/s，比单线程 (32.5 tok/s) 提升 60%。MNN LLM Qwen2-0.5B 模型已通过 llmexport.py (HQQ 4-bit, 294.87 MiB) 成功导出，llm_bench 可加载但 tokenizer 生成待修复（mtok 格式兼容性）。TVM Qwen2 需要 MLC-LLM 级别 Transformer 编译管线，不在当前 Relax 单算子路径范围内。
+**LLM 三框架实测**: Qwen2-0.5B 在骁龙 865 上，MNN LLM (HQQ 4-bit, 294.87 MiB) decode 62.22 tok/s，比 llama.cpp (Q4_K_M, 380 MB) 的 51.96 tok/s 快 **1.20x**。MNN LLM 体积更小 (78%)、速度更快 (120%)，但量化精度可能略低于 Q4_K_M。TVM Qwen2 需 MLC-LLM 管线。
 
 **TVM 未调优性能**: MobileNetV2/ResNet50/YOLOv8n/mobilevit_s/BERT 五模型延迟为 MNN 的 31-150x（BERT 150x, ResNet50 57x），ORT 的 24-150x。编译流程（ONNX→Relax→.so→NDK 交叉编译）已验证通顺，精度 Cos=1.0。瓶颈在缺少 auto-tuning（当前为 0 trial 基线），后续调优预期可达 ~5-10x 提升。
 
