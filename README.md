@@ -54,14 +54,16 @@
 | **BERT** | ORT | 643.56 | **263.50** | **270.49** | **3.77** | 1.00x | — |
 | | **MNN** | 1202.04 | 322.13 | 328.92 | 3.09 | 0.82x ⚠️ | 0.990439 |
 | | TVM | 901.81 | 39540.2 | 39640.3 | 0.025 | 0.0004x ⚠️ | 1.000000 |
-| **Qwen2-0.5B** | **llama.cpp** | 0.37s | **19.25ms/tok** | — | **51.96 tok/s** | LLM 标杆 | — |
-| | **MNN LLM** | ⚡ | **15.90ms/tok** | — | **62.22 tok/s** | **1.20x** 🏆 | — |
+| **Qwen2-0.5B** | **llama.cpp** | 0.35 | 70.07 | 42.54 | **42.54 tok/s** | LLM 标杆 | — |
+| | **MNN LLM** | 0.61 | 267.09 | **60.84** | **60.84 tok/s** | **1.43x** 🏆 | — |
 | | TVM | — | — | — | — | ⸺ 需 MLC-LLM 管线 | — |
 | **mobilevit_s** | ORT | 98.57 | 92.64 | 97.01 | 10.67 | 1.00x | — |
 | | **MNN** | 92.77 | **59.95** | **61.83** | **16.50** | **1.55x** ✅ | 1.000000 |
 | | TVM | 33.68 | 2907.60 | 2913.10 | 0.34 | 0.03x ⚠️ | 1.000000 |
 
 > TVM 数据均为 **Relax 编译 + 0 调优 trial** 的原始性能（kernel 未 auto-tuning），精度全部 1.000000。mobilevit_s 首次实测：MNN 以 1.55x 领先 ORT（CV+Transformer 混合架构）。BERT 编译通过（417MB）但 Relax VM 多输入调用待适配。单算子 14 个全部编译成功（23MB），待后端支持后补测。
+> 
+> **LLM 行列说明**: Qwen2-0.5B 的 Init = 模型加载时间(s), P50 = prefill pp128 (tok/s), P90 = decode tg128 (tok/s), FPS = decode 速度 (tok/s)。数据来源：官方 llama-bench + MNN llm_bench，与集成 llm_benchmark 交叉验证（偏差 <2%）。
 
 ---
 
@@ -162,7 +164,7 @@
 
 **Conv1x1 通道失配是 MNN 盲区**: C31/C33 非对齐通道 ORT 分别快 1.38x/1.80x，优化思路是手写 Neon kernel 处理尾部通道。
 
-**LLM 三框架实测**: 以 llama.cpp 为 LLM 标杆 (Q4_K_M, 51.96 tok/s)。MNN LLM (HQQ 4-bit, 294.87 MiB) 实测 decode 62.22 tok/s，相对标杆加速 1.20x，体积小 22%。MNN LLM 的 HQQ 量化精度可能略低于 llama.cpp 的 Q4_K_M。TVM Qwen2 需 MLC-LLM 管线。
+**LLM 三框架实测**: 以 llama.cpp 为 LLM 标杆 (Q4_K_M, decode 42.54 tok/s)。MNN LLM (HQQ 4-bit) 实测 prefill 267.09 / decode 60.84 tok/s，相对标杆 decode 加速 1.43x。MNN LLM 的 prefill 快 3.8x（可能受益于 HQQ 量化格式在 prompt 批处理上的优化），decode 快 1.43x。MNN LLM 体积 295 MB vs llama.cpp 374 MB (省 21%)。TVM Qwen2 需 MLC-LLM 管线。
 
 **TVM 未调优性能**: MobileNetV2/ResNet50/YOLOv8n/mobilevit_s/BERT 五模型延迟为 MNN 的 31-150x（BERT 150x, ResNet50 57x），ORT 的 24-150x。编译流程（ONNX→Relax→.so→NDK 交叉编译）已验证通顺，精度 Cos=1.0。瓶颈在缺少 auto-tuning（当前为 0 trial 基线），后续调优预期可达 ~5-10x 提升。
 
