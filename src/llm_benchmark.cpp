@@ -171,7 +171,8 @@ static bool run_mnn_llm(const Args& args) {
         printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
                args.n_prompt, args.max_tokens, args.n_repeat);
         auto result = backend.benchmark(args.n_prompt, args.max_tokens, args.n_repeat);
-        printf("decode: %.2f tok/s\n", result.decode_tok_per_s);
+        printf("prefill: %.2f tok/s  |  decode: %.2f tok/s\n",
+               result.prefill_tok_per_s, result.decode_tok_per_s);
     } else {
         // Interactive mode
         std::string prompt = "Hello, explain what machine learning is in one sentence.";

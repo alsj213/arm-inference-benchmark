@@ -53,11 +53,7 @@ void MnnLlmBackend::reset() {
 }
 
 // ── benchmark ──
-// NOTE: MNN's public generate() API bundles prefill+decode into one call.
-// Prefill runs ~4x faster than decode per token, so combined speed overstates
-// real decode speed. The official llm_bench separates them via internal hooks.
-// Use combined speed for relative comparison between runs; for absolute
-// decode-only speed, reference the official llm_bench output.
+// Uses Llm::getContext()->prefill_us / decode_us — same hooks as official llm_bench
 
 MnnLlmBackend::LlmBenchResult MnnLlmBackend::benchmark(
         int n_prompt, int n_generate, int n_repeat) {
@@ -73,40 +69,40 @@ MnnLlmBackend::LlmBenchResult MnnLlmBackend::benchmark(
         prompt_ids[i] = (rand() % 10000) + 100;
     }
 
-    std::vector<double> total_speeds, decode_speeds;
+    std::vector<double> prefill_speeds, decode_speeds;
 
-    for (int r = 0; r < n_repeat; r++) {
+    for (int r = 0; r < n_repeat + 1; r++) {  // +1 warmup (skip first, like official llm_bench)
         llm_->reset();
 
-        // Phase 1: generate 1 token to measure prefill-included cost
-        auto t0 = std::chrono::high_resolution_clock::now();
-        auto first = llm_->generate(prompt_ids, 1);
-        auto t1 = std::chrono::high_resolution_clock::now();
-        double prefill_s = std::chrono::duration<double>(t1 - t0).count();
-        double prefill_tok_s = (double)n_prompt / prefill_s;  // prompt processing speed
+        // Read baseline before generation
+        auto* ctx = llm_->getContext();
+        int64_t prefill_before = ctx->prefill_us;
+        int64_t decode_before  = ctx->decode_us;
 
-        // Phase 2: full run prefill+decode (public API limitation)
-        llm_->reset();
-        auto t2 = std::chrono::high_resolution_clock::now();
+        // Full run: prefill + decode
         auto output_ids = llm_->generate(prompt_ids, n_generate);
-        auto t3 = std::chrono::high_resolution_clock::now();
-        double total_s = std::chrono::duration<double>(t3 - t2).count();
 
-        int total_tokens = n_prompt + (int)output_ids.size();
-        total_speeds.push_back(total_tokens / total_s);
+        // Read after — take delta (context accumulates across calls)
+        int64_t prefill_delta = ctx->prefill_us - prefill_before;
+        int64_t decode_delta  = ctx->decode_us  - decode_before;
 
-        // Approximate decode: subtract prefill time (from phase 1)
-        double decode_s = total_s - prefill_s;
-        double decode_speed = (output_ids.size() > 0) ? (double)output_ids.size() / decode_s : 0;
-        decode_speeds.push_back(decode_speed);
+        if (r == 0) continue;  // skip warmup (same as official llm_bench)
+
+        double prefill_s = prefill_delta / 1e6;
+        double decode_s  = decode_delta  / 1e6;
+
+        double prefill_tok_s = (prefill_s > 0) ? (double)n_prompt / prefill_s : 0;
+        double decode_tok_s  = (decode_s > 0)  ? (double)output_ids.size() / decode_s : 0;
+
+        prefill_speeds.push_back(prefill_tok_s);
+        decode_speeds.push_back(decode_tok_s);
     }
 
-    // Average across repeats
-    double avg_total = 0, avg_decode = 0;
-    for (auto v : total_speeds) avg_total += v;
-    for (auto v : decode_speeds) avg_decode += v;
-    result.decode_tok_per_s = avg_decode / decode_speeds.size();
-    result.prefill_tok_per_s = 0;
+    double avg_prefill = 0, avg_decode = 0;
+    for (auto v : prefill_speeds) avg_prefill += v;
+    for (auto v : decode_speeds)  avg_decode += v;
+    result.prefill_tok_per_s = avg_prefill / prefill_speeds.size();
+    result.decode_tok_per_s  = avg_decode  / decode_speeds.size();
 
     return result;
 }
