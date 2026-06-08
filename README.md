@@ -11,7 +11,7 @@
 - **性能指标**: 延迟 P50/P90/P99、吞吐量 FPS、初始化时间、峰值内存
 - **精度对比**: 以 ONNX Runtime 为标杆，自动计算余弦相似度、平均绝对/相对误差
 - **Claude Code 插件**: 通过 `claude-code-mobile-bench` 插件自动化测试流程
-- **测试模型**: MobileNetV2 / ResNet50 / YOLOv8n / BERT / Qwen2-0.5B（覆盖 CV + NLP + LLM）
+- **测试模型**: MobileNetV2 / ResNet50 / YOLOv8n / BERT / Qwen2-0.5B / mobilevit_s（覆盖 CV + NLP + LLM）
 - **单算子 Benchmark**: 支持分类批量测试（Conv1x1/MatMul/DWConv 等 7 大类 80+ 测例）
 - **环境控制**: CPU 锁频 + 缓存清理，保证结果可复现
 
@@ -24,7 +24,8 @@
 ## 基准测试结果
 
 > 测试平台: 红米 K30 Pro / 骁龙 865 (SM8250) / Android 12 · FP32 · 4 线程 · 2026-06-08  
-> 完整原始日志: `results/phaseA_model_*.log`, `results/phaseA_singleop_*.log`
+> 完整原始日志: `results/phaseA_model_*.log`, `results/phaseA_singleop_*.log`  
+> TVM 实测日志: 见下行内嵌数据（`adb shell` 直接采集，完整输出在会话日志中）
 
 ### 框架策略定位
 
@@ -32,7 +33,7 @@
 |------|------|------|
 | **MNN** | 🎯 主测 | 摸底 MNN 性能基线，挖掘优化点（CV + LLM） |
 | **ONNX Runtime** | 📐 精度标杆 | 作为 output reference，其他框架对比精度 |
-| **TVM** | 🔍 对比优化 | 与 MNN 对比发现隐式优化空间（当前 Kernel 未调优，数据仅供参考） |
+| **TVM** | 🔍 对比优化 | 与 MNN 对比发现隐式优化空间（Relax 编译，0 调优 trial，数据供参考） |
 | **llama.cpp** | 🦙 LLM 标杆 | 端侧 LLM 推理性能基线（GGUF 量化） |
 
 ---
@@ -43,22 +44,22 @@
 |------|------|----------|---------|---------|-----|----------------|-------------|
 | **MobileNetV2** | ORT | 33.11 | 21.55 | 21.94 | 45.89 | 1.00x | — |
 | | **MNN** | 36.76 | **8.62** | **8.89** | **114.66** | **2.50x** ✅ | 1.000000 |
-| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | ⏳ |
+| | TVM | 21.64 | 514.02 | 514.69 | 1.95 | 0.04x ⚠️ | 1.000000 |
 | **ResNet50** | ORT | 364.49 | 142.62 | 182.04 | 7.15 | 1.00x | — |
 | | **MNN** | 509.59 | **83.47** | **97.20** | **11.44** | **1.60x** ✅ | 1.000000 |
-| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | ⏳ |
+| | TVM | 149.65 | 4738.52 | 4741.64 | 0.21 | 0.003x ⚠️ | 1.000000 |
 | **YOLOv8n** | ORT | 36.94 | 134.38 | 140.92 | 7.35 | 1.00x | — |
 | | **MNN** | 159.23 | **76.28** | **78.05** | **13.00** | **1.77x** ✅ | 1.000000 |
-| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | ⏳ |
+| | TVM | 20.29 | 4406.27 | 4406.68 | 0.23 | 0.003x ⚠️ | 1.000000 |
 | **BERT** | ORT | 643.56 | **263.50** | **270.49** | **3.77** | 1.00x | — |
 | | **MNN** | 1202.04 | 322.13 | 328.92 | 3.09 | 0.82x ⚠️ | 0.990439 |
-| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | ⏳ |
+| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 多输入待适配 | ⏳ |
 | **Qwen2-0.5B** | **llama.cpp** | 0.37s | **19.25ms/tok** | — | **51.96 tok/s** | LLM 标杆 | — |
 | | MNN LLM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | — |
 | | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待探索 | — |
 | **mobilevit_s** | — | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 模型文件待下载 | ⏳ |
 
-> ⏳ = Phase B 补充；TVM 目前仅 MobileNetV2 完成编译（kernel 未调优，513ms，详见 [TVM 部署指南](docs/tvm_deployment_guide.md)）。
+> TVM 数据均为 **Relax 编译 + 0 调优 trial** 的原始性能（kernel 未 auto-tuning），精度全部 1.000000。BERT 编译通过（417MB）但 Relax VM 多输入调用待适配。单算子 14 个全部编译成功（23MB），待后端支持后补测。
 
 ---
 
@@ -127,7 +128,11 @@
 
 **llama.cpp LLM 表现**: Qwen2-0.5B Q4_K_M 在骁龙 865 上达到 51.96 tok/s，比单线程 (32.5 tok/s) 提升 60%。
 
-**后续 (Phase B)**: TVM 编译全部模型 + auto-tuning 后补全数据，形成 4 框架完整对比。
+**TVM 未调优性能**: MobileNetV2/ResNet50/YOLOv8n 三模型延迟达到 MNN 的 57-60x，ORT 的 24-33x。编译流程（ONNX→Relax→.so→NDK 交叉编译）已验证通顺，精度 Cos=1.0。瓶颈在缺少 auto-tuning（当前为 0 trial 基线），后续调优预期可达 ~5-10x 提升。
+
+**TVM 限制**: BERT 多输入（input_ids + attention_mask）在 Relax VM set_input 调用中参数传递未适配；Qwen2-0.5B 不适用 TVM Relax（需专门的 LLM 编译管线）；mobilevit_s ONNX 模型文件缺失。
+
+**Phase B 完成**: TVM 3 整模型 + 14 单算子全部编译成功，设备实测通过。BERT/Qwen/mobilevit_s 标记为待解决。编译脚本 `tools/tvm/compile_all_models.py` 支持 torch.export + ONNX 双路径，可复用。
 
 ## 快速开始
 

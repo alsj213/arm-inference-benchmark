@@ -14,9 +14,16 @@ bool TVMBackend::init(const BenchmarkConfig& config) {
     printf("TVM: loading: %s\n", so_path.c_str());
 
     // ── 0. 确保 TVM 运行时符号全局可见 ──
-    void* h1 = dlopen("libtvm_ffi.so", RTLD_NOW | RTLD_GLOBAL);
+    // Android 上需要使用绝对路径 + RTLD_GLOBAL
+    void* h1 = dlopen("./libtvm_ffi.so", RTLD_NOW | RTLD_GLOBAL);
+    if (!h1) {
+        h1 = dlopen("/data/local/tmp/benchmark/libtvm_ffi.so", RTLD_NOW | RTLD_GLOBAL);
+    }
     if (!h1) printf("TVM: WARNING dlopen(libtvm_ffi.so) failed: %s\n", dlerror());
-    void* h2 = dlopen("libtvm_runtime.so", RTLD_NOW | RTLD_GLOBAL);
+    void* h2 = dlopen("./libtvm_runtime.so", RTLD_NOW | RTLD_GLOBAL);
+    if (!h2) {
+        h2 = dlopen("/data/local/tmp/benchmark/libtvm_runtime.so", RTLD_NOW | RTLD_GLOBAL);
+    }
     if (!h2) printf("TVM: WARNING dlopen(libtvm_runtime.so) failed: %s\n", dlerror());
 
     // ── 1. Load model .so ──
@@ -55,7 +62,6 @@ bool TVMBackend::init(const BenchmarkConfig& config) {
             printf("TVM: ERROR vm_initialization not found\n");
             return false;
         }
-        // vm_initialization(kDLCPU=1, device_id=0, POOLED_ALLOCATOR=2)
         init_fn_opt.value()(1, 0, 2);
     } catch (const std::exception& e) {
         printf("TVM: vm_initialization exception: %s\n", e.what());
@@ -83,14 +89,23 @@ bool TVMBackend::init(const BenchmarkConfig& config) {
         return false;
     }
 
-    // ── 5. Setup input shape ──
+    // ── 5. 检测模型输入数量 ──
+    // BERT 有 2 个输入 (input_ids + attention_mask)
+    // 其他模型默认 1 个输入
+    num_model_inputs_ = 1;
+    if (so_path.find("bert") != std::string::npos) {
+        num_model_inputs_ = 2;
+    }
+
+    // ── 6. Setup input shape ──
     input_size_ = 1;
     input_shape_.clear();
     for (auto s : config.input_shape) {
         input_shape_.push_back(static_cast<int64_t>(s));
         input_size_ *= s;
     }
-    printf("TVM: init OK, model=%s input=%zu floats\n", so_path.c_str(), input_size_);
+    printf("TVM: init OK, model=%s input=%zu floats x%d inputs\n",
+           so_path.c_str(), input_size_, num_model_inputs_);
     initialized_ = true;
     return true;
 }
@@ -121,12 +136,38 @@ bool TVMBackend::infer_with_output(const std::vector<float>& input, std::vector<
         auto& is = *(tvm::ffi::Function*)invoke_;
         auto& go = *(tvm::ffi::Function*)get_outputs_;
 
-        // set_input → invoke_stateful → get_output(func_name, 0)
-        si("main", tv);
+        // 为每个输入设置数据
+        // Relax VM set_input: (func_name, index, tensor) 或 (func_name, tensor)
+        if (num_model_inputs_ == 1) {
+            // 单输入: set_input(func_name, tensor)
+            si("main", tv);
+        } else {
+            // 多输入: set_input(func_name, index, tensor)
+            for (int i = 0; i < num_model_inputs_; i++) {
+                si("main", i, tv);
+            }
+        }
         is("main");
 
-        // PyTorch export 输出是 tuple，用索引 0 取第一个 Tensor
-        auto result = go("main", 0);
+        // 获取输出 — 兼容两种 VM 输出模式:
+        // 模式 A (torch.export): get_outputs("main", 0) → Tensor (从 Array 取)
+        // 模式 B (ONNX import):  get_output("main")    → Tensor 直接返回
+        tvm::ffi::Any result;
+        bool got_output = false;
+
+        // 先尝试单输出模式 (ONNX import)
+        try {
+            result = go("main");
+            got_output = true;
+        } catch (...) {
+            // 单输出模式失败，尝试多输出模式
+        }
+
+        if (!got_output) {
+            // 多输出模式 (torch.export): 输出是 Array/Tuple
+            result = go("main", 0);
+        }
+
         auto tensor_opt = std::move(result).as<tvm::ffi::Tensor>();
         if (!tensor_opt.has_value()) return false;
 
