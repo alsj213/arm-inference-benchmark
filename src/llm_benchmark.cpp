@@ -95,15 +95,12 @@ static bool run_llamacpp(const Args& args) {
     printf("Loaded in %.2f s\n\n", load_s);
 
     if (args.benchmark_only) {
-        // Benchmark mode: random prompt, measure decode speed
-        std::string prompt(args.n_prompt, 'a');  // dummy prompt
-        auto st = std::chrono::high_resolution_clock::now();
-        std::string output = backend.generate(prompt, args.max_tokens, 0.0f);
-        auto et = std::chrono::high_resolution_clock::now();
-        double gen_s = std::chrono::duration<double>(et - st).count();
-        double tok_s = args.max_tokens / gen_s;
-        printf("decode: %d tokens in %.2f s = %.2f tok/s\n",
-               args.max_tokens, gen_s, tok_s);
+        // Benchmark mode: random tokens, token-level API (same as llama-bench)
+        printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
+               args.n_prompt, args.max_tokens, args.n_repeat);
+        auto r = backend.benchmark_decode(args.n_prompt, args.max_tokens, args.n_repeat);
+        printf("prefill: %.2f tok/s  |  decode: %.2f tok/s\n",
+               r.prefill_tok_per_s, r.decode_tok_per_s);
     } else {
         // Interactive mode
         std::string prompt = "Below is an instruction that describes a task. "

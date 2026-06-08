@@ -31,6 +31,14 @@ class LlamaCppBackend : public BenchmarkBackend {
   int get_context_length() const { return n_ctx_; }
   int get_batch_size() const { return n_batch_; }
 
+  // Token-level benchmark (same methodology as llama-bench)
+  // Uses random tokens directly, measures prefill and decode separately
+  struct TokenBenchResult {
+    double prefill_tok_per_s;
+    double decode_tok_per_s;
+  };
+  TokenBenchResult benchmark_decode(int n_prompt, int n_gen, int n_repeat);
+
  private:
 #ifdef BENCHMARK_LLAMACPP
   llama_context* ctx_ = nullptr;
