@@ -1,0 +1,117 @@
+Analyzing results from: results/single_ops_20260424_002216.csv
+Loaded 37 operators across 2 backends
+
+========================================================================================================================
+Operator                                  mnn           ncnn      Best
+------------------------------------------------------------------------------------------------------------------------
+AdaptiveAvgPool                        0.000ms         0.000ms       mnn
+Add                                    0.000ms         0.000ms       mnn
+AvgPool2d_2x2_s2                       0.000ms         0.000ms       mnn
+BatchNorm2d                            0.000ms         0.000ms       mnn
+Conv2d_1x1_s1                          0.000ms         0.000ms       mnn
+Conv2d_3x3_s1                          0.000ms         0.000ms       mnn
+Conv2d_3x3_s2                          0.000ms         0.000ms       mnn
+ConvTranspose_2x2                      0.000ms         0.000ms       mnn
+Conv_BN_ReLU                           0.000ms         0.000ms       mnn
+DWConv_PWConv                          0.000ms         0.000ms       mnn
+DepthwiseConv_3x3_s1                   0.000ms         0.000ms       mnn
+Div                                    0.000ms         0.000ms       mnn
+ElementWise_Pow                        0.000ms         0.000ms       mnn
+Exp                                    0.000ms         0.000ms       mnn
+GELU                                   0.000ms         0.000ms       mnn
+Hardswish                              0.000ms         0.000ms       mnn
+InstanceNorm2d                         0.000ms         0.000ms       mnn
+LayerNorm                              0.000ms         0.000ms       mnn
+LeakyReLU                              0.000ms         0.000ms       mnn
+Linear_1024_1024                       0.000ms         0.000ms       mnn
+Linear_512_512                         0.000ms         0.000ms       mnn
+MaxPool2d_2x2_s2                       0.000ms         0.000ms       mnn
+Mul                                    0.000ms         0.000ms       mnn
+PReLU                                  0.000ms         0.000ms       mnn
+ReLU                                   0.000ms         0.000ms       mnn
+ReLU6                                  0.000ms         0.000ms       mnn
+ReduceMean_Spatial                     0.000ms         0.000ms       mnn
+ReduceSum_Spatial                      0.000ms         0.000ms       mnn
+ReflectionPad2d                        0.000ms         0.000ms       mnn
+Reshape_Flatten                        0.000ms         0.000ms       mnn
+Sigmoid                                0.000ms         0.000ms       mnn
+Softmax                                0.000ms         0.000ms       mnn
+Sqrt                                   0.000ms         0.000ms       mnn
+Tanh                                   0.000ms         0.000ms       mnn
+Upsample_Bilinear                      0.000ms         0.000ms       mnn
+Upsample_Nearest                       0.000ms         0.000ms       mnn
+ZeroPad2d                              0.000ms         0.000ms       mnn
+------------------------------------------------------------------------------------------------------------------------
+TOTAL                                  0.000ms         0.000ms
+
+=== Wins by Backend ===
+  mnn                 : 37 operators fastest
+  ncnn                : 0 operators fastest
+
+========================================================================================================================
+Performance by Operator Category
+========================================================================================================================
+
+--- Convolution (6 ops) ---
+Backend             Total ms       Avg ms
+----------------------------------------
+mnn                    0.000        0.000
+ncnn                   0.000        0.000
+
+--- Pooling (3 ops) ---
+Backend             Total ms       Avg ms
+----------------------------------------
+mnn                    0.000        0.000
+ncnn                   0.000        0.000
+
+--- Activation (9 ops) ---
+Backend             Total ms       Avg ms
+----------------------------------------
+mnn                    0.000        0.000
+ncnn                   0.000        0.000
+
+--- Normalization (3 ops) ---
+Backend             Total ms       Avg ms
+----------------------------------------
+mnn                    0.000        0.000
+ncnn                   0.000        0.000
+
+--- Linear (2 ops) ---
+Backend             Total ms       Avg ms
+----------------------------------------
+mnn                    0.000        0.000
+ncnn                   0.000        0.000
+
+--- ElementWise (6 ops) ---
+Backend             Total ms       Avg ms
+----------------------------------------
+mnn                    0.000        0.000
+ncnn                   0.000        0.000
+
+--- ShapeOp (5 ops) ---
+Backend             Total ms       Avg ms
+----------------------------------------
+mnn                    0.000        0.000
+ncnn                   0.000        0.000
+
+--- Reduce (2 ops) ---
+Backend             Total ms       Avg ms
+----------------------------------------
+mnn                    0.000        0.000
+ncnn                   0.000        0.000
+
+--- Softmax (1 ops) ---
+Backend             Total ms       Avg ms
+----------------------------------------
+mnn                    0.000        0.000
+ncnn                   0.000        0.000
+
+--- Fused (1 ops) ---
+Backend             Total ms       Avg ms
+----------------------------------------
+mnn                    0.000        0.000
+ncnn                   0.000        0.000
+
+========================================================================================================================
+Analysis complete!
+========================================================================================================================
