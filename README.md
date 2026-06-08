@@ -56,7 +56,7 @@
 | | TVM | 901.81 | 39540.2 | 39640.3 | 0.025 | 0.0004x ⚠️ | 1.000000 |
 | **Qwen2-0.5B** | **llama.cpp** | 0.35 | 70.07 | 42.54 | **42.54 tok/s** | LLM 标杆 | — |
 | | **MNN LLM** | 0.61 | 267.09 | **60.84** | **60.84 tok/s** | **1.43x** 🏆 | — |
-| | TVM | — | — | — | — | ⸺ 需 MLC-LLM 管线 | — |
+| | TVM | — | — | — | — | ⸺ 后期评估 (需 MLC-LLM 独立工具链, TVM 子模块版本冲突) | — |
 | **mobilevit_s** | ORT | 98.57 | 92.64 | 97.01 | 10.67 | 1.00x | — |
 | | **MNN** | 92.77 | **59.95** | **61.83** | **16.50** | **1.55x** ✅ | 1.000000 |
 | | TVM | 33.68 | 2907.60 | 2913.10 | 0.34 | 0.03x ⚠️ | 1.000000 |
@@ -164,7 +164,7 @@
 
 **Conv1x1 通道失配是 MNN 盲区**: C31/C33 非对齐通道 ORT 分别快 1.38x/1.80x，优化思路是手写 Neon kernel 处理尾部通道。
 
-**LLM 三框架实测**: 以 llama.cpp 为 LLM 标杆 (Q4_K_M, decode 42.54 tok/s)。MNN LLM (HQQ 4-bit) 实测 prefill 267.09 / decode 60.84 tok/s，相对标杆 decode 加速 1.43x。MNN LLM 的 prefill 快 3.8x（可能受益于 HQQ 量化格式在 prompt 批处理上的优化），decode 快 1.43x。MNN LLM 体积 295 MB vs llama.cpp 374 MB (省 21%)。TVM Qwen2 需 MLC-LLM 管线。
+**LLM 三框架实测**: 以 llama.cpp 为 LLM 标杆 (Q4_K_M, decode 42.54 tok/s)。MNN LLM (HQQ 4-bit) 实测 prefill 267.09 / decode 60.84 tok/s，相对标杆 decode 加速 1.43x。MNN LLM 的 prefill 快 3.8x（可能受益于 HQQ 量化格式在 prompt 批处理上的优化），decode 快 1.43x。MNN LLM 体积 295 MB vs llama.cpp 374 MB (省 21%)。TVM Qwen2 → MLC-LLM 独立工具链，与项目 TVM 子模块冲突，后期评估。
 
 **TVM 未调优性能**: MobileNetV2/ResNet50/YOLOv8n/mobilevit_s/BERT 五模型延迟为 MNN 的 31-150x（BERT 150x, ResNet50 57x），ORT 的 24-150x。编译流程（ONNX→Relax→.so→NDK 交叉编译）已验证通顺，精度 Cos=1.0。瓶颈在缺少 auto-tuning（当前为 0 trial 基线），后续调优预期可达 ~5-10x 提升。
 
