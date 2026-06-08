@@ -53,6 +53,11 @@ void MnnLlmBackend::reset() {
 }
 
 // ── benchmark ──
+// NOTE: MNN's public generate() API bundles prefill+decode into one call.
+// Prefill runs ~4x faster than decode per token, so combined speed overstates
+// real decode speed. The official llm_bench separates them via internal hooks.
+// Use combined speed for relative comparison between runs; for absolute
+// decode-only speed, reference the official llm_bench output.
 
 MnnLlmBackend::LlmBenchResult MnnLlmBackend::benchmark(
         int n_prompt, int n_generate, int n_repeat) {
@@ -63,51 +68,45 @@ MnnLlmBackend::LlmBenchResult MnnLlmBackend::benchmark(
     result.n_prompt = n_prompt;
     result.n_generate = n_generate;
 
-    // Generate random token IDs for prompt
     std::vector<int> prompt_ids(n_prompt);
     for (int i = 0; i < n_prompt; i++) {
-        prompt_ids[i] = (rand() % 10000) + 100;  // valid token range
+        prompt_ids[i] = (rand() % 10000) + 100;
     }
 
-    std::vector<int64_t> prefill_us, decode_us;
+    std::vector<double> total_speeds, decode_speeds;
 
     for (int r = 0; r < n_repeat; r++) {
         llm_->reset();
 
-        // Prefill: process prompt tokens (measured via first token latency)
+        // Phase 1: generate 1 token to measure prefill-included cost
         auto t0 = std::chrono::high_resolution_clock::now();
-
-        // Use generate with prompt_ids for prefill + first n_generate tokens
-        auto output_ids = llm_->generate(prompt_ids, n_generate);
-
+        auto first = llm_->generate(prompt_ids, 1);
         auto t1 = std::chrono::high_resolution_clock::now();
-        int64_t elapsed = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();
+        double prefill_s = std::chrono::duration<double>(t1 - t0).count();
+        double prefill_tok_s = (double)n_prompt / prefill_s;  // prompt processing speed
 
-        // MNN's generate() does prefill + decode in one call.
-        // We can't easily separate them without modifying MNN internals.
-        // Approximate: total = prefill + n_generate * per_token_decode
-        // For fair comparison with llama.cpp, report total speed.
-        // llm_bench separates via internal hooks — here we use total speed.
+        // Phase 2: full run prefill+decode (public API limitation)
+        llm_->reset();
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto output_ids = llm_->generate(prompt_ids, n_generate);
+        auto t3 = std::chrono::high_resolution_clock::now();
+        double total_s = std::chrono::duration<double>(t3 - t2).count();
+
+        int total_tokens = n_prompt + (int)output_ids.size();
+        total_speeds.push_back(total_tokens / total_s);
+
+        // Approximate decode: subtract prefill time (from phase 1)
+        double decode_s = total_s - prefill_s;
+        double decode_speed = (output_ids.size() > 0) ? (double)output_ids.size() / decode_s : 0;
+        decode_speeds.push_back(decode_speed);
     }
 
-    // Run with generate() and measure elapsed time
-    // Since MNN's API doesn't expose prefill/decode separately,
-    // measure total end-to-end time and compute combined tok/s
-    llm_->reset();
-
-    auto t0 = std::chrono::high_resolution_clock::now();
-    auto output_ids = llm_->generate(prompt_ids, n_generate);
-    auto t1 = std::chrono::high_resolution_clock::now();
-
-    double elapsed_s = std::chrono::duration<double>(t1 - t0).count();
-    int total_tokens = n_prompt + (int)output_ids.size();
-    double total_tok_per_s = total_tokens / elapsed_s;
-
-    // Approximate decode speed (subtract estimated prefill time)
-    // Prefill is typically ~10x faster per token than decode for small models
-    // This is approximate — exact measurement requires MNN internal hooks
-    result.decode_tok_per_s = total_tok_per_s;  // total speed as primary metric
-    result.prefill_tok_per_s = 0;               // not measurable with public API
+    // Average across repeats
+    double avg_total = 0, avg_decode = 0;
+    for (auto v : total_speeds) avg_total += v;
+    for (auto v : decode_speeds) avg_decode += v;
+    result.decode_tok_per_s = avg_decode / decode_speeds.size();
+    result.prefill_tok_per_s = 0;
 
     return result;
 }
