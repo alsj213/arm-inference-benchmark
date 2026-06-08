@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>ORT vs MNN 基准测试对比报告</title>
+<style>
+body { max-width: 960px; margin: 0 auto; padding: 24px; font-family: -apple-system, 'Segoe UI', sans-serif; background: #f8f9fa; color: #333; }
+h1 { text-align: center; color: #1a1a2e; border-bottom: 3px solid #4a90d9; padding-bottom: 16px; }
+h2 { border-left: 4px solid #4a90d9; padding-left: 12px; margin-top: 32px; color: #1a1a2e; }
+table { border-collapse: collapse; width: 100%; margin: 16px 0 24px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+th, td { padding: 12px 16px; border: 1px solid #e0e0e0; text-align: center; }
+th { background: #4a90d9; color: #fff; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+.winner { background: #d4edda !important; font-weight: bold; color: #155724; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+.badge-mnn { background: #cce5ff; color: #004085; }
+.badge-ort { background: #fff3cd; color: #856404; }
+.badge-tie { background: #e2e3e5; color: #383d41; }
+.summary-card { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+.card { flex: 1; min-width: 200px; background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
+.card h3 { margin: 0 0 8px; font-size: 14px; color: #666; }
+.card .value { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+.card .sub { font-size: 12px; color: #999; }
+.env-info { background: #fff; border-radius: 8px; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin: 16px 0; }
+.env-info td { border: none; text-align: left; padding: 6px 16px; }
+.env-info th { background: transparent; color: #666; border: none; text-align: left; padding: 6px 16px; font-weight: 600; width: 120px; }
+.bar-chart { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.bar { height: 24px; border-radius: 4px; min-width: 4px; }
+.bar-ort { background: #ffc107; }
+.bar-mnn { background: #007bff; }
+.bar-label { min-width: 80px; font-size: 13px; }
+.note { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; border-radius: 4px; margin: 16px 0; font-size: 14px; }
+.footer { text-align: center; color: #999; font-size: 12px; margin-top: 40px; padding-top: 16px; border-top: 1px solid #e0e0e0; }
+</style>
+</head>
+<body>
+
+<h1>ORT vs MNN 端侧推理性能对比报告</h1>
+
+<div class="summary-card">
+  <div class="card">
+    <h3>测试设备</h3>
+    <div class="value">Redmi K30 Pro</div>
+    <div class="sub">骁龙 865 / SM8250</div>
+  </div>
+  <div class="card">
+    <h3>CPU 温度</h3>
+    <div class="value">33.7&deg;C</div>
+    <div class="sub">状态良好，无降频</div>
+  </div>
+  <div class="card">
+    <h3>运行次数</h3>
+    <div class="value">50</div>
+    <div class="sub">每次推理</div>
+  </div>
+  <div class="card">
+    <h3>线程数</h3>
+    <div class="value">4</div>
+    <div class="sub">ARM A77</div>
+  </div>
+</div>
+
+<div class="env-info">
+  <table>
+    <tr><th>提交版本</th><td>f74fc4f</td></tr>
+    <tr><th>测试日期</th><td>2026-05-16 00:30-00:33</td></tr>
+    <tr><th>测试框架</th><td>ONNX Runtime (ORT) vs MNN</td></tr>
+    <tr><th>测试模型</th><td>MobileNetV2, ResNet50, YOLOv8n, BERT</td></tr>
+  </table>
+</div>
+
+<h2>一、Init 时间对比</h2>
+<table>
+  <tr>
+    <th>模型</th>
+    <th>ORT (ms)</th>
+    <th>MNN (ms)</th>
+    <th>胜出</th>
+    <th>差距</th>
+  </tr>
+  <tr>
+    <td>MobileNetV2</td>
+    <td>180.54</td>
+    <td class="winner">26.30</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td>MNN 快 85.4%</td>
+  </tr>
+  <tr>
+    <td>ResNet50</td>
+    <td class="winner">489.79</td>
+    <td>539.75</td>
+    <td><span class="badge badge-ort">ORT</span></td>
+    <td>ORT 快 9.3%</td>
+  </tr>
+  <tr>
+    <td>YOLOv8n</td>
+    <td class="winner">118.58</td>
+    <td>157.83</td>
+    <td><span class="badge badge-ort">ORT</span></td>
+    <td>ORT 快 24.9%</td>
+  </tr>
+  <tr>
+    <td>BERT</td>
+    <td>1294.60</td>
+    <td class="winner">1193.74</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td>MNN 快 7.8%</td>
+  </tr>
+</table>
+
+<h2>二、P50 延迟对比（越低越好）</h2>
+<table>
+  <tr>
+    <th>模型</th>
+    <th>ORT (ms)</th>
+    <th>MNN (ms)</th>
+    <th>胜出</th>
+    <th>差距</th>
+    <th>延迟对比</th>
+  </tr>
+  <tr>
+    <td>MobileNetV2</td>
+    <td>19.74</td>
+    <td class="winner">8.55</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td>MNN 快 2.31x</td>
+    <td>
+      <div class="bar-chart"><span class="bar-label">ORT</span><div class="bar bar-ort" style="width:100%"></div></div>
+      <div class="bar-chart"><span class="bar-label">MNN</span><div class="bar bar-mnn" style="width:43%"></div></div>
+    </td>
+  </tr>
+  <tr>
+    <td>ResNet50</td>
+    <td>83.27</td>
+    <td class="winner">82.84</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td>基本持平 (0.5%)</td>
+    <td>
+      <div class="bar-chart"><span class="bar-label">ORT</span><div class="bar bar-ort" style="width:100%"></div></div>
+      <div class="bar-chart"><span class="bar-label">MNN</span><div class="bar bar-mnn" style="width:99%"></div></div>
+    </td>
+  </tr>
+  <tr>
+    <td>YOLOv8n</td>
+    <td>101.70</td>
+    <td class="winner">76.22</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td>MNN 快 33.4%</td>
+    <td>
+      <div class="bar-chart"><span class="bar-label">ORT</span><div class="bar bar-ort" style="width:100%"></div></div>
+      <div class="bar-chart"><span class="bar-label">MNN</span><div class="bar bar-mnn" style="width:75%"></div></div>
+    </td>
+  </tr>
+  <tr>
+    <td>BERT</td>
+    <td class="winner">212.35</td>
+    <td>362.16</td>
+    <td><span class="badge badge-ort">ORT</span></td>
+    <td>ORT 快 70.6%</td>
+    <td>
+      <div class="bar-chart"><span class="bar-label">ORT</span><div class="bar bar-ort" style="width:59%"></div></div>
+      <div class="bar-chart"><span class="bar-label">MNN</span><div class="bar bar-mnn" style="width:100%"></div></div>
+    </td>
+  </tr>
+</table>
+
+<h2>三、P90 延迟对比</h2>
+<table>
+  <tr>
+    <th>模型</th>
+    <th>ORT (ms)</th>
+    <th>MNN (ms)</th>
+    <th>胜出</th>
+  </tr>
+  <tr>
+    <td>MobileNetV2</td>
+    <td>19.99</td>
+    <td class="winner">8.77</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+  </tr>
+  <tr>
+    <td>ResNet50</td>
+    <td>84.27</td>
+    <td class="winner">84.16</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+  </tr>
+  <tr>
+    <td>YOLOv8n</td>
+    <td>103.00</td>
+    <td class="winner">78.28</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+  </tr>
+  <tr>
+    <td>BERT</td>
+    <td class="winner">213.61</td>
+    <td>368.59</td>
+    <td><span class="badge badge-ort">ORT</span></td>
+  </tr>
+</table>
+
+<h2>四、吞吐量 (FPS，越高越好)</h2>
+<table>
+  <tr>
+    <th>模型</th>
+    <th>ORT (FPS)</th>
+    <th>MNN (FPS)</th>
+    <th>胜出</th>
+    <th>加速比</th>
+  </tr>
+  <tr>
+    <td>MobileNetV2</td>
+    <td>50.58</td>
+    <td class="winner">116.47</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td><strong>2.30x</strong></td>
+  </tr>
+  <tr>
+    <td>ResNet50</td>
+    <td>11.99</td>
+    <td class="winner">12.07</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td>1.01x</td>
+  </tr>
+  <tr>
+    <td>YOLOv8n</td>
+    <td>9.76</td>
+    <td class="winner">12.91</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td><strong>1.32x</strong></td>
+  </tr>
+  <tr>
+    <td>BERT</td>
+    <td class="winner">4.70</td>
+    <td>2.78</td>
+    <td><span class="badge badge-ort">ORT</span></td>
+    <td>ORT 快 1.69x</td>
+  </tr>
+</table>
+
+<h2>五、汇总排名</h2>
+<table>
+  <tr>
+    <th>模型</th>
+    <th>Init</th>
+    <th>P50</th>
+    <th>P90</th>
+    <th>FPS</th>
+    <th>综合胜出</th>
+  </tr>
+  <tr>
+    <td>MobileNetV2</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td><span class="badge badge-mnn">MNN &#10003;</span></td>
+  </tr>
+  <tr>
+    <td>ResNet50</td>
+    <td style="background:#fff3cd">ORT</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td><span class="badge badge-mnn">MNN &#10003;</span></td>
+  </tr>
+  <tr>
+    <td>YOLOv8n</td>
+    <td style="background:#fff3cd">ORT</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td><span class="badge badge-mnn">MNN &#10003;</span></td>
+  </tr>
+  <tr>
+    <td>BERT</td>
+    <td style="background:#cce5ff">MNN</td>
+    <td style="background:#fff3cd">ORT</td>
+    <td style="background:#fff3cd">ORT</td>
+    <td style="background:#fff3cd">ORT</td>
+    <td><span class="badge badge-ort">ORT &#10003;</span></td>
+  </tr>
+</table>
+
+<h2>六、结论</h2>
+<table>
+  <tr><th>场景</th><th>推荐框架</th><th>说明</th></tr>
+  <tr>
+    <td>轻量分类 (MobileNetV2)</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td>MNN 延迟仅为 ORT 的 43%，吞吐量 2.3x</td>
+  </tr>
+  <tr>
+    <td>中型分类 (ResNet50)</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td>两者基本持平，MNN 微弱领先</td>
+  </tr>
+  <tr>
+    <td>目标检测 (YOLOv8n)</td>
+    <td><span class="badge badge-mnn">MNN</span></td>
+    <td>MNN 延迟低 33%，吞吐量高 32%</td>
+  </tr>
+  <tr>
+    <td>NLP (BERT)</td>
+    <td><span class="badge badge-ort">ORT</span></td>
+    <td>ORT 延迟低 70%，吞吐量高 69%，大模型优势明显</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>备注:</strong> ShuffleNetV2 模型文件已存在但未执行，需要在 <code>main.cpp</code> 的 <code>--model all</code> 迭代逻辑中注册。温度 33.7&deg;C 运行状态良好，无降频。
+</div>
+
+<div class="footer">
+  Benchmark Protocol 强制执行 | 设备 Redmi K30 Pro (SM8250) | 数据来源: 真实 adb 日志<br>
+  生成时间: 2026-05-16
+</div>
+
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>端侧推理框架性能基准测试报告</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+         color: #333; background: #f5f7fa; padding: 24px; }
+  .container { max-width: 1280px; margin: 0 auto; }
+  h1 { color: #1a1a2e; margin-bottom: 8px; font-size: 28px; }
+  h2 { color: #16213e; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; }
+  h3 { color: #16213e; margin: 24px 0 12px; }
+  .meta { color: #666; font-size: 14px; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 24px;
+          background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  th, td { padding: 10px 14px; text-align: center; border-bottom: 1px solid #eee; }
+  th { background: #1a1a2e; color: #fff; font-weight: 600; font-size: 13px; text-transform: uppercase; white-space: nowrap; }
+  tr:hover { background: #f0f4ff; }
+  td.num { text-align: right; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
+  td.left { text-align: left; }
+  .pass { color: #155724; background: #d4edda; text-align: center; font-weight: 600; border-radius: 4px; padding: 2px 8px; }
+  .fail { color: #721c24; background: #f8d7da; text-align: center; font-weight: 600; border-radius: 4px; padding: 2px 8px; }
+  .best { font-weight: 700; color: #1a1a2e; }
+  .warn { color: #856404; background: #fff3cd; text-align: center; border-radius: 4px; padding: 2px 8px; }
+  .summary-row { background: #eef2f7; font-weight: 600; }
+  .summary-bar { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+  .summary-card { flex: 1; min-width: 140px; background: #fff; padding: 20px; border-radius: 8px;
+                  box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
+  .summary-card .value { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+  .summary-card .label { font-size: 12px; color: #888; text-transform: uppercase; margin-top: 4px; }
+  .section { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .badge-gold { background: #fff3cd; color: #856404; }
+  .badge-silver { background: #e9ecef; color: #495057; }
+  .badge-bronze { background: #fde8d0; color: #8b4513; }
+  .code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
+  .footnote { font-size: 12px; color: #888; margin-top: 8px; }
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    th, td { padding: 6px 8px; font-size: 12px; }
+    .summary-card { min-width: 100px; padding: 12px; }
+    .summary-card .value { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>端侧推理框架性能基准测试报告</h1>
+<p class="meta">
+  生成时间: 2026-05-27 00:40 &mdash;
+  设备: Redmi K30 Pro (SM8250) &mdash;
+  测试: 3 后端 &times; 4 模型 = 12 组
+</p>
+
+<div class="summary-bar">
+  <div class="summary-card">
+    <div class="value">3</div>
+    <div class="label">后端</div>
+  </div>
+  <div class="summary-card">
+    <div class="value">12</div>
+    <div class="label">测试总数</div>
+  </div>
+  <div class="summary-card">
+    <div class="value" style="color:#155724;">11</div>
+    <div class="label">通过</div>
+  </div>
+  <div class="summary-card">
+    <div class="value" style="color:#721c24;">1</div>
+    <div class="label">失败/跳过</div>
+  </div>
+  <div class="summary-card">
+    <div class="value">91.7%</div>
+    <div class="label">通过率</div>
+  </div>
+</div>
+
+<h2>跨后端性能对比</h2>
+
+<div class="section">
+<table>
+  <thead>
+    <tr>
+      <th>后端</th>
+      <th>模型</th>
+      <th>Init(ms)</th>
+      <th>P50(ms)</th>
+      <th>P90(ms)</th>
+      <th>P99(ms)</th>
+      <th>FPS</th>
+      <th>Cosine Sim</th>
+      <th>状态</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MNN</strong></td>
+      <td class="left">MobileNetV2</td>
+      <td class="num">27.23</td>
+      <td class="num best">8.56</td>
+      <td class="num best">8.88</td>
+      <td class="num best">9.79</td>
+      <td class="num best">115.81</td>
+      <td class="num">1.000000</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr>
+      <td>ONNX Runtime</td>
+      <td class="left">MobileNetV2</td>
+      <td class="num">33.57</td>
+      <td class="num">17.93</td>
+      <td class="num">18.09</td>
+      <td class="num">18.43</td>
+      <td class="num">55.75</td>
+      <td class="num">-</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr>
+      <td>MindSpore Lite</td>
+      <td class="left">MobileNetV2</td>
+      <td class="num">135.94</td>
+      <td class="num">9.17</td>
+      <td class="num">10.79</td>
+      <td class="num">11.31</td>
+      <td class="num">104.77</td>
+      <td class="num">1.000000</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr><td colspan="9" style="background:#f5f7fa; padding:4px;"></td></tr>
+    <tr>
+      <td>MNN</td>
+      <td class="left">ResNet50</td>
+      <td class="num">440.59</td>
+      <td class="num">83.80</td>
+      <td class="num">85.72</td>
+      <td class="num">103.55</td>
+      <td class="num">11.84</td>
+      <td class="num">1.000000</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr>
+      <td>ONNX Runtime</td>
+      <td class="left">ResNet50</td>
+      <td class="num">377.50</td>
+      <td class="num">84.39</td>
+      <td class="num">84.80</td>
+      <td class="num">87.62</td>
+      <td class="num">11.84</td>
+      <td class="num">-</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr>
+      <td><strong>MindSpore Lite</strong></td>
+      <td class="left">ResNet50</td>
+      <td class="num best">202.48</td>
+      <td class="num best">65.60</td>
+      <td class="num best">66.06</td>
+      <td class="num best">67.70</td>
+      <td class="num best">15.23</td>
+      <td class="num">1.000000</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr><td colspan="9" style="background:#f5f7fa; padding:4px;"></td></tr>
+    <tr>
+      <td>MNN</td>
+      <td class="left">YOLOv8n</td>
+      <td class="num">98.34</td>
+      <td class="num">87.49</td>
+      <td class="num">88.37</td>
+      <td class="num">90.16</td>
+      <td class="num">11.97</td>
+      <td class="num">1.000000</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr>
+      <td>ONNX Runtime</td>
+      <td class="left">YOLOv8n</td>
+      <td class="num best">34.65</td>
+      <td class="num">102.14</td>
+      <td class="num">102.58</td>
+      <td class="num">103.89</td>
+      <td class="num">9.79</td>
+      <td class="num">-</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr>
+      <td><strong>MindSpore Lite</strong></td>
+      <td class="left">YOLOv8n</td>
+      <td class="num">287.19</td>
+      <td class="num best">76.20</td>
+      <td class="num best">78.33</td>
+      <td class="num best">83.32</td>
+      <td class="num best">13.11</td>
+      <td class="num">1.000000</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr><td colspan="9" style="background:#f5f7fa; padding:4px;"></td></tr>
+    <tr>
+      <td>MNN</td>
+      <td class="left">BERT</td>
+      <td class="num">845.59</td>
+      <td class="num">318.92</td>
+      <td class="num">324.22</td>
+      <td class="num">366.95</td>
+      <td class="num">3.12</td>
+      <td class="num">0.990439</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr>
+      <td><strong>ONNX Runtime</strong></td>
+      <td class="left">BERT</td>
+      <td class="num best">659.65</td>
+      <td class="num best">214.93</td>
+      <td class="num best">216.80</td>
+      <td class="num best">235.54</td>
+      <td class="num best">4.64</td>
+      <td class="num">-</td>
+      <td><span class="pass">PASS</span></td>
+    </tr>
+    <tr>
+      <td>MindSpore Lite</td>
+      <td class="left">BERT</td>
+      <td class="num">77.57</td>
+      <td class="num">0.00</td>
+      <td class="num">0.00</td>
+      <td class="num">0.00</td>
+      <td class="num">0.00</td>
+      <td class="num">-</td>
+      <td><span class="fail">FAIL</span></td>
+    </tr>
+  </tbody>
+</table>
+<p class="footnote"><strong>注：</strong> ONNX Runtime 为精度参考基准，不自比。加粗行 = 每组模型 FPS 最优。</p>
+</div>
+
+<h2>性能排名</h2>
+
+<div class="section">
+<table>
+  <thead>
+    <tr>
+      <th>模型</th>
+      <th>第1名 (FPS)</th>
+      <th>第2名 (FPS)</th>
+      <th>第3名 (FPS)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MobileNetV2</strong></td>
+      <td><span class="badge badge-gold">MNN: 115.81</span></td>
+      <td><span class="badge badge-silver">MSLite: 104.77</span></td>
+      <td><span class="badge badge-bronze">ONNXRT: 55.75</span></td>
+    </tr>
+    <tr>
+      <td><strong>ResNet50</strong></td>
+      <td><span class="badge badge-gold">MSLite: 15.23</span></td>
+      <td><span class="badge badge-silver">MNN: 11.84</span></td>
+      <td><span class="badge badge-bronze">ONNXRT: 11.84</span></td>
+    </tr>
+    <tr>
+      <td><strong>YOLOv8n</strong></td>
+      <td><span class="badge badge-gold">MSLite: 13.11</span></td>
+      <td><span class="badge badge-silver">MNN: 11.97</span></td>
+      <td><span class="badge badge-bronze">ONNXRT: 9.79</span></td>
+    </tr>
+    <tr>
+      <td><strong>BERT</strong></td>
+      <td><span class="badge badge-gold">ONNXRT: 4.64</span></td>
+      <td><span class="badge badge-silver">MNN: 3.12</span></td>
+      <td><span class="badge badge-bronze">MSLite: FAIL</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2>各后端详情</h2>
+
+<div class="section">
+<h3>MNN</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>Init(ms)</th><th>P50(ms)</th><th>P90(ms)</th><th>P99(ms)</th><th>FPS</th><th>Cosine Sim</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>MobileNetV2</td><td class="num">27.23</td><td class="num">8.56</td><td class="num">8.88</td><td class="num">9.79</td><td class="num">115.81</td><td class="num">1.000000</td><td><span class="pass">PASS</span></td></tr>
+    <tr><td>ResNet50</td><td class="num">440.59</td><td class="num">83.80</td><td class="num">85.72</td><td class="num">103.55</td><td class="num">11.84</td><td class="num">1.000000</td><td><span class="pass">PASS</span></td></tr>
+    <tr><td>YOLOv8n</td><td class="num">98.34</td><td class="num">87.49</td><td class="num">88.37</td><td class="num">90.16</td><td class="num">11.97</td><td class="num">1.000000</td><td><span class="pass">PASS</span></td></tr>
+    <tr><td>BERT</td><td class="num">845.59</td><td class="num">318.92</td><td class="num">324.22</td><td class="num">366.95</td><td class="num">3.12</td><td class="num">0.990439</td><td><span class="pass">PASS</span></td></tr>
+    <tr class="summary-row"><td><strong>Avg</strong></td><td class="num">352.94</td><td class="num">124.69</td><td class="num">126.80</td><td class="num">142.61</td><td class="num">35.69</td><td colspan="2"></td></tr>
+  </tbody>
+</table>
+
+<h3>ONNX Runtime</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>Init(ms)</th><th>P50(ms)</th><th>P90(ms)</th><th>P99(ms)</th><th>FPS</th><th>Cosine Sim</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>MobileNetV2</td><td class="num">33.57</td><td class="num">17.93</td><td class="num">18.09</td><td class="num">18.43</td><td class="num">55.75</td><td class="num">-</td><td><span class="pass">PASS</span></td></tr>
+    <tr><td>ResNet50</td><td class="num">377.50</td><td class="num">84.39</td><td class="num">84.80</td><td class="num">87.62</td><td class="num">11.84</td><td class="num">-</td><td><span class="pass">PASS</span></td></tr>
+    <tr><td>YOLOv8n</td><td class="num">34.65</td><td class="num">102.14</td><td class="num">102.58</td><td class="num">103.89</td><td class="num">9.79</td><td class="num">-</td><td><span class="pass">PASS</span></td></tr>
+    <tr><td>BERT</td><td class="num">659.65</td><td class="num">214.93</td><td class="num">216.80</td><td class="num">235.54</td><td class="num">4.64</td><td class="num">-</td><td><span class="pass">PASS</span></td></tr>
+    <tr class="summary-row"><td><strong>Avg</strong></td><td class="num">276.34</td><td class="num">104.85</td><td class="num">105.57</td><td class="num">111.37</td><td class="num">20.51</td><td colspan="2"></td></tr>
+  </tbody>
+</table>
+
+<h3>MindSpore Lite</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>Init(ms)</th><th>P50(ms)</th><th>P90(ms)</th><th>P99(ms)</th><th>FPS</th><th>Cosine Sim</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>MobileNetV2</td><td class="num">135.94</td><td class="num">9.17</td><td class="num">10.79</td><td class="num">11.31</td><td class="num">104.77</td><td class="num">1.000000</td><td><span class="pass">PASS</span></td></tr>
+    <tr><td>ResNet50</td><td class="num">202.48</td><td class="num">65.60</td><td class="num">66.06</td><td class="num">67.70</td><td class="num">15.23</td><td class="num">1.000000</td><td><span class="pass">PASS</span></td></tr>
+    <tr><td>YOLOv8n</td><td class="num">287.19</td><td class="num">76.20</td><td class="num">78.33</td><td class="num">83.32</td><td class="num">13.11</td><td class="num">1.000000</td><td><span class="pass">PASS</span></td></tr>
+    <tr><td>BERT</td><td class="num">77.57</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">0.00</td><td class="num">-</td><td><span class="fail">FAIL</span></td></tr>
+    <tr class="summary-row"><td><strong>Avg*</strong></td><td class="num">175.80</td><td class="num">37.74</td><td class="num">38.80</td><td class="num">40.58</td><td class="num">33.28</td><td colspan="2"></td></tr>
+  </tbody>
+</table>
+<p class="footnote">* Avg 含 BERT 失败项 (0.00)，有效平均参考 MobileNetV2/ResNet50/YOLOv8n。</p>
+</div>
+
+<h2>精度验证</h2>
+
+<div class="section">
+<table>
+  <thead>
+    <tr><th>后端</th><th>模型</th><th>Cosine Similarity</th><th>MAE</th><th>Max Error</th><th>判定</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>MNN</td><td>MobileNetV2</td><td class="num">1.000000</td><td class="num">0.000002</td><td class="num">0.000009</td><td><span class="pass">Excellent</span></td></tr>
+    <tr><td>MindSpore Lite</td><td>MobileNetV2</td><td class="num">1.000000</td><td class="num">0.000003</td><td class="num">0.000015</td><td><span class="pass">Excellent</span></td></tr>
+    <tr><td>MNN</td><td>ResNet50</td><td class="num">1.000000</td><td class="num">0.000070</td><td class="num">0.000359</td><td><span class="pass">Excellent</span></td></tr>
+    <tr><td>MindSpore Lite</td><td>ResNet50</td><td class="num">1.000000</td><td class="num">0.000002</td><td class="num">0.000009</td><td><span class="pass">Excellent</span></td></tr>
+    <tr><td>MNN</td><td>YOLOv8n</td><td class="num">1.000000</td><td class="num">0.000082</td><td class="num">0.046753</td><td><span class="pass">Excellent</span></td></tr>
+    <tr><td>MindSpore Lite</td><td>YOLOv8n</td><td class="num">1.000000</td><td class="num">0.000004</td><td class="num">0.001587</td><td><span class="pass">Excellent</span></td></tr>
+    <tr><td>MNN</td><td>BERT</td><td class="num">0.990439</td><td class="num">0.068855</td><td class="num">0.612348</td><td><span class="pass">Good</span></td></tr>
+  </tbody>
+</table>
+<p class="footnote">以 ONNX Runtime 输出为参考基准。余弦相似度 0.99+ 为通过。</p>
+</div>
+
+<h2>数据真实性验证</h2>
+
+<div class="section">
+<table>
+  <thead>
+    <tr><th>验证项</th><th>结果</th><th>来源命令</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>设备型号</td><td>Redmi K30 Pro (M2007J3SC)</td><td><span class="code">adb shell getprop ro.product.model</span></td></tr>
+    <tr><td>设备 ID</td><td>b08dee23</td><td><span class="code">.benchmarkrc.yml device.id</span></td></tr>
+    <tr><td>SoC</td><td>Snapdragon 865 (SM8250)</td><td><span class="code">/proc/cpuinfo CPU part 0x805</span></td></tr>
+    <tr><td>代码版本</td><td>1a874e3 (main)</td><td><span class="code">git log --oneline -1</span></td></tr>
+    <tr><td>二进制 MD5</td><td>ef4cf192073dda240cc3c2b35ea20fd0</td><td><span class="code">md5sum build_android/src/benchmark_inference</span></td></tr>
+    <tr><td>原始日志</td><td>720 lines / 19.5 KB</td><td><span class="code">wc -l results/benchmark_12combo_20260527_001759.log</span></td></tr>
+    <tr><td>初始温度</td><td>29.0 C</td><td><span class="code">cat thermal_zone0/temp</span></td></tr>
+    <tr><td>最高温度</td><td>41.0 C</td><td><span class="code">cat thermal_zone*/temp</span></td></tr>
+    <tr><td>降频风险</td><td><span class="pass">无</span> (&lt; 45 C)</td><td>温度在安全范围内</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>已知问题</h2>
+
+<div class="section">
+<table>
+  <thead>
+    <tr><th>#</th><th>问题</th><th>影响范围</th><th>状态</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td class="left"><strong>BERT + MindSpore Lite 无法测试</strong> -- 设备上缺少 <span class="code">bert.ms</span> 模型文件。主机上 converter_lite OOM（7.4GB RAM + 417MB ONNX），需增加 swap 或在 16GB+ 机器上转换</td>
+      <td>MSLite BERT</td>
+      <td><span class="warn">待解决</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td class="left"><strong>峰值内存数据异常</strong> -- 部分测试 Peak mem 为溢出值，因 <span class="code">/proc/self/status</span> 解析 Bug</td>
+      <td>多组测试</td>
+      <td><span class="warn">待修复</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td class="left"><strong>无 root 权限</strong> -- CPU 调度器保持在 <span class="code">schedutil</span>，未锁定 <span class="code">performance</span> 模式</td>
+      <td>所有测试</td>
+      <td><span class="warn">环境限制</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+</body>
+</html>
