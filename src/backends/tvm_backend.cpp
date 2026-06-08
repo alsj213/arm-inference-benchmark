@@ -119,33 +119,68 @@ bool TVMBackend::infer_with_output(const std::vector<float>& input, std::vector<
     if (!initialized_) return false;
     if (input.size() != input_size_) return false;
 
-    // 构建 DLTensor 视图 — 引用外部 buffer（无拷贝）
-    DLTensor dlt;
-    dlt.data = const_cast<float*>(input.data());
-    dlt.device = {kDLCPU, 0};
-    dlt.ndim = static_cast<int>(input_shape_.size());
-    dlt.dtype = {kDLFloat, 32, 1};
-    dlt.shape = const_cast<int64_t*>(input_shape_.data());
-    dlt.strides = nullptr;
-    dlt.byte_offset = 0;
+    // 多输入模型 (BERT): 需要 int64 类型的 input_ids + attention_mask
+    // 单输入模型: 直接使用 float32 数据
+    std::vector<int64_t> input_ids_buf;
+    std::vector<int64_t> attention_mask_buf;
 
-    tvm::ffi::TensorView tv(&dlt);
+    DLTensor dlt1, dlt2;
+
+    if (num_model_inputs_ > 1) {
+        // 将 float 输入转换为 int64 token IDs
+        // 转换逻辑与 ORT 后端完全一致，保证精度可比
+        input_ids_buf.resize(input.size());
+        attention_mask_buf.resize(input.size());
+        for (size_t i = 0; i < input.size(); i++) {
+            int64_t val = static_cast<int64_t>(input[i] * 1000.0f) % 30521;
+            if (val < 0) val = -val;
+            if (val == 0) val = 101;  // [CLS] token
+            input_ids_buf[i] = val;
+            attention_mask_buf[i] = val;  // 与 ORT 一致: 两者使用相同转换
+        }
+
+        // DLTensor for input_ids
+        dlt1.data = input_ids_buf.data();
+        dlt1.device = {kDLCPU, 0};
+        dlt1.ndim = static_cast<int>(input_shape_.size());
+        dlt1.dtype = {kDLInt, 64, 1};
+        dlt1.shape = const_cast<int64_t*>(input_shape_.data());
+        dlt1.strides = nullptr;
+        dlt1.byte_offset = 0;
+
+        // DLTensor for attention_mask
+        dlt2.data = attention_mask_buf.data();
+        dlt2.device = {kDLCPU, 0};
+        dlt2.ndim = static_cast<int>(input_shape_.size());
+        dlt2.dtype = {kDLInt, 64, 1};
+        dlt2.shape = const_cast<int64_t*>(input_shape_.data());
+        dlt2.strides = nullptr;
+        dlt2.byte_offset = 0;
+    } else {
+        // 单输入: float32
+        dlt1.data = const_cast<float*>(input.data());
+        dlt1.device = {kDLCPU, 0};
+        dlt1.ndim = static_cast<int>(input_shape_.size());
+        dlt1.dtype = {kDLFloat, 32, 1};
+        dlt1.shape = const_cast<int64_t*>(input_shape_.data());
+        dlt1.strides = nullptr;
+        dlt1.byte_offset = 0;
+    }
 
     try {
         auto& si = *(tvm::ffi::Function*)set_input_;
         auto& is = *(tvm::ffi::Function*)invoke_;
         auto& go = *(tvm::ffi::Function*)get_outputs_;
 
-        // 为每个输入设置数据
-        // Relax VM set_input: (func_name, index, tensor) 或 (func_name, tensor)
+        // Relax VM set_input: 单输入 set_input("main", tensor)
+        //                    多输入 set_input("main", tensor1, tensor2)
         if (num_model_inputs_ == 1) {
-            // 单输入: set_input(func_name, tensor)
-            si("main", tv);
+            tvm::ffi::TensorView tv1(&dlt1);
+            si("main", tv1);
         } else {
-            // 多输入: set_input(func_name, index, tensor)
-            for (int i = 0; i < num_model_inputs_; i++) {
-                si("main", i, tv);
-            }
+            tvm::ffi::TensorView tv1(&dlt1);
+            tvm::ffi::TensorView tv2(&dlt2);
+            si("main", tv1, tv2);
         }
         is("main");
 

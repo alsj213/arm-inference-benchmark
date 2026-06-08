@@ -1,0 +1,9 @@
+=== BERT TVM Benchmark (4 threads, FP32, 10 runs) ===
+Date: 2026-06-08
+Device: M2007J3SC (SM8250)
+Commit: d84d96e
+
+Fix: set_input("main", tv_ids, tv_mask) — 一次传递全部输入
+     int64 token ID 转换逻辑对齐 ORT (float→int64)
+
+{"backend":"TVM","model":"bert","precision":"fp32","threads":4,"gpu":false,"init_time_ms":901.809,"peak_memory_kb":18446744073709551612,"latency":{"min":39469.3,"max":39640.3,"mean":39540.6,"p50":39540.2,"p90":39640.3,"p95":39640.3,"p99":39640.3,"std_dev":47.6468},"throughput_fps":0.0252905,"accuracy":{"passed":true,"cosine_similarity":1,"mean_absolute_error":1.5141e-06,"max_absolute_error":1.35899e-05}}

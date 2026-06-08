@@ -53,7 +53,7 @@
 | | TVM | 20.29 | 4406.27 | 4406.68 | 0.23 | 0.003x ⚠️ | 1.000000 |
 | **BERT** | ORT | 643.56 | **263.50** | **270.49** | **3.77** | 1.00x | — |
 | | **MNN** | 1202.04 | 322.13 | 328.92 | 3.09 | 0.82x ⚠️ | 0.990439 |
-| | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 多输入待适配 | ⏳ |
+| | TVM | 901.81 | 39540.2 | 39640.3 | 0.025 | 0.0004x ⚠️ | 1.000000 |
 | **Qwen2-0.5B** | **llama.cpp** | 0.37s | **19.25ms/tok** | — | **51.96 tok/s** | LLM 标杆 | — |
 | | MNN LLM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | — |
 | | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待探索 | — |
@@ -114,7 +114,8 @@
 | **MobileNetV2** | 1.000000 | 实测 | ✅ 精度一致 |
 | **ResNet50** | 1.000000 | 实测 | ✅ 精度一致 |
 | **YOLOv8n** | 1.000000 | 实测 | ✅ 精度一致 |
-| **BERT** | 0.990439 | 实测 | ⚠️ 微小偏差，可接受 |
+| **BERT** | 0.990439 | 实测 | ⚠️ MNN vs ORT 微小偏差，可接受 |
+| **BERT (TVM) ** | 1.000000 | 0.000002 | ✅ TVM vs ORT 完美一致 |
 | **mobilevit_s** | 1.000000 | 0.000172 | ✅ 精度一致 |
 
 ---
@@ -133,13 +134,15 @@
 
 **llama.cpp LLM 表现**: Qwen2-0.5B Q4_K_M 在骁龙 865 上达到 51.96 tok/s，比单线程 (32.5 tok/s) 提升 60%。
 
-**TVM 未调优性能**: MobileNetV2/ResNet50/YOLOv8n/mobilevit_s 四模型延迟为 MNN 的 31-60x（mobilevit_s 31x, ResNet50 57x），ORT 的 24-33x。编译流程（ONNX→Relax→.so→NDK 交叉编译）已验证通顺，精度 Cos=1.0。瓶颈在缺少 auto-tuning（当前为 0 trial 基线），后续调优预期可达 ~5-10x 提升。
+**TVM 未调优性能**: MobileNetV2/ResNet50/YOLOv8n/mobilevit_s/BERT 五模型延迟为 MNN 的 31-150x（BERT 150x, ResNet50 57x），ORT 的 24-150x。编译流程（ONNX→Relax→.so→NDK 交叉编译）已验证通顺，精度 Cos=1.0。瓶颈在缺少 auto-tuning（当前为 0 trial 基线），后续调优预期可达 ~5-10x 提升。
 
-**TVM 限制**: BERT 多输入（input_ids + attention_mask）在 Relax VM set_input 调用中参数传递未适配；Qwen2-0.5B 不适用 TVM Relax（需专门的 LLM 编译管线）。
+**TVM 限制**: Qwen2-0.5B 不适用 TVM Relax（需专门的 LLM 编译管线）。
 
 **mobilevit_s 补齐**: ONNX 从 timm 导出（opset 18）+ MNN 转换 + TVM Relax 编译全链路打通。MNN 1.55x vs ORT，精度 1.000000。TVM 精度 1.000000（延迟 2907ms，0 trial 基线）。
 
-**Phase B 完成**: TVM 4 整模型 + 14 单算子全部编译成功，设备实测通过。BERT/Qwen 标记为待解决。编译脚本 `tools/tvm/compile_all_models.py` 支持 torch.export + ONNX 双路径，可复用。
+**BERT TVM 多输入修复**: Relax VM `set_input("main", tv_ids, tv_mask)` 一次传递全部输入，int64 token ID 转换对齐 ORT 逻辑。精度 Cos=1.0，延迟 39.5s（0 trial）。Qwen2 TVM 待探索。
+
+**Phase B 完成**: TVM 5 整模型 + 14 单算子全部编译成功，设备实测通过。仅 Qwen2 TVM 标记为待探索。编译脚本 `tools/tvm/compile_all_models.py` 支持 torch.export + ONNX 双路径，可复用。
 
 ## 快速开始
 
