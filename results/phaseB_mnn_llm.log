@@ -1,0 +1,12 @@
+=== MNN LLM Qwen2-0.5B Benchmark ===
+Date: 2026-06-08
+Device: M2007J3SC (SM8250, 骁龙 865)
+Model: Qwen2-0.5B (HQQ 4-bit, 294.87 MiB)
+Config: llmexport.py --hqq
+
+prefill:  pp64=229.07  pp128=265.44  pp256=286.10  pp512=268.91 tok/s
+decode:   tg128=62.22 tok/s (4 threads)
+
+vs llama.cpp (same device, Q4_K_M, 51.96 tok/s): MNN LLM 1.20x faster
+
+Next: MNN LLM mtok→txt, MLC-LLM 独立评测

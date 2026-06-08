@@ -82,8 +82,11 @@ if(BENCHMARK_NCNN)
 endif()
 
 if(BENCHMARK_MNN)
-    list(APPEND BACKEND_SRCS backends/mnn_backend.cpp)
+    list(APPEND BACKEND_SRCS backends/mnn_backend.cpp backends/mnn_llm_backend.cpp)
     list(APPEND BACKEND_LIBS MNN)
+    # MNN LLM engine header (for llm_benchmark / mnn_llm_backend)
+    target_include_directories(benchmark_common PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/MNN/transformers/llm/engine/include)
 endif()
 
 if(BENCHMARK_TFLITE)
@@ -217,13 +220,18 @@ if(BENCHMARK_TVM)
     target_link_libraries(single_op_benchmark PRIVATE tvm_runtime)
 endif()
 
-# LLM benchmark executable for llama.cpp
-if(BENCHMARK_LLAMACPP)
+# LLM benchmark executable for llama.cpp + MNN LLM
+if(BENCHMARK_LLAMACPP OR BENCHMARK_MNN)
     add_executable(llm_benchmark
         llm_benchmark.cpp
     )
     target_compile_options(llm_benchmark PRIVATE -fexceptions)
-    # Compile definitions and llama lib already inherited from benchmark_common
+    if(BENCHMARK_LLAMACPP)
+        target_compile_definitions(llm_benchmark PRIVATE BENCHMARK_LLAMACPP)
+    endif()
+    if(BENCHMARK_MNN)
+        target_compile_definitions(llm_benchmark PRIVATE BENCHMARK_MNN)
+    endif()
     target_link_libraries(llm_benchmark
         PRIVATE
         benchmark_common

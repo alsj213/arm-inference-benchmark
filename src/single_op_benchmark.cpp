@@ -52,19 +52,19 @@ static const std::map<std::string, std::vector<std::string>> CATEGORY_MODELS = {
         "models/single_ops/MatMul_768x3072.onnx",
     }},
 
-    // ═══════ LayerNorm ═══════
+    // ═══════ LayerNorm (BERT: [1,128,768] normalized_shape=768) ═══════
     {"layernorm", {
-        "models/single_ops/LayerNorm.onnx",
+        "models/single_ops/LayerNorm_BERT.onnx",
     }},
 
-    // ═══════ Softmax ═══════
+    // ═══════ Softmax (BERT attention: [1,128,128] dim=-1) ═══════
     {"softmax", {
-        "models/single_ops/Softmax.onnx",
+        "models/single_ops/Softmax_BERT.onnx",
     }},
 
-    // ═══════ GELU ═══════
+    // ═══════ GELU (BERT FFN: [1,128,3072]) ═══════
     {"gelu", {
-        "models/single_ops/GELU.onnx",
+        "models/single_ops/GELU_BERT.onnx",
     }},
 };
 
@@ -115,6 +115,11 @@ static std::vector<int> parse_shape_from_name(const std::string& fname) {
     if (fname.find("MatMul_768x768x768") != std::string::npos) return {1, 768};
     if (fname.find("MatMul_768x3072") != std::string::npos)     return {1, 768};
     if (fname.find("MatMul_3072x768") != std::string::npos)     return {1, 3072};
+
+    // NLP ops (BERT-specific shapes)
+    if (fname.find("LayerNorm_BERT") != std::string::npos) return {1, 128, 768};
+    if (fname.find("Softmax_BERT") != std::string::npos)    return {1, 128, 128};
+    if (fname.find("GELU_BERT") != std::string::npos)       return {1, 128, 3072};
 
     // DWConv: 通道数决定空间尺寸
     if (fname.find("DWConv_C16_3x3") != std::string::npos)  return {1, 16, 112, 112};
@@ -168,6 +173,19 @@ static bool run_single_op(const std::string& backend_name, const std::string& mo
         if (pos != std::string::npos) {
             actual_model_path.replace(pos, 5, ".mnn");
         }
+    }
+    // TVM 后端需要 tvm_models/ 下的 .so 文件
+    if (bt == BackendType::TVM) {
+        // models/single_ops/XXX.onnx → tvm_models/XXX_tvm.so
+        size_t last_slash = actual_model_path.rfind('/');
+        std::string fname = (last_slash != std::string::npos)
+            ? actual_model_path.substr(last_slash + 1)
+            : actual_model_path;
+        size_t dot = fname.rfind(".onnx");
+        if (dot != std::string::npos) {
+            fname = fname.substr(0, dot);
+        }
+        actual_model_path = "tvm_models/" + fname + "_tvm.so";
     }
     config.model_path = actual_model_path;
 

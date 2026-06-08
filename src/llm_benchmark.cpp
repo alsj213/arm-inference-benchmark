@@ -1,95 +1,212 @@
 /*
- * LLM Benchmark for llama.cpp
- * Tests Qwen-0.5B and other models on mobile devices
+ * LLM Benchmark — unified entry for llama.cpp + MNN LLM
+ * Usage: ./llm_benchmark [--backend <llamacpp|mnn_llm>] [--model <path>]
  */
 
-#include "backends/llamacpp_backend.h"
 #include <chrono>
 #include <cstdio>
+#include <cstring>
 #include <string>
 
-int main(int argc, char* argv[]) {
-    printf("========================================\n");
-    printf("   LLM Benchmark (llama.cpp backend)   \n");
-    printf("========================================\n\n");
+#ifdef BENCHMARK_LLAMACPP
+#include "backends/llamacpp_backend.h"
+#endif
+#ifdef BENCHMARK_MNN
+#include "backends/mnn_llm_backend.h"
+#endif
 
-    std::string model_path = "models/nlp/qwen2_0.5b/qwen2-0_5b-instruct-q4_k_m.gguf";
+struct Args {
+    std::string backend = "llamacpp";
+    std::string model;
     int max_tokens = 128;
     int n_ctx = 1024;
+    int n_prompt = 128;
+    int n_repeat = 5;
+    bool benchmark_only = false;
+};
 
-    if (argc > 1) {
-        model_path = argv[1];
+void print_usage(const char* prog) {
+    printf("Usage: %s [options]\n", prog);
+    printf("Options:\n");
+    printf("  --backend <llamacpp|mnn_llm>   LLM backend (default: llamacpp)\n");
+    printf("  --model <path>                  Model file/config path\n");
+    printf("  --max-tokens <n>                Max tokens to generate (default: 128)\n");
+    printf("  --n-prompt <n>                  Prompt length for benchmark (default: 128)\n");
+    printf("  --n-repeat <n>                  Benchmark repeats (default: 5)\n");
+    printf("  --benchmark                     Benchmark mode (random tokens, perf only)\n");
+    printf("  --help                          Show this help\n");
+}
+
+Args parse_args(int argc, char* argv[]) {
+    Args args;
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--backend") == 0 && i + 1 < argc) {
+            args.backend = argv[++i];
+        } else if (strcmp(argv[i], "--model") == 0 && i + 1 < argc) {
+            args.model = argv[++i];
+        } else if (strcmp(argv[i], "--max-tokens") == 0 && i + 1 < argc) {
+            args.max_tokens = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--n-prompt") == 0 && i + 1 < argc) {
+            args.n_prompt = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--n-repeat") == 0 && i + 1 < argc) {
+            args.n_repeat = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--benchmark") == 0) {
+            args.benchmark_only = true;
+        } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+            print_usage(argv[0]);
+            exit(0);
+        }
     }
-    if (argc > 2) {
-        max_tokens = atoi(argv[2]);
-    }
+    return args;
+}
+
+// ── llama.cpp path ──
+#ifdef BENCHMARK_LLAMACPP
+static bool run_llamacpp(const Args& args) {
+    printf("========================================\n");
+    printf("   LLM Benchmark (llama.cpp)\n");
+    printf("========================================\n\n");
+
+    std::string model_path = args.model.empty()
+        ? "models/nlp/qwen2_0.5b/qwen2-0_5b-instruct-q4_k_m.gguf"
+        : args.model;
 
     printf("Model: %s\n", model_path.c_str());
-    printf("Max tokens: %d\n", max_tokens);
-    printf("Context size: %d\n\n", n_ctx);
+    printf("Max tokens: %d\n\n", args.max_tokens);
 
-    // Initialize backend (don't auto-load model - we'll load with custom n_ctx)
     LlamaCppBackend backend;
     BenchmarkConfig config;
-    // Leave model_path empty so init() only initializes the backend without loading
     config.model_path = "";
 
-    printf("Initializing llama.cpp backend...\n");
+    printf("Initializing llama.cpp...\n");
     if (!backend.init(config)) {
-        printf("ERROR: Failed to initialize llama.cpp backend\n");
-        return 1;
+        printf("ERROR: init failed\n");
+        return false;
     }
 
-    // Load model
-    printf("\nLoading model...\n");
-    auto start_load = std::chrono::high_resolution_clock::now();
+    printf("Loading model...\n");
+    auto t0 = std::chrono::high_resolution_clock::now();
+    if (!backend.load_model(model_path, args.n_ctx, 512)) {
+        printf("ERROR: load failed\n");
+        return false;
+    }
+    auto t1 = std::chrono::high_resolution_clock::now();
+    double load_s = std::chrono::duration<double>(t1 - t0).count();
+    printf("Loaded in %.2f s\n\n", load_s);
 
-    if (!backend.load_model(model_path, n_ctx, 512)) {
-        printf("ERROR: Failed to load model\n");
-        return 1;
+    if (args.benchmark_only) {
+        // Benchmark mode: random tokens, token-level API (same as llama-bench)
+        printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
+               args.n_prompt, args.max_tokens, args.n_repeat);
+        auto r = backend.benchmark_decode(args.n_prompt, args.max_tokens, args.n_repeat);
+        printf("prefill: %.2f tok/s  |  decode: %.2f tok/s\n",
+               r.prefill_tok_per_s, r.decode_tok_per_s);
+    } else {
+        // Interactive mode
+        std::string prompt = "Below is an instruction that describes a task. "
+            "Write a response that appropriately completes the request.\n\n"
+            "### Instruction:\nExplain what is machine learning in one sentence.\n\n### Response:\n";
+
+        // Warm-up
+        printf("--- Warm-up ---\n");
+        std::string warmup = backend.generate(prompt, 16, 0.0f);
+        printf("Warm-up: %s\n\n", warmup.c_str());
+
+        // Generation
+        printf("--- Generate ---\n");
+        auto st = std::chrono::high_resolution_clock::now();
+        std::string output = backend.generate(prompt, args.max_tokens, 0.7f);
+        auto et = std::chrono::high_resolution_clock::now();
+        double gen_s = std::chrono::duration<double>(et - st).count();
+
+        printf("\n%s\n\n", output.c_str());
+        printf("--- Results ---\n");
+        printf("Generation time: %.2f s\n", gen_s);
+        printf("Throughput: ~%.2f tok/s\n", args.max_tokens / gen_s);
     }
 
-    auto end_load = std::chrono::high_resolution_clock::now();
-    double load_time = std::chrono::duration<double>(end_load - start_load).count();
-    printf("Model loaded in %.2f seconds\n\n", load_time);
-
-    // Test prompt
-    std::string prompt = "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\nExplain what is machine learning in one sentence.\n\n### Response:\n";
-
-    printf("Running generation test...\n");
-    printf("Prompt: %s\n\n", prompt.substr(0, 80).c_str());
-
-    // Warm-up generation
-    printf("\n--- Warm-up generation ---\n");
-    std::string warmup_output = backend.generate(prompt, 16, 0.0f);
-    printf("Warm-up output: %s\n\n", warmup_output.c_str());
-
-    // Benchmark generation
-    printf("--- Performance Benchmark ---\n");
-    auto start_gen = std::chrono::high_resolution_clock::now();
-
-    std::string output = backend.generate(prompt, max_tokens, 0.7f);
-
-    auto end_gen = std::chrono::high_resolution_clock::now();
-    double gen_time = std::chrono::duration<double>(end_gen - start_gen).count();
-
-    // Count tokens (approximate - we can improve this later)
-    int output_tokens = std::min(max_tokens, (int)output.size() / 4);
-
-    printf("\nGenerated output:\n%s\n\n", output.c_str());
-    printf("========================================\n");
-    printf("           Performance Results          \n");
-    printf("========================================\n");
-    printf("Model load time:    %.2f s\n", load_time);
-    printf("Generation time:    %.2f s\n", gen_time);
-    printf("Tokens generated:   ~%d\n", output_tokens);
-    printf("Throughput:         %.2f tokens/sec\n", output_tokens / gen_time);
-    printf("Latency per token:  %.2f ms\n", (gen_time / output_tokens) * 1000);
-    printf("========================================\n");
-
-    // Cleanup
     backend.deinit();
-    printf("\nBenchmark completed!\n");
+    return true;
+}
+#else
+static bool run_llamacpp(const Args&) {
+    printf("llama.cpp backend not compiled (BENCHMARK_LLAMACPP=OFF)\n");
+    return false;
+}
+#endif
 
-    return 0;
+// ── MNN LLM path ──
+#ifdef BENCHMARK_MNN
+static bool run_mnn_llm(const Args& args) {
+    printf("========================================\n");
+    printf("   LLM Benchmark (MNN LLM)\n");
+    printf("========================================\n\n");
+
+    std::string config_path = args.model.empty()
+        ? "models/nlp/qwen2_0.5b/mnn_llm/config.json"
+        : args.model;
+
+    printf("Config: %s\n", config_path.c_str());
+    printf("Max tokens: %d\n\n", args.max_tokens);
+
+    MnnLlmBackend backend;
+    BenchmarkConfig config;
+    config.model_path = config_path;
+
+    printf("Loading MNN LLM model...\n");
+    auto t0 = std::chrono::high_resolution_clock::now();
+    if (!backend.load_model(config_path)) {
+        printf("ERROR: load failed\n");
+        return false;
+    }
+    auto t1 = std::chrono::high_resolution_clock::now();
+    double load_s = std::chrono::duration<double>(t1 - t0).count();
+    printf("Loaded in %.2f s\n\n", load_s);
+
+    if (args.benchmark_only) {
+        // Benchmark mode: random token IDs, measure decode
+        printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
+               args.n_prompt, args.max_tokens, args.n_repeat);
+        auto result = backend.benchmark(args.n_prompt, args.max_tokens, args.n_repeat);
+        printf("prefill: %.2f tok/s  |  decode: %.2f tok/s\n",
+               result.prefill_tok_per_s, result.decode_tok_per_s);
+    } else {
+        // Interactive mode
+        std::string prompt = "Hello, explain what machine learning is in one sentence.";
+
+        printf("--- Warm-up ---\n");
+        std::string warmup = backend.generate("Hello", 16);
+        printf("Warm-up: %s\n\n", warmup.c_str());
+
+        printf("--- Generate ---\n");
+        auto st = std::chrono::high_resolution_clock::now();
+        std::string output = backend.generate(prompt, args.max_tokens);
+        auto et = std::chrono::high_resolution_clock::now();
+        double gen_s = std::chrono::duration<double>(et - st).count();
+
+        printf("\n%s\n\n", output.c_str());
+        printf("--- Results ---\n");
+        printf("Generation time: %.2f s\n", gen_s);
+        printf("Throughput: ~%.2f tok/s\n", args.max_tokens / gen_s);
+    }
+
+    backend.deinit();
+    return true;
+}
+#else
+static bool run_mnn_llm(const Args&) {
+    printf("MNN LLM backend not compiled (BENCHMARK_MNN=OFF)\n");
+    return false;
+}
+#endif
+
+// ── main ──
+int main(int argc, char* argv[]) {
+    Args args = parse_args(argc, argv);
+
+    if (args.backend == "mnn_llm" || args.backend == "mnn") {
+        return run_mnn_llm(args) ? 0 : 1;
+    } else {
+        return run_llamacpp(args) ? 0 : 1;
+    }
 }

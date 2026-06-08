@@ -6,7 +6,9 @@
 
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
 #include <sstream>
+#include <chrono>
 #include <algorithm>
 
 bool LlamaCppBackend::init(const BenchmarkConfig& config) {
@@ -203,6 +205,79 @@ std::string LlamaCppBackend::generate(const std::string& prompt, int max_tokens,
   (void)temperature;
   return "llama.cpp not enabled";
 #endif
+}
+
+LlamaCppBackend::TokenBenchResult LlamaCppBackend::benchmark_decode(
+        int n_prompt, int n_gen, int n_repeat) {
+    TokenBenchResult r = {};
+#ifdef BENCHMARK_LLAMACPP
+    if (!model_loaded_) return r;
+
+    // Random token IDs (bypass tokenizer, same as llama-bench)
+    std::vector<llama_token> tokens(n_prompt);
+    for (int i = 0; i < n_prompt; i++) {
+        tokens[i] = (rand() % 10000) + 100;
+    }
+
+    int n_batch = std::min(n_batch_, n_prompt);
+    llama_memory_t mem = llama_get_memory(ctx_);
+
+    double prefill_sum = 0, decode_sum = 0;
+
+    for (int rep = 0; rep < n_repeat + 1; rep++) {  // +1 warmup (skip first)
+        // Clear KV cache
+        llama_memory_seq_rm(mem, 0, 0, -1);
+        int n_past = 0;
+
+        // --- Prefill: batch decode all prompt tokens ---
+        auto t0 = std::chrono::high_resolution_clock::now();
+
+        llama_batch batch = llama_batch_init(n_batch, 0, 1);
+        for (int i = 0; i < n_prompt; i++) {
+            batch.token[i] = tokens[i];
+            batch.pos[i] = n_past + i;
+            batch.n_seq_id[i] = 1;
+            batch.seq_id[i][0] = 0;
+            batch.logits[i] = (i == n_prompt - 1) ? 1 : 0;
+        }
+        batch.n_tokens = n_prompt;
+        llama_decode(ctx_, batch);
+        n_past += n_prompt;
+
+        auto t1 = std::chrono::high_resolution_clock::now();
+
+        // --- Decode: generate n_gen tokens ---
+        llama_token new_token = llama_sampler_sample(smpl_, ctx_, -1);
+        auto t2 = std::chrono::high_resolution_clock::now();
+
+        for (int i = 0; i < n_gen - 1; i++) {
+            batch.n_tokens = 1;
+            batch.token[0] = new_token;
+            batch.pos[0] = n_past;
+            batch.n_seq_id[0] = 1;
+            batch.seq_id[0][0] = 0;
+            batch.logits[0] = 1;
+            llama_decode(ctx_, batch);
+            n_past++;
+            new_token = llama_sampler_sample(smpl_, ctx_, -1);
+        }
+        auto t3 = std::chrono::high_resolution_clock::now();
+        llama_batch_free(batch);
+
+        if (rep == 0) continue;  // skip warmup
+
+        double prefill_s = std::chrono::duration<double>(t1 - t0).count();
+        double decode_s  = std::chrono::duration<double>(t3 - t2).count();
+        prefill_sum += (double)n_prompt / prefill_s;
+        decode_sum  += (double)n_gen / decode_s;
+    }
+
+    r.prefill_tok_per_s = prefill_sum / n_repeat;
+    r.decode_tok_per_s  = decode_sum  / n_repeat;
+#else
+    (void)n_prompt; (void)n_gen; (void)n_repeat;
+#endif
+    return r;
 }
 
 void LlamaCppBackend::deinit() {
