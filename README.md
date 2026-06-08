@@ -103,7 +103,15 @@
 | 768×3072 | [1,768]×[768,3072] | BERT FFN | 0.549 | **0.513** | ORT **1.07x** |
 | 3072×768 | [1,3072]×[3072,768] | BERT FFN | 0.504 | **0.391** | ORT **1.29x** |
 
-> ⏳ NLP 算子 (LayerNorm / Softmax / GELU): ONNX 模型未生成，待补充。
+#### 表 E: NLP 算子 (BERT 热点)
+
+| 算子 | 形状 | 场景 | MNN(ms) | ORT(ms) | 胜者 |
+|------|------|------|---------|---------|------|
+| LayerNorm | [1,128,768] | BERT hidden | **0.182** | 0.305 | MNN **1.68x** |
+| Softmax | [1,128,128] | BERT attention | **0.085** | 0.217 | MNN **2.55x** |
+| GELU | [1,128,3072] | BERT FFN | **1.748** | 2.144 | MNN **1.23x** |
+
+> NLP 单算子全部生成自 PyTorch → ONNX (opset 18)，BERT 真实形状。MNN 在逐元素/规约类算子全面领先 ORT。
 
 ---
 
@@ -126,9 +134,10 @@
 
 **MobileViT-S (CV+Transformer 混合)**: MNN 仍以 1.55x 领先 ORT。mobilevit_s 含 LayerNorm/MatMul/Transpose 等 Transformer 算子 + Conv 混合，是 MNN 在混合架构上的首次验证。MNN 对 Conv 的 NCHW4c 优化仍发挥作用，但 Transformer 算子是纯 MatMul/Self-Attention，收益有限。
 
-**BERT 是唯一弱项**: MNN 在 BERT 上落后 ORT 22% (3.09 vs 3.77 FPS)，根因分析指向：
-1. MatMul 大矩阵 (768×3072) 落后 1.29x — MNN GEMM 长矩阵 pack 策略不如 ORT
-2. 单算子验证：768×768 MatMul ORT 快 1.47x，BERT 热点对齐
+**BERT 弱项根因已定位**: MNN 在 BERT 上落后 ORT 22% (3.09 vs 3.77 FPS)。NLP 单算子拆解揭示：
+1. **逐元素/激活算子 MNN 全面领先**: LayerNorm 1.68x / Softmax 2.55x / GELU 1.23x
+2. **MatMul 是唯一短板**: 768×768 落后 1.47x / 768×3072 落后 1.07x / 3072×768 落后 1.29x
+3. **结论**: BERT 的 MatMul 热点消耗 ~90% 总时间，MNN 的 GEMM pack 策略不如 ORT，逐元素优势被淹没
 
 **Conv1x1 通道失配是 MNN 盲区**: C31/C33 非对齐通道 ORT 分别快 1.38x/1.80x，优化思路是手写 Neon kernel 处理尾部通道。
 

@@ -1,0 +1,10 @@
+=== NLP 单算子 Benchmark (4 threads, FP32, 100 runs) ===
+Date: 2026-06-08
+Device: M2007J3SC (SM8250)
+Commit: 8657bfc
+
+LayerNorm_BERT [1,128,768]:  MNN mean=0.182ms  ORT mean=0.305ms  MNN 1.68x
+Softmax_BERT   [1,128,128]:  MNN mean=0.085ms  ORT mean=0.217ms  MNN 2.55x
+GELU_BERT      [1,128,3072]: MNN mean=1.748ms  ORT mean=2.144ms  MNN 1.23x
+
+All models generated from PyTorch opset 18, BERT real shapes.
