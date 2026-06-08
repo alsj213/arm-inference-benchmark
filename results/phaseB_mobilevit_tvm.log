@@ -1,0 +1,6 @@
+=== mobilevit_s TVM Benchmark (4 threads, FP32) ===
+Date: 2026-06-08
+Device: M2007J3SC (SM8250)
+Commit: b30cdec
+
+{"backend":"TVM","model":"mobilevit_s","precision":"fp32","threads":4,"gpu":false,"init_time_ms":33.6789,"peak_memory_kb":18446744073709551588,"latency":{"min":2900.4,"max":3073.79,"mean":2909.87,"p50":2907.6,"p90":2913.1,"p95":2916.05,"p99":3073.79,"std_dev":16.9286},"throughput_fps":0.343658,"accuracy":{"passed":true,"cosine_similarity":1,"mean_absolute_error":5.11272e-05,"max_absolute_error":0.000198364}}

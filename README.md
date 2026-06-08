@@ -57,9 +57,11 @@
 | **Qwen2-0.5B** | **llama.cpp** | 0.37s | **19.25ms/tok** | — | **51.96 tok/s** | LLM 标杆 | — |
 | | MNN LLM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待适配 | — |
 | | TVM | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 待探索 | — |
-| **mobilevit_s** | — | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ 模型文件待下载 | ⏳ |
+| **mobilevit_s** | ORT | 98.57 | 92.64 | 97.01 | 10.67 | 1.00x | — |
+| | **MNN** | 92.77 | **59.95** | **61.83** | **16.50** | **1.55x** ✅ | 1.000000 |
+| | TVM | 33.68 | 2907.60 | 2913.10 | 0.34 | 0.03x ⚠️ | 1.000000 |
 
-> TVM 数据均为 **Relax 编译 + 0 调优 trial** 的原始性能（kernel 未 auto-tuning），精度全部 1.000000。BERT 编译通过（417MB）但 Relax VM 多输入调用待适配。单算子 14 个全部编译成功（23MB），待后端支持后补测。
+> TVM 数据均为 **Relax 编译 + 0 调优 trial** 的原始性能（kernel 未 auto-tuning），精度全部 1.000000。mobilevit_s 首次实测：MNN 以 1.55x 领先 ORT（CV+Transformer 混合架构）。BERT 编译通过（417MB）但 Relax VM 多输入调用待适配。单算子 14 个全部编译成功（23MB），待后端支持后补测。
 
 ---
 
@@ -113,12 +115,15 @@
 | **ResNet50** | 1.000000 | 实测 | ✅ 精度一致 |
 | **YOLOv8n** | 1.000000 | 实测 | ✅ 精度一致 |
 | **BERT** | 0.990439 | 实测 | ⚠️ 微小偏差，可接受 |
+| **mobilevit_s** | 1.000000 | 0.000172 | ✅ 精度一致 |
 
 ---
 
 ### 🔑 分析解读
 
 **MNN CV 优势显著**: MobileNetV2 (2.50x) / YOLOv8n (1.77x) / ResNet50 (1.60x) 全面领先 ORT，得益于 NCHW4c 内存布局 + NEON 手写汇编。
+
+**MobileViT-S (CV+Transformer 混合)**: MNN 仍以 1.55x 领先 ORT。mobilevit_s 含 LayerNorm/MatMul/Transpose 等 Transformer 算子 + Conv 混合，是 MNN 在混合架构上的首次验证。MNN 对 Conv 的 NCHW4c 优化仍发挥作用，但 Transformer 算子是纯 MatMul/Self-Attention，收益有限。
 
 **BERT 是唯一弱项**: MNN 在 BERT 上落后 ORT 22% (3.09 vs 3.77 FPS)，根因分析指向：
 1. MatMul 大矩阵 (768×3072) 落后 1.29x — MNN GEMM 长矩阵 pack 策略不如 ORT
@@ -128,11 +133,13 @@
 
 **llama.cpp LLM 表现**: Qwen2-0.5B Q4_K_M 在骁龙 865 上达到 51.96 tok/s，比单线程 (32.5 tok/s) 提升 60%。
 
-**TVM 未调优性能**: MobileNetV2/ResNet50/YOLOv8n 三模型延迟达到 MNN 的 57-60x，ORT 的 24-33x。编译流程（ONNX→Relax→.so→NDK 交叉编译）已验证通顺，精度 Cos=1.0。瓶颈在缺少 auto-tuning（当前为 0 trial 基线），后续调优预期可达 ~5-10x 提升。
+**TVM 未调优性能**: MobileNetV2/ResNet50/YOLOv8n/mobilevit_s 四模型延迟为 MNN 的 31-60x（mobilevit_s 31x, ResNet50 57x），ORT 的 24-33x。编译流程（ONNX→Relax→.so→NDK 交叉编译）已验证通顺，精度 Cos=1.0。瓶颈在缺少 auto-tuning（当前为 0 trial 基线），后续调优预期可达 ~5-10x 提升。
 
-**TVM 限制**: BERT 多输入（input_ids + attention_mask）在 Relax VM set_input 调用中参数传递未适配；Qwen2-0.5B 不适用 TVM Relax（需专门的 LLM 编译管线）；mobilevit_s ONNX 模型文件缺失。
+**TVM 限制**: BERT 多输入（input_ids + attention_mask）在 Relax VM set_input 调用中参数传递未适配；Qwen2-0.5B 不适用 TVM Relax（需专门的 LLM 编译管线）。
 
-**Phase B 完成**: TVM 3 整模型 + 14 单算子全部编译成功，设备实测通过。BERT/Qwen/mobilevit_s 标记为待解决。编译脚本 `tools/tvm/compile_all_models.py` 支持 torch.export + ONNX 双路径，可复用。
+**mobilevit_s 补齐**: ONNX 从 timm 导出（opset 18）+ MNN 转换 + TVM Relax 编译全链路打通。MNN 1.55x vs ORT，精度 1.000000。TVM 精度 1.000000（延迟 2907ms，0 trial 基线）。
+
+**Phase B 完成**: TVM 4 整模型 + 14 单算子全部编译成功，设备实测通过。BERT/Qwen 标记为待解决。编译脚本 `tools/tvm/compile_all_models.py` 支持 torch.export + ONNX 双路径，可复用。
 
 ## 快速开始
 

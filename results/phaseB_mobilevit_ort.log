@@ -1,0 +1,6 @@
+=== mobilevit_s ORT Benchmark (4 threads, FP32) ===
+Date: 2026-06-08
+Device: M2007J3SC (SM8250)
+Commit: b30cdec
+
+{"backend":"ONNXRT","model":"mobilevit_s","precision":"fp32","threads":4,"gpu":false,"init_time_ms":98.5695,"peak_memory_kb":764,"latency":{"min":90.1423,"max":100.776,"mean":93.7553,"p50":92.6429,"p90":97.0089,"p95":99.4672,"p99":100.776,"std_dev":2.79117},"throughput_fps":10.6661,"accuracy":{"passed":true,"cosine_similarity":0,"mean_absolute_error":0,"max_absolute_error":0}}

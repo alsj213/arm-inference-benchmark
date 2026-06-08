@@ -1,0 +1,6 @@
+=== mobilevit_s MNN Benchmark (4 threads, FP32) ===
+Date: 2026-06-08
+Device: M2007J3SC (SM8250)
+Commit: b30cdec
+
+{"backend":"MNN","model":"mobilevit_s","precision":"fp32","threads":4,"gpu":false,"init_time_ms":92.772,"peak_memory_kb":996,"latency":{"min":59.0947,"max":69.7314,"mean":60.5904,"p50":59.9497,"p90":61.8327,"p95":68.3458,"p99":69.7314,"std_dev":2.22049},"throughput_fps":16.5043,"accuracy":{"passed":true,"cosine_similarity":1,"mean_absolute_error":0.000172197,"max_absolute_error":0.000595093}}
