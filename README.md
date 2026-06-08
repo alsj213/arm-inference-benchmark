@@ -34,7 +34,7 @@
 | **MNN** | 🎯 主测 | 摸底 MNN 性能基线，挖掘优化点（CV + LLM） |
 | **ONNX Runtime** | 📐 精度标杆 | 作为 output reference，其他框架对比精度 |
 | **TVM** | 🔍 对比优化 | 与 MNN 对比发现隐式优化空间（Relax 编译，0 调优 trial，数据供参考） |
-| **llama.cpp** | 🦙 LLM 标杆 | 端侧 LLM 推理性能基线（GGUF 量化） |
+| **llama.cpp** | 🦙 LLM 标杆 | 端侧 LLM 推理性能基线（GGUF 量化）。MNN LLM / TVM 均以此为参照 |
 
 ---
 
@@ -162,7 +162,7 @@
 
 **Conv1x1 通道失配是 MNN 盲区**: C31/C33 非对齐通道 ORT 分别快 1.38x/1.80x，优化思路是手写 Neon kernel 处理尾部通道。
 
-**LLM 三框架实测**: Qwen2-0.5B 在骁龙 865 上，MNN LLM (HQQ 4-bit, 294.87 MiB) decode 62.22 tok/s，比 llama.cpp (Q4_K_M, 380 MB) 的 51.96 tok/s 快 **1.20x**。MNN LLM 体积更小 (78%)、速度更快 (120%)，但量化精度可能略低于 Q4_K_M。TVM Qwen2 需 MLC-LLM 管线。
+**LLM 三框架实测**: 以 llama.cpp 为 LLM 标杆 (Q4_K_M, 51.96 tok/s)。MNN LLM (HQQ 4-bit, 294.87 MiB) 实测 decode 62.22 tok/s，相对标杆加速 1.20x，体积小 22%。MNN LLM 的 HQQ 量化精度可能略低于 llama.cpp 的 Q4_K_M。TVM Qwen2 需 MLC-LLM 管线。
 
 **TVM 未调优性能**: MobileNetV2/ResNet50/YOLOv8n/mobilevit_s/BERT 五模型延迟为 MNN 的 31-150x（BERT 150x, ResNet50 57x），ORT 的 24-150x。编译流程（ONNX→Relax→.so→NDK 交叉编译）已验证通顺，精度 Cos=1.0。瓶颈在缺少 auto-tuning（当前为 0 trial 基线），后续调优预期可达 ~5-10x 提升。
 
