@@ -5,7 +5,8 @@
 #include <string>
 #include <vector>
 
-// 前向声明 — 实际 TVM 类型只在 .cpp 中使用
+// TVM v0.15.0 Relay GraphExecutor 后端
+// 使用 tvm::runtime::Module / PackedFunc / NDArray (非 tvm-ffi)
 class TVMBackend : public BenchmarkBackend {
 public:
     TVMBackend() = default;
@@ -17,12 +18,13 @@ public:
     std::string name() const override { return "TVM"; }
 
 private:
-    void* mod_ = nullptr;          // ffi::Module*
-    void* vm_ = nullptr;           // ffi::Module*
-    void* set_input_ = nullptr;    // ffi::Function*
-    void* invoke_ = nullptr;       // ffi::Function*
-    void* get_outputs_ = nullptr;  // ffi::Function*
-    std::string func_name_{"main"};
+    void* mod_ = nullptr;            // tvm::runtime::Module*
+    void* set_input_ = nullptr;      // tvm::runtime::PackedFunc*
+    void* run_ = nullptr;            // tvm::runtime::PackedFunc*
+    void* get_output_ = nullptr;     // tvm::runtime::PackedFunc*
+    void* input_ndarray_ = nullptr;  // tvm::runtime::NDArray* (预分配，单输入模型)
+    void* h_rt_ = nullptr;           // dlopen handle for libtvm_runtime.so
+    std::string input_name_{"input"};
     std::vector<int64_t> input_shape_;
     size_t input_size_ = 0;
     int num_model_inputs_ = 1;
