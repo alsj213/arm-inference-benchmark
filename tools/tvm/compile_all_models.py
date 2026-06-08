@@ -56,6 +56,7 @@ TARGET_ARM = tvm.target.Target({
     "mtriple": "aarch64-linux-android",
     "mattr": ["+neon"],
     "mcpu": "cortex-a77",
+    "num-cores": 8,  # 骁龙 865 8核 (MetaSchedule 需要此属性)
 })
 
 # ── 整模型配置 ──
@@ -275,28 +276,62 @@ def _export_so(executable, name: str) -> Path:
 
 
 def apply_autotune(mod, model_name: str, input_shape: tuple):
-    """TVM MetaSchedule / AutoTVM 自动调优（基础实现）"""
-    print(f"  [Tune] Auto-tuning {model_name} ...")
-    # MetaSchedule tuning — 对 arm CPU 进行基础调优
-    try:
-        from tvm import meta_schedule as ms
+    """TVM MetaSchedule 自动调优 — 通过 RPC 在 Android 设备上实测
 
-        # 使用默认的 CPU 调优规则（可能较慢但有效）
-        database = ms.tune_relax(
+    TVM v0.24.dev0 中的 MetaSchedule 位于 tvm.s_tir.meta_schedule，
+    是当前版本唯一可用的自动调优系统（AutoTVM/AutoScheduler 已移除）。
+
+    调优流程:
+    1. MetaSchedule 在主机上搜索调度方案（evolutionary search）
+    2. 交叉编译候选 kernel 并通过 RPC 推送到 Android 设备
+    3. 在骁龙 865 上实测延迟，反馈给 XGBoost 代价模型
+    4. 迭代收敛后应用最佳调度到 IRModule
+    """
+    import os
+
+    print(f"  [Tune] Auto-tuning {model_name} (MetaSchedule, RPC → 骁龙865) ...")
+
+    try:
+        from tvm.s_tir import meta_schedule as ms
+        from tvm.s_tir.meta_schedule.builder import LocalBuilder
+
+        work_dir = str(OUTPUT_DIR / "tuning_logs" / model_name)
+        os.makedirs(work_dir, exist_ok=True)
+
+        # RPC runner 配置（设备通过 ADB 端口转发连接 tracker）
+        # 环境变量与 TVM 官方 RPC 工具链兼容
+        os.environ.setdefault("TVM_TRACKER_HOST", "127.0.0.1")
+        os.environ.setdefault("TVM_TRACKER_PORT", "9190")
+        os.environ.setdefault("TVM_TRACKER_KEY", "snapdragon865")
+
+        database = ms.relax_integration.tune_relax(
             mod=mod,
             target=TARGET_ARM,
             params={},
-            # 限制 trials 数量以控制编译时间
-            max_trials_global=32,
-            num_trials_per_iter=8,
+            work_dir=work_dir,
+            max_trials_global=800,       # CNN 模型推荐 800+ trials
+            num_trials_per_iter=4,       # WSL2 内存有限，降低并行度
+            strategy="evolutionary",     # 进化搜索
+            cost_model="xgb",            # XGBoost 代价模型
+            space="post-order-apply",    # 后序遍历搜索空间生成
+            runner="rpc",                # ← 通过 RPC 在设备上实测
+            builder=LocalBuilder(timeout_sec=600, max_workers=2),
         )
 
         # 应用调优结果
-        mod = database.apply(mod)
-        print(f"  [Tune] Auto-tuning 完成")
+        from tvm.relax.transform import MetaScheduleApplyDatabase
+        with TARGET_ARM:
+            mod = MetaScheduleApplyDatabase(work_dir)(mod)
+        print(f"  [Tune] ✅ Auto-tuning 完成，调优日志: {work_dir}")
+        return mod
+    except ImportError as e:
+        print(f"  [Tune] ERROR: MetaSchedule 不可用 ({e})")
+        print(f"  [Tune] 请确认 TVM C++ 库已编译且 PYTHONPATH/LD_LIBRARY_PATH 已设置")
         return mod
     except Exception as e:
-        print(f"  [Tune] Warning: auto-tuning skipped ({e})")
+        print(f"  [Tune] ERROR: auto-tuning 失败 ({e})")
+        import traceback
+        traceback.print_exc()
         return mod
 
 
