@@ -174,6 +174,19 @@ static bool run_single_op(const std::string& backend_name, const std::string& mo
             actual_model_path.replace(pos, 5, ".mnn");
         }
     }
+    // TVM 后端需要 tvm_models/ 下的 .so 文件
+    if (bt == BackendType::TVM) {
+        // models/single_ops/XXX.onnx → tvm_models/XXX_tvm.so
+        size_t last_slash = actual_model_path.rfind('/');
+        std::string fname = (last_slash != std::string::npos)
+            ? actual_model_path.substr(last_slash + 1)
+            : actual_model_path;
+        size_t dot = fname.rfind(".onnx");
+        if (dot != std::string::npos) {
+            fname = fname.substr(0, dot);
+        }
+        actual_model_path = "tvm_models/" + fname + "_tvm.so";
+    }
     config.model_path = actual_model_path;
 
     std::unique_ptr<BenchmarkBackend> infer;

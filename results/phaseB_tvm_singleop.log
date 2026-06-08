@@ -1,0 +1,22 @@
+=== TVM 单算子 Benchmark (4 threads, FP32, 100 runs per op) ===
+Date: 2026-06-08
+Device: M2007J3SC (SM8250)
+Commit: 12d41c7
+
+Conv1x1_K16_C64_M784: mean=0.953ms
+Conv1x1_K1024_C256_M784: mean=318.110ms
+Conv1x1_M49_C32_K64: mean=0.040ms
+Conv1x1_M49_C256_K512: mean=9.762ms
+Conv1x1_M784_C32_K64: mean=0.270ms
+Conv1x1_M3136_C64_K128: mean=31.346ms
+Conv1x1_Misaligned_C31_K64: mean=1.039ms
+Conv1x1_Misaligned_C33_K64: mean=1.113ms
+DWConv_C16_3x3: mean=0.556ms
+DWConv_C960_3x3: mean=0.141ms
+MatMul_512x512x512: mean=0.697ms
+MatMul_768x768x768: mean=1.563ms
+MatMul_3072x768: mean=9.833ms
+MatMul_768x3072: mean=9.931ms
+
+Key finding: TVM beats ORT on micro-kernels (M49_C32_K64, DWConv_C960)
+but falls far behind on large MatMul/Conv (20-60x slower without auto-tuning).
