@@ -507,6 +507,119 @@
       ],
       "base_path": "models/single_ops",
       "input_name": "input"
+    },
+    {
+      "name": "L4_Conv1x1_C1024_S28_K2048",
+      "input_shape": [
+        1,
+        1024,
+        28,
+        28
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "L4_Conv3x3_C256_S80_K256",
+      "input_shape": [
+        1,
+        256,
+        80,
+        80
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "L5_Conv1x1_C2048_S14_K512",
+      "input_shape": [
+        1,
+        2048,
+        14,
+        14
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "L5_DWConv_C1024_S14",
+      "input_shape": [
+        1,
+        1024,
+        14,
+        14
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "L5_MatMul_1024x4096",
+      "input_shape": [
+        1,
+        1024
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "L6_Conv1x1_C512_S40_K1024",
+      "input_shape": [
+        1,
+        512,
+        40,
+        40
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "L6_MatMul_768x3072x2",
+      "input_shape": [
+        1,
+        768
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "L7_Conv1x1_C2048_S14_K4096",
+      "input_shape": [
+        1,
+        2048,
+        14,
+        14
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "L7_MatMul_2048x4096",
+      "input_shape": [
+        1,
+        2048
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "L8_Conv1x1_C4096_S7_K8192",
+      "input_shape": [
+        1,
+        4096,
+        7,
+        7
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "L8_MatMul_896x4864",
+      "input_shape": [
+        1,
+        896
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_stair"
     }
   ]
 }
