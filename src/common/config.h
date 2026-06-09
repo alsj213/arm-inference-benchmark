@@ -30,6 +30,7 @@ struct BenchmarkConfig {
     std::string model_path;
     std::string weights_path;
     std::vector<int> input_shape;
+    std::string input_name;  // ONNX 模型第一个数据输入名
 
     // Backend config
     BackendType backend_type;
