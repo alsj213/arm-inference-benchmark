@@ -55,13 +55,18 @@ OP_GROUPS = {
 
 
 def load_onnx(path):
-    """加载 ONNX 模型并构建形状映射"""
+    """加载 ONNX 模型并构建形状映射（含 shape inference）"""
     m = onnx.load(str(path))
+    # 运行 shape inference — 填充所有中间 tensor 的形状
+    try:
+        from onnx import shape_inference
+        m = shape_inference.infer_shapes(m, strict_mode=False)
+    except Exception as e:
+        print(f"  [WARN] shape_inference failed for {path.name}: {e}")
+
     shapes = {}
     for vi in list(m.graph.input) + list(m.graph.output) + list(m.graph.value_info):
-        dims = [d.dim_value for d in vi.type.tensor_type.shape.dim]
-        if any(d == 0 for d in dims):  # 跳过动态维
-            continue
+        dims = [d.dim_value if d.dim_value > 0 else 1 for d in vi.type.tensor_type.shape.dim]
         shapes[vi.name] = tuple(dims)
     for init in m.graph.initializer:
         shapes[init.name] = tuple(init.dims)
@@ -244,24 +249,73 @@ def make_operator_name(op):
         return f"{ot}_{model}"
 
 
+def _classify_input(shape, ot):
+    """根据形状推断输入类型: 'data' | 'weight' | 'bias' | 'unknown'"""
+    ndim = len(shape)
+    if ot == "Conv":
+        if ndim == 1:
+            return "bias"
+        if ndim == 4:
+            # data: N×C×H×W, weight: K×C×kh×kw
+            # data 通常 C 较小 (3, 16, 32, 64...) 且 H,W 较大
+            # weight 通常 C 和 K 都较大, 且 kh,kw 小 (1,1 或 3,3)
+            _, c, h, w = shape
+            if h > 3 and w > 3:
+                return "data"
+            else:
+                return "weight"
+        return "unknown"
+    elif ot == "MatMul":
+        if ndim >= 2:
+            return "data"  # MatMul 第一个是 data，第二个是 weight
+        return "weight"
+    else:
+        return "data"
+
+
 def generate_onnx(op, output_path):
-    """根据算子信息生成单算子 ONNX 文件"""
+    """根据算子信息生成单算子 ONNX 文件 — 按形状自动识别 data/weight/bias 并正确排序"""
     ot = op["op_type"]
     node = op["node"]
     attrs = op["attrs"]
 
-    # 创建输入
-    inputs = []
+    shapes = op["input_shapes"]
+
+    # 1. 分类每个输入
+    classified = {"data": [], "weight": [], "bias": [], "unknown": []}
+    for i, inp_name in enumerate(node.input):
+        shape = shapes[i] if i < len(shapes) else None
+        if shape is None or any(d <= 0 for d in shape):
+            classified["unknown"].append((inp_name, None, i))
+            continue
+        kind = _classify_input(shape, ot)
+        classified[kind].append((inp_name, shape, i))
+
+    # 2. 构建标准顺序的输入列表
+    # Conv: [data, weight, bias]
+    # MatMul: [data, weight]
+    # 其他: 按原顺序
+    if ot == "Conv":
+        ordered = classified["data"] + classified["weight"] + classified["bias"] + classified["unknown"]
+    elif ot == "MatMul":
+        ordered = classified["data"] + classified["weight"] + classified["unknown"]
+    else:
+        ordered = classified["data"] + classified["weight"] + classified["bias"] + classified["unknown"]
+
+    # 3. 生成 value_info 和 initializer
+    graph_inputs = []
     initializers = []
     input_names = []
 
-    for i, inp_name in enumerate(node.input):
-        shape = op["input_shapes"][i] if i < len(op["input_shapes"]) else None
-        if shape is None or any(d <= 0 for d in shape):
-            shape = [1, 64, 56, 56]  # fallback
+    for inp_name, shape, orig_idx in ordered:
+        if shape is None:
+            continue
 
-        if ot == "Conv" and i == 1:
-            # weight 作为 initializer
+        kind = _classify_input(shape, ot)
+        is_weight_like = (kind == "weight" or kind == "bias")
+
+        if is_weight_like:
+            # 权重/偏置 → initializer (随机数据)
             dtype = TensorProto.FLOAT
             data = np.random.randn(*shape).astype(np.float32)
             init = helper.make_tensor(
@@ -270,54 +324,47 @@ def generate_onnx(op, output_path):
             )
             initializers.append(init)
             input_names.append(inp_name)
-        elif ot == "MatMul" and i == 1:
-            # 第二个输入作为 initializer
-            dtype = TensorProto.FLOAT
-            data = np.random.randn(*shape).astype(np.float32)
-            init = helper.make_tensor(
-                name=inp_name, data_type=dtype, dims=list(shape),
-                vals=data.flatten().tolist()
-            )
-            initializers.append(init)
-            input_names.append(inp_name)
-        elif inp_name not in [x.name for x in initializers]:
-            # 真正的输入
-            vi = helper.make_tensor_value_info(inp_name, TensorProto.FLOAT, list(shape))
-            inputs.append(vi)
-            input_names.append(inp_name)
-
-    # 创建输出
-    output_name = node.output[0]
-    # 推测输出形状
-    if ot == "Conv":
-        input_s = list(op["input_shapes"][0])
-        weight_s = list(op["input_shapes"][1]) if len(op["input_shapes"]) > 1 else [1, 1, 1, 1]
-        ks = attrs.get("kernel_shape", [1, 1])
-        stride = attrs.get("strides", [1, 1])
-        group = attrs.get("group", 1)
-        out_c = weight_s[0]
-        out_h = (input_s[2] - ks[0]) // stride[0] + 1 if len(input_s) > 2 else 1
-        out_w = (input_s[3] - ks[1]) // stride[1] + 1 if len(input_s) > 3 else 1
-        out_shape = [input_s[0], out_c, out_h, out_w]
-    elif ot == "MatMul":
-        a_s = op["input_shapes"][0]
-        b_s = op["input_shapes"][1] if len(op["input_shapes"]) > 1 else [1, 1]
-        if len(a_s) >= 2 and len(b_s) >= 2:
-            out_shape = [a_s[0], b_s[1]]
         else:
-            out_shape = [a_s[0], b_s[0]]
+            # 真正的数据输入
+            vi = helper.make_tensor_value_info(inp_name, TensorProto.FLOAT, list(shape))
+            graph_inputs.append(vi)
+            input_names.append(inp_name)
+
+    # 4. 推测输出形状 — 使用 data 输入的 shape
+    data_shapes = [s for _, s, _ in ordered if _classify_input(s, ot) == "data"]
+    data_shape = data_shapes[0] if data_shapes else op["input_shapes"][0]
+
+    if ot == "Conv":
+        weight_shapes = [s for _, s, _ in ordered if _classify_input(s, ot) == "weight"]
+        weight_s = weight_shapes[0] if weight_shapes else [1, 1, 1, 1]
+        ks = attrs.get("kernel_shape", [1, 1])
+        strides = attrs.get("strides", [1, 1])
+        pads = attrs.get("pads", [0, 0, 0, 0])
+        out_c = weight_s[0]
+        out_h = (data_shape[2] + 2*pads[0] - ks[0]) // strides[0] + 1
+        out_w = (data_shape[3] + 2*pads[1] - ks[1]) // strides[1] + 1
+        out_shape = [data_shape[0], out_c, out_h, out_w]
+    elif ot == "MatMul":
+        weight_shapes = [s for _, s, _ in ordered if _classify_input(s, ot) == "weight"]
+        b_s = weight_shapes[0] if weight_shapes else data_shape
+        if len(data_shape) >= 2 and len(b_s) >= 2:
+            out_shape = list(data_shape[:-1]) + [b_s[-1]]
+        else:
+            out_shape = [data_shape[0], b_s[-1]]
     elif ot in ("LayerNormalization", "GELU", "Softmax",
                 "GlobalAveragePool", "MaxPool", "AveragePool"):
-        out_shape = list(op["input_shapes"][0])
+        out_shape = list(data_shape)
     elif ot == "Concat":
-        total = sum(s[1] for s in op["input_shapes"])
-        out_shape = [op["input_shapes"][0][0], total] + list(op["input_shapes"][0][2:])
+        all_shapes = [s for _, s, _ in ordered if s is not None]
+        total = sum(s[1] for s in all_shapes[1:])
+        out_shape = [all_shapes[0][0], all_shapes[0][1] + total] + list(all_shapes[0][2:])
     else:
-        out_shape = list(op["input_shapes"][0])
+        out_shape = list(data_shape)
 
+    output_name = node.output[0] if node.output else "output"
     outputs = [helper.make_tensor_value_info(output_name, TensorProto.FLOAT, out_shape)]
 
-    # 重建节点 (使用原始 op_type)
+    # 重建节点属性
     new_attrs = []
     for k, v in attrs.items():
         if isinstance(v, list):
@@ -329,24 +376,24 @@ def generate_onnx(op, output_path):
 
     new_node = helper.make_node(
         op_type=ot, inputs=input_names, outputs=[output_name],
-        name=op["output_name"]
+        name=output_name
     )
     for a in new_attrs:
         if a.name not in [na.name for na in new_node.attribute]:
             new_node.attribute.append(a)
 
     graph = helper.make_graph(
-        nodes=[new_node], name=op["output_name"],
-        inputs=inputs, outputs=outputs,
+        nodes=[new_node], name=output_name,
+        inputs=graph_inputs, outputs=outputs,
         initializer=initializers
     )
 
-    # opset 17 (支持 LayerNorm) + ir_version 8 (ORT 兼容)
+    # opset 18 + ir_version 10
     op_id = onnx.OperatorSetIdProto()
     op_id.domain = ""
-    op_id.version = 17
+    op_id.version = 18
 
-    model = helper.make_model(graph, opset_imports=[op_id], ir_version=8)
+    model = helper.make_model(graph, opset_imports=[op_id], ir_version=10)
     onnx.checker.check_model(model)
     onnx.save(model, str(output_path))
     return out_shape

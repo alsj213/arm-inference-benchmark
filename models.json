@@ -56,209 +56,22 @@
       "base_path": "models/classification/mobilevit_s"
     },
     {
-      "name": "Conv1x1_MBV2_C32_S1_K16",
+      "name": "Concat_MVIT_C160_S8",
       "input_shape": [
-        16,
-        32,
         1,
-        1
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv1x1_MBV2_C96_S1_K24",
-      "input_shape": [
-        24,
-        96,
-        1,
-        1
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv1x1_MBV2_C576_S1_K160",
-      "input_shape": [
         160,
-        576,
-        1,
-        1
+        8,
+        8
       ],
       "base_path": "models/single_ops_extracted"
     },
     {
-      "name": "Conv1x1_MBV2_C960_S1_K320",
-      "input_shape": [
-        320,
-        960,
-        1,
-        1
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv1x1_R50_C64_S1_K64",
-      "input_shape": [
-        64,
-        64,
-        1,
-        1
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv1x1_R50_C256_S1_K64",
-      "input_shape": [
-        64,
-        256,
-        1,
-        1
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv1x1_R50_C512_S1_K2048",
-      "input_shape": [
-        2048,
-        512,
-        1,
-        1
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv1x1_YOLO_C128_S80_K64",
+      "name": "Concat_YOLO_C32_S80",
       "input_shape": [
         1,
-        128,
+        32,
         80,
         80
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv1x1_YOLO_C128_S40_K128",
-      "input_shape": [
-        1,
-        128,
-        40,
-        40
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv3x3_R50_C64_S3",
-      "input_shape": [
-        64,
-        64,
-        3,
-        3
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv3x3_R50_C256_S3",
-      "input_shape": [
-        256,
-        256,
-        3,
-        3
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv3x3_MBV2_C3_S3_K32_S2",
-      "input_shape": [
-        32,
-        3,
-        3,
-        3
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv3x3_YOLO_C3_S640_K16_S2",
-      "input_shape": [
-        1,
-        3,
-        640,
-        640
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Conv7x7_R50_C3_S7_S2",
-      "input_shape": [
-        64,
-        3,
-        7,
-        7
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "DWConv_MBV2_C1_S3_K32",
-      "input_shape": [
-        32,
-        1,
-        3,
-        3
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "DWConv_MBV2_C1_S3_K960",
-      "input_shape": [
-        960,
-        1,
-        3,
-        3
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "DWConv_MBV2_C1_S3_K96_S2",
-      "input_shape": [
-        96,
-        1,
-        3,
-        3
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "MatMul_BERT_768x3072",
-      "input_shape": [
-        1,
-        128,
-        768
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "MatMul_BERT_3072x768",
-      "input_shape": [
-        1,
-        128,
-        3072
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "LayerNorm_BERT_L128_H768",
-      "input_shape": [
-        1,
-        128,
-        768
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
-      "name": "Softmax_BERT_12x128",
-      "input_shape": [
-        1,
-        12,
-        128,
-        128
       ],
       "base_path": "models/single_ops_extracted"
     },
@@ -273,6 +86,202 @@
       "base_path": "models/single_ops_extracted"
     },
     {
+      "name": "Conv1x1_MBV2_C32_S112_K16",
+      "input_shape": [
+        1,
+        32,
+        112,
+        112
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C256_S32_K96",
+      "input_shape": [
+        1,
+        256,
+        32,
+        32
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C3_S256_K16_S2",
+      "input_shape": [
+        1,
+        3,
+        256,
+        256
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C256_S56_K64",
+      "input_shape": [
+        1,
+        256,
+        56,
+        56
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C256_S56_K512_S2",
+      "input_shape": [
+        1,
+        256,
+        56,
+        56
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C384_S40_K128",
+      "input_shape": [
+        1,
+        384,
+        40,
+        40
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_MBV2_C3_S224_K32_S2",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_R50_C512_S7_K512",
+      "input_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C64_S20_K64",
+      "input_shape": [
+        1,
+        64,
+        20,
+        20
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C32_S160_K64_S2",
+      "input_shape": [
+        1,
+        32,
+        160,
+        160
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv7x7_R50_C3_S224_K64_S2",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C384_S14_K384",
+      "input_shape": [
+        1,
+        384,
+        14,
+        14
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C576_S14_K576_S2",
+      "input_shape": [
+        1,
+        576,
+        14,
+        14
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MVIT_C64_S128_K64",
+      "input_shape": [
+        1,
+        64,
+        128,
+        128
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MVIT_C384_S32_K384_S2",
+      "input_shape": [
+        1,
+        384,
+        32,
+        32
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "LayerNorm_BERT_L128_H768",
+      "input_shape": [
+        1,
+        128,
+        768
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "LayerNorm_MVIT_L256_H144",
+      "input_shape": [
+        4,
+        256,
+        144
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_BERT_3072x768",
+      "input_shape": [
+        1,
+        128,
+        3072
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_MVIT_288x144",
+      "input_shape": [
+        4,
+        256,
+        288
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MaxPool_R50_C64_S112",
+      "input_shape": [
+        1,
+        64,
+        112,
+        112
+      ],
+      "base_path": "models/single_ops_extracted"
+    },
+    {
       "name": "MaxPool_YOLO_C128_S20",
       "input_shape": [
         1,
@@ -283,31 +292,32 @@
       "base_path": "models/single_ops_extracted"
     },
     {
-      "name": "Conv1x1_MVIT_C16_S128_K64",
+      "name": "Softmax_BERT_12x128",
       "input_shape": [
         1,
-        16,
+        12,
         128,
         128
       ],
       "base_path": "models/single_ops_extracted"
     },
     {
-      "name": "DWConv_MVIT_C256_S64_K256",
+      "name": "Softmax_MVIT_4x256",
       "input_shape": [
-        1,
+        4,
+        4,
         256,
-        64,
-        64
+        256
       ],
       "base_path": "models/single_ops_extracted"
     },
     {
-      "name": "LayerNorm_MVIT_L256_H144",
+      "name": "Softmax_YOLO_8400x4",
       "input_shape": [
+        1,
+        8400,
         4,
-        256,
-        144
+        16
       ],
       "base_path": "models/single_ops_extracted"
     }
