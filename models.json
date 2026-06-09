@@ -391,7 +391,7 @@
         80,
         80
       ],
-      "input_name": "/model.13/Resize_output_0",
+      "input_name": "X",
       "base_path": "models/single_ops_extracted"
     },
     {
@@ -413,7 +413,7 @@
         40,
         40
       ],
-      "input_name": "/model.10/Resize_output_0",
+      "input_name": "X",
       "base_path": "models/single_ops_extracted"
     },
     {
@@ -444,7 +444,7 @@
         4,
         8400
       ],
-      "input_name": "/model.22/Mul_2_output_0",
+      "input_name": "X",
       "base_path": "models/single_ops_extracted"
     },
     {
@@ -454,7 +454,7 @@
         64,
         6400
       ],
-      "input_name": "/model.22/Reshape_output_0",
+      "input_name": "X",
       "base_path": "models/single_ops_extracted"
     },
     {
@@ -475,7 +475,7 @@
         80,
         6400
       ],
-      "input_name": "/model.22/Reshape_3_output_0",
+      "input_name": "X",
       "base_path": "models/single_ops_extracted"
     },
     {
