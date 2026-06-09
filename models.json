@@ -61,288 +61,6 @@
       "input_name": "input"
     },
     {
-      "name": "Concat_MVIT_C160_S8",
-      "input_shape": [
-        1,
-        160,
-        8,
-        8
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "getitem_99"
-    },
-    {
-      "name": "Concat_YOLO_C32_S80",
-      "input_shape": [
-        1,
-        32,
-        80,
-        80
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "/model.4/Split_output_0"
-    },
-    {
-      "name": "Concat_YOLO_C128_S20",
-      "input_shape": [
-        1,
-        128,
-        20,
-        20
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "/model.8/Split_output_0"
-    },
-    {
-      "name": "Conv1x1_MBV2_C32_S112_K16",
-      "input_shape": [
-        1,
-        32,
-        112,
-        112
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "320"
-    },
-    {
-      "name": "Conv1x1_MVIT_C256_S32_K96",
-      "input_shape": [
-        1,
-        256,
-        32,
-        32
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "silu_10"
-    },
-    {
-      "name": "Conv1x1_MVIT_C3_S256_K16_S2",
-      "input_shape": [
-        1,
-        3,
-        256,
-        256
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "input"
-    },
-    {
-      "name": "Conv1x1_R50_C256_S56_K64",
-      "input_shape": [
-        1,
-        256,
-        56,
-        56
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "resnetv17_stage1_activation0"
-    },
-    {
-      "name": "Conv1x1_R50_C256_S56_K512_S2",
-      "input_shape": [
-        1,
-        256,
-        56,
-        56
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "resnetv17_stage1_activation2"
-    },
-    {
-      "name": "Conv1x1_YOLO_C384_S40_K128",
-      "input_shape": [
-        1,
-        384,
-        40,
-        40
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "/model.11/Concat_output_0"
-    },
-    {
-      "name": "Conv3x3_MBV2_C3_S224_K32_S2",
-      "input_shape": [
-        1,
-        3,
-        224,
-        224
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "input"
-    },
-    {
-      "name": "Conv3x3_YOLO_C64_S20_K64",
-      "input_shape": [
-        1,
-        64,
-        20,
-        20
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "/model.22/cv2.2/cv2.2.0/act/Mul_output_0"
-    },
-    {
-      "name": "Conv3x3_YOLO_C32_S160_K64_S2",
-      "input_shape": [
-        1,
-        32,
-        160,
-        160
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "/model.2/cv2/act/Mul_output_0"
-    },
-    {
-      "name": "Conv7x7_R50_C3_S224_K64_S2",
-      "input_shape": [
-        1,
-        3,
-        224,
-        224
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "data"
-    },
-    {
-      "name": "DWConv_MBV2_C384_S14_K384",
-      "input_shape": [
-        1,
-        384,
-        14,
-        14
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "376"
-    },
-    {
-      "name": "DWConv_MBV2_C576_S14_K576_S2",
-      "input_shape": [
-        1,
-        576,
-        14,
-        14
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "429"
-    },
-    {
-      "name": "DWConv_MVIT_C64_S128_K64",
-      "input_shape": [
-        1,
-        64,
-        128,
-        128
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "silu_1"
-    },
-    {
-      "name": "DWConv_MVIT_C384_S32_K384_S2",
-      "input_shape": [
-        1,
-        384,
-        32,
-        32
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "silu_16"
-    },
-    {
-      "name": "LayerNorm_BERT_L128_H768",
-      "input_shape": [
-        1,
-        128,
-        768
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "add_1"
-    },
-    {
-      "name": "LayerNorm_MVIT_L256_H144",
-      "input_shape": [
-        4,
-        256,
-        144
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "view_1"
-    },
-    {
-      "name": "MatMul_BERT_3072x768",
-      "input_shape": [
-        1,
-        128,
-        3072
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "gelu"
-    },
-    {
-      "name": "MatMul_MVIT_288x144",
-      "input_shape": [
-        4,
-        256,
-        288
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "silu_12"
-    },
-    {
-      "name": "MaxPool_R50_C64_S112",
-      "input_shape": [
-        1,
-        64,
-        112,
-        112
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "resnetv17_relu0_fwd"
-    },
-    {
-      "name": "MaxPool_YOLO_C128_S20",
-      "input_shape": [
-        1,
-        128,
-        20,
-        20
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "/model.9/cv1/act/Mul_output_0"
-    },
-    {
-      "name": "Softmax_BERT_12x128",
-      "input_shape": [
-        1,
-        12,
-        128,
-        128
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "val_102"
-    },
-    {
-      "name": "Softmax_MVIT_4x256",
-      "input_shape": [
-        4,
-        4,
-        256,
-        256
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "val_276"
-    },
-    {
-      "name": "Softmax_YOLO_8400x4",
-      "input_shape": [
-        1,
-        8400,
-        4,
-        16
-      ],
-      "base_path": "models/single_ops_extracted",
-      "input_name": "/model.22/dfl/Transpose_output_0"
-    },
-    {
       "name": "Conv1x1_K1024_C256_M784",
       "input_shape": [
         1,
@@ -620,6 +338,1530 @@
       ],
       "input_name": "X",
       "base_path": "models/single_ops_stair"
+    },
+    {
+      "name": "Concat_MVIT_C128_S16",
+      "input_shape": [
+        1,
+        128,
+        16,
+        16
+      ],
+      "input_name": "getitem_69",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_MVIT_C160_S8",
+      "input_shape": [
+        1,
+        160,
+        8,
+        8
+      ],
+      "input_name": "getitem_99",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_MVIT_C96_S32",
+      "input_shape": [
+        1,
+        96,
+        32,
+        32
+      ],
+      "input_name": "getitem_45",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_YOLO_C128_S20",
+      "input_shape": [
+        1,
+        128,
+        20,
+        20
+      ],
+      "input_name": "/model.8/Split_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_YOLO_C128_S80",
+      "input_shape": [
+        1,
+        128,
+        80,
+        80
+      ],
+      "input_name": "/model.13/Resize_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_YOLO_C16_S160",
+      "input_shape": [
+        1,
+        16,
+        160,
+        160
+      ],
+      "input_name": "/model.2/Split_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_YOLO_C256_S40",
+      "input_shape": [
+        1,
+        256,
+        40,
+        40
+      ],
+      "input_name": "/model.10/Resize_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_YOLO_C2_L8400",
+      "input_shape": [
+        1,
+        2,
+        8400
+      ],
+      "input_name": "/model.22/Div_1_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_YOLO_C32_S80",
+      "input_shape": [
+        1,
+        32,
+        80,
+        80
+      ],
+      "input_name": "/model.4/Split_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_YOLO_C4_L8400",
+      "input_shape": [
+        1,
+        4,
+        8400
+      ],
+      "input_name": "/model.22/Mul_2_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_YOLO_C64_L6400",
+      "input_shape": [
+        1,
+        64,
+        6400
+      ],
+      "input_name": "/model.22/Reshape_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_YOLO_C64_S40",
+      "input_shape": [
+        1,
+        64,
+        40,
+        40
+      ],
+      "input_name": "/model.6/Split_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Concat_YOLO_C80_L6400",
+      "input_shape": [
+        1,
+        80,
+        6400
+      ],
+      "input_name": "/model.22/Reshape_3_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C144_S28_K32",
+      "input_shape": [
+        1,
+        144,
+        28,
+        28
+      ],
+      "input_name": "345",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C144_S56_K24",
+      "input_shape": [
+        1,
+        144,
+        56,
+        56
+      ],
+      "input_name": "336",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C160_S7_K960",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C16_S112_K96",
+      "input_shape": [
+        1,
+        16,
+        112,
+        112
+      ],
+      "input_name": "480",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C192_S14_K64",
+      "input_shape": [
+        1,
+        192,
+        14,
+        14
+      ],
+      "input_name": "371",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C192_S28_K32",
+      "input_shape": [
+        1,
+        192,
+        28,
+        28
+      ],
+      "input_name": "353",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C24_S56_K144",
+      "input_shape": [
+        1,
+        24,
+        56,
+        56
+      ],
+      "input_name": "489",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C320_S7_K1280",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C32_S112_K16",
+      "input_shape": [
+        1,
+        32,
+        112,
+        112
+      ],
+      "input_name": "320",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C32_S28_K192",
+      "input_shape": [
+        1,
+        32,
+        28,
+        28
+      ],
+      "input_name": "507",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C384_S14_K96",
+      "input_shape": [
+        1,
+        384,
+        14,
+        14
+      ],
+      "input_name": "406",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C576_S14_K96",
+      "input_shape": [
+        1,
+        576,
+        14,
+        14
+      ],
+      "input_name": "414",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C576_S7_K160",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C64_S14_K384",
+      "input_shape": [
+        1,
+        64,
+        14,
+        14
+      ],
+      "input_name": "534",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C960_S7_K320",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C96_S14_K576",
+      "input_shape": [
+        1,
+        96,
+        14,
+        14
+      ],
+      "input_name": "570",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MBV2_C96_S56_K24",
+      "input_shape": [
+        1,
+        96,
+        56,
+        56
+      ],
+      "input_name": "328",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C128_S16_K128",
+      "input_shape": [
+        1,
+        128,
+        16,
+        16
+      ],
+      "input_name": "getitem_69",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C128_S64_K64",
+      "input_shape": [
+        1,
+        128,
+        64,
+        64
+      ],
+      "input_name": "silu_4",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C144_S32_K96",
+      "input_shape": [
+        1,
+        144,
+        32,
+        32
+      ],
+      "input_name": "_unsafe_view_2",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C160_S8_K160",
+      "input_shape": [
+        1,
+        160,
+        8,
+        8
+      ],
+      "input_name": "getitem_99",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C16_S128_K64",
+      "input_shape": [
+        1,
+        16,
+        128,
+        128
+      ],
+      "input_name": "silu",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C192_S16_K128",
+      "input_shape": [
+        1,
+        192,
+        16,
+        16
+      ],
+      "input_name": "_unsafe_view_5",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C192_S32_K96",
+      "input_shape": [
+        1,
+        192,
+        32,
+        32
+      ],
+      "input_name": "cat",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C240_S8_K160",
+      "input_shape": [
+        1,
+        240,
+        8,
+        8
+      ],
+      "input_name": "_unsafe_view_8",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C256_S16_K128",
+      "input_shape": [
+        1,
+        256,
+        16,
+        16
+      ],
+      "input_name": "cat_1",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C256_S32_K96",
+      "input_shape": [
+        1,
+        256,
+        32,
+        32
+      ],
+      "input_name": "silu_10",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C256_S64_K64",
+      "input_shape": [
+        1,
+        256,
+        64,
+        64
+      ],
+      "input_name": "silu_6",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C320_S8_K160",
+      "input_shape": [
+        1,
+        320,
+        8,
+        8
+      ],
+      "input_name": "cat_2",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C32_S128_K128",
+      "input_shape": [
+        1,
+        32,
+        128,
+        128
+      ],
+      "input_name": "getitem_9",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C384_S16_K128",
+      "input_shape": [
+        1,
+        384,
+        16,
+        16
+      ],
+      "input_name": "silu_17",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C3_S256_K16_S2",
+      "input_shape": [
+        1,
+        3,
+        256,
+        256
+      ],
+      "input_name": "input",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C512_S8_K160",
+      "input_shape": [
+        1,
+        512,
+        8,
+        8
+      ],
+      "input_name": "silu_26",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C64_S128_K32",
+      "input_shape": [
+        1,
+        64,
+        128,
+        128
+      ],
+      "input_name": "silu_2",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C64_S64_K256",
+      "input_shape": [
+        1,
+        64,
+        64,
+        64
+      ],
+      "input_name": "getitem_18",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_MVIT_C96_S32_K96",
+      "input_shape": [
+        1,
+        96,
+        32,
+        32
+      ],
+      "input_name": "getitem_45",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C1024_S14_K2048_S2",
+      "input_shape": [
+        1,
+        1024,
+        14,
+        14
+      ],
+      "input_name": "resnetv17_stage3_activation5",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C1024_S14_K256",
+      "input_shape": [
+        1,
+        1024,
+        14,
+        14
+      ],
+      "input_name": "resnetv17_stage3_activation0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C128_S28_K512",
+      "input_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "input_name": "resnetv17_stage2_relu1_fwd",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C2048_S7_K512",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C256_S14_K1024",
+      "input_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "input_name": "resnetv17_stage3_relu1_fwd",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C256_S56_K512_S2",
+      "input_shape": [
+        1,
+        256,
+        56,
+        56
+      ],
+      "input_name": "resnetv17_stage1_activation2",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C256_S56_K64",
+      "input_shape": [
+        1,
+        256,
+        56,
+        56
+      ],
+      "input_name": "resnetv17_stage1_activation0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C512_S28_K1024_S2",
+      "input_shape": [
+        1,
+        512,
+        28,
+        28
+      ],
+      "input_name": "resnetv17_stage2_activation3",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C512_S28_K128",
+      "input_shape": [
+        1,
+        512,
+        28,
+        28
+      ],
+      "input_name": "resnetv17_stage2_activation0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C512_S7_K2048",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_R50_C64_S56_K256",
+      "input_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "input_name": "resnetv17_stage1_relu1_fwd",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C128_S40_K128",
+      "input_shape": [
+        1,
+        128,
+        40,
+        40
+      ],
+      "input_name": "/model.5/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C128_S80_K64",
+      "input_shape": [
+        1,
+        128,
+        80,
+        80
+      ],
+      "input_name": "/model.4/Concat_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C16_S4_K1",
+      "input_shape": [
+        1,
+        16,
+        4,
+        8400
+      ],
+      "input_name": "/model.22/dfl/Transpose_1_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C192_S40_K128",
+      "input_shape": [
+        1,
+        192,
+        40,
+        40
+      ],
+      "input_name": "/model.12/Concat_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C192_S80_K64",
+      "input_shape": [
+        1,
+        192,
+        80,
+        80
+      ],
+      "input_name": "/model.14/Concat_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C256_S20_K256",
+      "input_shape": [
+        1,
+        256,
+        20,
+        20
+      ],
+      "input_name": "/model.7/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C256_S40_K128",
+      "input_shape": [
+        1,
+        256,
+        40,
+        40
+      ],
+      "input_name": "/model.6/Concat_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C32_S160_K32",
+      "input_shape": [
+        1,
+        32,
+        160,
+        160
+      ],
+      "input_name": "/model.1/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C384_S20_K256",
+      "input_shape": [
+        1,
+        384,
+        20,
+        20
+      ],
+      "input_name": "/model.8/Concat_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C384_S40_K128",
+      "input_shape": [
+        1,
+        384,
+        40,
+        40
+      ],
+      "input_name": "/model.11/Concat_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C48_S160_K32",
+      "input_shape": [
+        1,
+        48,
+        160,
+        160
+      ],
+      "input_name": "/model.2/Concat_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C512_S20_K256",
+      "input_shape": [
+        1,
+        512,
+        20,
+        20
+      ],
+      "input_name": "/model.9/Concat_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C64_S20_K64",
+      "input_shape": [
+        1,
+        64,
+        20,
+        20
+      ],
+      "input_name": "/model.22/cv2.2/cv2.2.1/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C64_S40_K64",
+      "input_shape": [
+        1,
+        64,
+        40,
+        40
+      ],
+      "input_name": "/model.22/cv2.1/cv2.1.1/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C64_S80_K64",
+      "input_shape": [
+        1,
+        64,
+        80,
+        80
+      ],
+      "input_name": "/model.3/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C80_S20_K80",
+      "input_shape": [
+        1,
+        80,
+        20,
+        20
+      ],
+      "input_name": "/model.22/cv3.2/cv3.2.1/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C80_S40_K80",
+      "input_shape": [
+        1,
+        80,
+        40,
+        40
+      ],
+      "input_name": "/model.22/cv3.1/cv3.1.1/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C80_S80_K80",
+      "input_shape": [
+        1,
+        80,
+        80,
+        80
+      ],
+      "input_name": "/model.22/cv3.0/cv3.0.1/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_YOLO_C96_S80_K64",
+      "input_shape": [
+        1,
+        96,
+        80,
+        80
+      ],
+      "input_name": "/model.15/Concat_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_MBV2_C3_S224_K32_S2",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "input_name": "input",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_R50_C128_S28_K128",
+      "input_shape": [
+        1,
+        128,
+        28,
+        28
+      ],
+      "input_name": "resnetv17_stage2_relu0_fwd",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_R50_C256_S14_K256",
+      "input_shape": [
+        1,
+        256,
+        14,
+        14
+      ],
+      "input_name": "resnetv17_stage3_relu0_fwd",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_R50_C512_S7_K512",
+      "input_shape": [
+        1,
+        512,
+        7,
+        7
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_R50_C64_S56_K64",
+      "input_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "input_name": "resnetv17_stage1_relu0_fwd",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C128_S20_K128",
+      "input_shape": [
+        1,
+        128,
+        20,
+        20
+      ],
+      "input_name": "/model.8/Split_output_1",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C128_S40_K256_S2",
+      "input_shape": [
+        1,
+        128,
+        40,
+        40
+      ],
+      "input_name": "/model.6/cv2/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C128_S40_K80",
+      "input_shape": [
+        1,
+        128,
+        40,
+        40
+      ],
+      "input_name": "/model.18/cv2/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C16_S160_K16",
+      "input_shape": [
+        1,
+        16,
+        160,
+        160
+      ],
+      "input_name": "/model.2/Split_output_1",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C16_S320_K32_S2",
+      "input_shape": [
+        1,
+        16,
+        320,
+        320
+      ],
+      "input_name": "/model.0/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C256_S20_K80",
+      "input_shape": [
+        1,
+        256,
+        20,
+        20
+      ],
+      "input_name": "/model.21/cv2/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C32_S160_K64_S2",
+      "input_shape": [
+        1,
+        32,
+        160,
+        160
+      ],
+      "input_name": "/model.2/cv2/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C32_S80_K32",
+      "input_shape": [
+        1,
+        32,
+        80,
+        80
+      ],
+      "input_name": "/model.4/Split_output_1",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C3_S640_K16_S2",
+      "input_shape": [
+        1,
+        3,
+        640,
+        640
+      ],
+      "input_name": "images",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C64_S20_K64",
+      "input_shape": [
+        1,
+        64,
+        20,
+        20
+      ],
+      "input_name": "/model.22/cv2.2/cv2.2.0/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C64_S40_K64",
+      "input_shape": [
+        1,
+        64,
+        40,
+        40
+      ],
+      "input_name": "/model.6/Split_output_1",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C64_S80_K128_S2",
+      "input_shape": [
+        1,
+        64,
+        80,
+        80
+      ],
+      "input_name": "/model.4/cv2/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C64_S80_K80",
+      "input_shape": [
+        1,
+        64,
+        80,
+        80
+      ],
+      "input_name": "/model.15/cv2/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C80_S20_K80",
+      "input_shape": [
+        1,
+        80,
+        20,
+        20
+      ],
+      "input_name": "/model.22/cv3.2/cv3.2.0/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C80_S40_K80",
+      "input_shape": [
+        1,
+        80,
+        40,
+        40
+      ],
+      "input_name": "/model.22/cv3.1/cv3.1.0/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv3x3_YOLO_C80_S80_K80",
+      "input_shape": [
+        1,
+        80,
+        80,
+        80
+      ],
+      "input_name": "/model.22/cv3.0/cv3.0.0/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv7x7_R50_C3_S224_K64_S2",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "input_name": "data",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C144_S56_K144",
+      "input_shape": [
+        1,
+        144,
+        56,
+        56
+      ],
+      "input_name": "333",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C144_S56_K144_S2",
+      "input_shape": [
+        1,
+        144,
+        56,
+        56
+      ],
+      "input_name": "342",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C192_S28_K192",
+      "input_shape": [
+        1,
+        192,
+        28,
+        28
+      ],
+      "input_name": "350",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C192_S28_K192_S2",
+      "input_shape": [
+        1,
+        192,
+        28,
+        28
+      ],
+      "input_name": "368",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C32_S112_K32",
+      "input_shape": [
+        1,
+        32,
+        112,
+        112
+      ],
+      "input_name": "317",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C384_S14_K384",
+      "input_shape": [
+        1,
+        384,
+        14,
+        14
+      ],
+      "input_name": "376",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C576_S14_K576",
+      "input_shape": [
+        1,
+        576,
+        14,
+        14
+      ],
+      "input_name": "411",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C576_S14_K576_S2",
+      "input_shape": [
+        1,
+        576,
+        14,
+        14
+      ],
+      "input_name": "429",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C960_S7_K960",
+      "input_shape": [
+        1,
+        3,
+        224,
+        224
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MBV2_C96_S112_K96_S2",
+      "input_shape": [
+        1,
+        96,
+        112,
+        112
+      ],
+      "input_name": "325",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MVIT_C128_S128_K128_S2",
+      "input_shape": [
+        1,
+        128,
+        128,
+        128
+      ],
+      "input_name": "silu_3",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MVIT_C256_S64_K256",
+      "input_shape": [
+        1,
+        256,
+        64,
+        64
+      ],
+      "input_name": "silu_5",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MVIT_C256_S64_K256_S2",
+      "input_shape": [
+        1,
+        256,
+        64,
+        64
+      ],
+      "input_name": "silu_9",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MVIT_C384_S32_K384_S2",
+      "input_shape": [
+        1,
+        384,
+        32,
+        32
+      ],
+      "input_name": "silu_16",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MVIT_C512_S16_K512_S2",
+      "input_shape": [
+        1,
+        512,
+        16,
+        16
+      ],
+      "input_name": "silu_25",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "DWConv_MVIT_C64_S128_K64",
+      "input_shape": [
+        1,
+        64,
+        128,
+        128
+      ],
+      "input_name": "silu_1",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "GlobalAveragePool_MBV2_C1280_S7",
+      "input_shape": [
+        1,
+        1280,
+        7,
+        7
+      ],
+      "input_name": "463",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "GlobalAveragePool_R50_C2048_S7",
+      "input_shape": [
+        1,
+        2048,
+        7,
+        7
+      ],
+      "input_name": "resnetv17_stage4_activation2",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "LayerNorm_BERT_L128_H768",
+      "input_shape": [
+        1,
+        128,
+        768
+      ],
+      "input_name": "add_1",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "LayerNorm_MVIT_L16_H240",
+      "input_shape": [
+        4,
+        16,
+        240
+      ],
+      "input_name": "view_19",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "LayerNorm_MVIT_L256_H144",
+      "input_shape": [
+        4,
+        256,
+        144
+      ],
+      "input_name": "view_1",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "LayerNorm_MVIT_L64_H192",
+      "input_shape": [
+        4,
+        64,
+        192
+      ],
+      "input_name": "view_8",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_BERT_1x12",
+      "input_shape": [
+        1,
+        12,
+        128,
+        64
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_BERT_3072x768",
+      "input_shape": [
+        1,
+        128,
+        3072
+      ],
+      "input_name": "gelu",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_BERT_768x3072",
+      "input_shape": [
+        1,
+        128,
+        768
+      ],
+      "input_name": "layer_norm_1",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_MVIT_144x432",
+      "input_shape": [
+        4,
+        256,
+        144
+      ],
+      "input_name": "layer_norm",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_MVIT_192x576",
+      "input_shape": [
+        4,
+        64,
+        192
+      ],
+      "input_name": "layer_norm_5",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_MVIT_240x720",
+      "input_shape": [
+        4,
+        16,
+        240
+      ],
+      "input_name": "layer_norm_14",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_MVIT_288x144",
+      "input_shape": [
+        4,
+        256,
+        288
+      ],
+      "input_name": "silu_12",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_MVIT_384x192",
+      "input_shape": [
+        4,
+        64,
+        384
+      ],
+      "input_name": "silu_19",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_MVIT_480x240",
+      "input_shape": [
+        4,
+        16,
+        480
+      ],
+      "input_name": "silu_28",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MatMul_MVIT_4x4",
+      "input_shape": [
+        4,
+        4,
+        256,
+        36
+      ],
+      "input_name": "X",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MaxPool_R50_C64_S112",
+      "input_shape": [
+        1,
+        64,
+        112,
+        112
+      ],
+      "input_name": "resnetv17_relu0_fwd",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "MaxPool_YOLO_C128_S20",
+      "input_shape": [
+        1,
+        128,
+        20,
+        20
+      ],
+      "input_name": "/model.9/cv1/act/Mul_output_0",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Softmax_BERT_12x128",
+      "input_shape": [
+        1,
+        12,
+        128,
+        128
+      ],
+      "input_name": "val_102",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Softmax_MVIT_4x16",
+      "input_shape": [
+        4,
+        4,
+        16,
+        16
+      ],
+      "input_name": "val_892",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Softmax_MVIT_4x256",
+      "input_shape": [
+        4,
+        4,
+        256,
+        256
+      ],
+      "input_name": "val_276",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Softmax_MVIT_4x64",
+      "input_shape": [
+        4,
+        4,
+        64,
+        64
+      ],
+      "input_name": "val_519",
+      "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Softmax_YOLO_8400x4",
+      "input_shape": [
+        1,
+        8400,
+        4,
+        16
+      ],
+      "input_name": "/model.22/dfl/Transpose_output_0",
+      "base_path": "models/single_ops_extracted"
     }
   ]
 }
