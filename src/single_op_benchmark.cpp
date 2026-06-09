@@ -66,13 +66,41 @@ static const std::map<std::string, std::vector<std::string>> CATEGORY_MODELS = {
     {"gelu", {
         "models/single_ops/GELU_BERT.onnx",
     }},
+
+    // ═══════ GEMM Pack/Unpack 分析（24 算子）═══════
+    {"gemm", {
+        "models/single_ops_gemm/GEMM_Square_16x16.onnx",
+        "models/single_ops_gemm/GEMM_Square_32x32.onnx",
+        "models/single_ops_gemm/GEMM_Square_64x64.onnx",
+        "models/single_ops_gemm/GEMM_Square_128x128.onnx",
+        "models/single_ops_gemm/GEMM_Square_256x256.onnx",
+        "models/single_ops_gemm/GEMM_Square_512x512.onnx",
+        "models/single_ops_gemm/GEMM_Square_1024x1024.onnx",
+        "models/single_ops_gemm/GEMM_KScan_K16_M256_N256.onnx",
+        "models/single_ops_gemm/GEMM_KScan_K32_M256_N256.onnx",
+        "models/single_ops_gemm/GEMM_KScan_K64_M256_N256.onnx",
+        "models/single_ops_gemm/GEMM_KScan_K128_M256_N256.onnx",
+        "models/single_ops_gemm/GEMM_KScan_K512_M256_N256.onnx",
+        "models/single_ops_gemm/GEMM_KScan_K1024_M256_N256.onnx",
+        "models/single_ops_gemm/GEMM_MNScan_M16_K256_N16.onnx",
+        "models/single_ops_gemm/GEMM_MNScan_M32_K256_N32.onnx",
+        "models/single_ops_gemm/GEMM_MNScan_M64_K256_N64.onnx",
+        "models/single_ops_gemm/GEMM_MNScan_M128_K256_N128.onnx",
+        "models/single_ops_gemm/GEMM_MNScan_M512_K256_N512.onnx",
+        "models/single_ops_gemm/GEMM_MNScan_M1024_K256_N1024.onnx",
+        "models/single_ops_gemm/GEMM_BERT_FFN1_S128_H768_I3072.onnx",
+        "models/single_ops_gemm/GEMM_BERT_Proj_S128_H3072_O768.onnx",
+        "models/single_ops_gemm/GEMM_Attention_128x768x128.onnx",
+        "models/single_ops_gemm/GEMM_LLM_FFN_1x4096x14336.onnx",
+        "models/single_ops_gemm/GEMM_LLM_AttnProj_1x4096x4096.onnx",
+    }},
 };
 
 void print_usage() {
     printf("Single Operator Benchmark Tool\n");
     printf("Usage: ./single_op_benchmark [options]\n");
     printf("Options:\n");
-    printf("  --backend <mnn|onnxrt|ort|tvm>  Backend to test (required)\n");
+    printf("  --backend <mnn|mnn_gpu|onnxrt|ort|tvm>  Backend to test (required)\n");
     printf("  --model <path>                  Model path (mutually exclusive with --category)\n");
     printf("  --category <name>               Operator category (");
     bool first = true;
@@ -102,6 +130,7 @@ std::vector<int> parse_shape(const std::string& s) {
 
 BackendType parse_backend(const std::string& b) {
     if (b == "mnn" || b == "MNN") return BackendType::MNN;
+    if (b == "mnn_gpu" || b == "MNN_GPU") return BackendType::MNN_GPU;
     if (b == "onnxrt" || b == "ort" || b == "ORT") return BackendType::ONNXRT;
     if (b == "tvm" || b == "TVM") return BackendType::TVM;
     if (b == "llamacpp" || b == "llama") return BackendType::LLAMACPP;
@@ -129,6 +158,111 @@ static std::vector<int> parse_shape_from_name(const std::string& fname) {
     if (fname.find("Misaligned_C31") != std::string::npos) return {1, 31, 56, 56};
     if (fname.find("Misaligned_C33") != std::string::npos) return {1, 33, 56, 56};
 
+// ── GEMM 算子: 通用模式解析 ──
+// 所有 GEMM_ 前缀的模型文件名包含 M/K/N 维度信息
+// 注意: 使用 rfind (反向查找) 避免 _KScan 比 _K16 先匹配
+{
+    // 尝试通用解析: _M{num}_K{num}_N{num} 模式
+    // 只匹配 _M 后面紧跟数字的情况 (MScan → 跳过)
+    size_t mp = std::string::npos, kp = std::string::npos;
+    for (size_t i = 0; i + 2 < fname.size(); i++) {
+        if (fname[i] == '_' && fname[i+1] == 'M' && i+2 < fname.size() && isdigit(fname[i+2])) {
+            mp = i;
+        }
+        if (fname[i] == '_' && fname[i+1] == 'K' && i+2 < fname.size() && isdigit(fname[i+2])) {
+            kp = i;
+        }
+    }
+    if (mp != std::string::npos && kp != std::string::npos) {
+        int Mval = 0, Kval = 0;
+        try {
+            size_t me = fname.find_first_of("_x.", mp + 2);
+            Mval = std::stoi(fname.substr(mp + 2, me - mp - 2));
+            size_t ke = fname.find_first_of("_x.", kp + 2);
+            Kval = std::stoi(fname.substr(kp + 2, ke - kp - 2));
+        } catch (...) {}
+        if (Mval > 0 && Kval > 0) return {Mval, Kval};
+    }
+}
+{
+    // Square 模式: GEMM_Square_{D}x{D}
+    size_t sp = fname.find("_Square_");
+    if (sp != std::string::npos) {
+        std::string tail = fname.substr(sp + 8);
+        size_t xp = tail.find('x');
+        if (xp != std::string::npos) {
+            try {
+                int D = std::stoi(tail.substr(0, xp));
+                return {D, D};
+            } catch (...) {}
+        }
+    }
+}
+{
+    // BERT/LLM 模式: 尝试从命名提取 M 和 K
+    // GEMM_Attention_{M}x{K}x{N}
+    size_t ap = fname.find("_Attention_");
+    if (ap != std::string::npos) {
+        std::string tail = fname.substr(ap + 11);
+        size_t x1 = tail.find('x');
+        size_t x2 = tail.find('x', x1 + 1);
+        if (x1 != std::string::npos && x2 != std::string::npos) {
+            try {
+                int Mval = std::stoi(tail.substr(0, x1));
+                int Kval = std::stoi(tail.substr(x1 + 1, x2 - x1 - 1));
+                return {Mval, Kval};
+            } catch (...) {}
+        }
+    }
+    // GEMM_BERT_FFN1_S{seq}_H{hidden}_I{inter}
+    size_t bp = fname.find("_BERT_FFN");
+    if (bp != std::string::npos) {
+        size_t sp = fname.find("_S", bp);
+        size_t hp = fname.find("_H", bp);
+        if (sp != std::string::npos && hp != std::string::npos) {
+            try {
+                size_t se = fname.find("_", sp + 2);
+                int Mval = std::stoi(fname.substr(sp + 2, se - sp - 2));
+                size_t he = fname.find("_", hp + 2);
+                int Kval = std::stoi(fname.substr(hp + 2, he - hp - 2));
+                return {Mval, Kval};
+            } catch (...) {}
+        }
+    }
+    // GEMM_BERT_Proj 类似
+    if (fname.find("_BERT_Proj") != std::string::npos) {
+        size_t sp = fname.find("_S");
+        size_t hp = fname.find("_H");
+        if (sp != std::string::npos && hp != std::string::npos) {
+            try {
+                size_t se = fname.find("_", sp + 2);
+                int Mval = std::stoi(fname.substr(sp + 2, se - sp - 2));
+                size_t he = fname.find("_", hp + 2);
+                int Kval = std::stoi(fname.substr(hp + 2, he - hp - 2));
+                return {Mval, Kval};
+            } catch (...) {}
+        }
+    }
+    // GEMM_LLM_FFN_1x{K}x{N} / GEMM_LLM_AttnProj_1x{K}x{N}
+    size_t lp = fname.find("_LLM_");
+    if (lp != std::string::npos) {
+        std::string tail = fname.substr(lp + 5);  // FFN_1x4096x14336 or AttnProj_1x4096x4096
+        size_t us = tail.find('_');
+        if (us != std::string::npos) {
+            std::string dims = tail.substr(us + 1);  // 1x4096x14336
+            size_t x1 = dims.find('x');
+            size_t x2 = dims.find('x', x1 + 1);
+            if (x1 != std::string::npos && x2 != std::string::npos) {
+                try {
+                    int Mval = std::stoi(dims.substr(0, x1));
+                    int Kval = std::stoi(dims.substr(x1 + 1, x2 - x1 - 1));
+                    return {Mval, Kval};
+                } catch (...) {}
+            }
+        }
+    }
+}
+
     // Conv1x1: 从 _M 和 _C 字段解析
     int C = 64, M = 784;
     size_t cp = fname.rfind("_C");
@@ -151,24 +285,11 @@ static bool run_single_op(const std::string& backend_name, const std::string& mo
     printf("  [%s] %s\n", backend_name.c_str(), model_path.c_str());
     fflush(stdout);
 
-    if (access(model_path.c_str(), F_OK) != 0) {
-        printf("  ⚠️  Model not found, skipping\n");
-        fflush(stdout);
-        return false;
-    }
-
-    BenchmarkConfig config;
-    config.model_name = "single_op";
-    config.model_path = model_path;
-    config.input_shape = input_shape;
-    config.num_threads = threads;
-    config.use_gpu = false;
-    config.precision = (precision == "fp16") ? Precision::FP16 : Precision::FP32;
-
-    // MNN 后端需要 .mnn 文件，自动替换扩展名
+    // 后端的路径解析（先替换扩展名，再检查文件）
     std::string actual_model_path = model_path;
     BackendType bt = parse_backend(backend_name);
-    if (bt == BackendType::MNN) {
+
+    if (bt == BackendType::MNN || bt == BackendType::MNN_GPU) {
         size_t pos = actual_model_path.rfind(".onnx");
         if (pos != std::string::npos) {
             actual_model_path.replace(pos, 5, ".mnn");
@@ -176,7 +297,6 @@ static bool run_single_op(const std::string& backend_name, const std::string& mo
     }
     // TVM 后端需要 tvm_models/ 下的 .so 文件
     if (bt == BackendType::TVM) {
-        // models/single_ops/XXX.onnx → tvm_models/XXX_tvm.so
         size_t last_slash = actual_model_path.rfind('/');
         std::string fname = (last_slash != std::string::npos)
             ? actual_model_path.substr(last_slash + 1)
@@ -187,11 +307,30 @@ static bool run_single_op(const std::string& backend_name, const std::string& mo
         }
         actual_model_path = "tvm_models/" + fname + "_tvm.so";
     }
+
+    if (access(actual_model_path.c_str(), F_OK) != 0) {
+        printf("  ⚠️  Model not found: %s\n", actual_model_path.c_str());
+        fflush(stdout);
+        return false;
+    }
+
+    BenchmarkConfig config;
+    config.model_name = "single_op";
     config.model_path = actual_model_path;
+    config.input_shape = input_shape;
+    config.num_threads = threads;
+    config.use_gpu = false;
+    config.precision = (precision == "fp16") ? Precision::FP16 : Precision::FP32;
+
+    if (bt == BackendType::MNN_GPU) {
+        config.use_gpu = true;
+        config.backend_type = BackendType::MNN_GPU;
+    }
 
     std::unique_ptr<BenchmarkBackend> infer;
     switch (bt) {
         case BackendType::MNN:
+        case BackendType::MNN_GPU:
             infer = std::make_unique<MNNBackend>();
             break;
         case BackendType::ONNXRT:
