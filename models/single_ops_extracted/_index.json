@@ -772,7 +772,7 @@
     ],
     "output_shape": [
       1,
-      160,
+      1,
       7,
       7
     ]
@@ -801,7 +801,7 @@
     ],
     "output_shape": [
       1,
-      960,
+      1,
       7,
       7
     ]
@@ -830,7 +830,7 @@
     ],
     "output_shape": [
       1,
-      320,
+      1,
       7,
       7
     ]
@@ -859,7 +859,7 @@
     ],
     "output_shape": [
       1,
-      1280,
+      1,
       7,
       7
     ]
@@ -1062,7 +1062,7 @@
     ],
     "output_shape": [
       1,
-      2048,
+      1,
       7,
       7
     ]
@@ -1091,7 +1091,7 @@
     ],
     "output_shape": [
       1,
-      512,
+      1,
       7,
       7
     ]
@@ -2372,7 +2372,7 @@
     ],
     "output_shape": [
       1,
-      512,
+      1,
       7,
       7
     ]
@@ -2891,7 +2891,7 @@
     ],
     "output_shape": [
       1,
-      1,
+      64,
       112,
       112
     ]
@@ -3065,7 +3065,7 @@
     ],
     "output_shape": [
       1,
-      960,
+      1,
       7,
       7
     ]
@@ -3515,33 +3515,7 @@
     "output_shape": [
       1,
       128,
-      768
-    ]
-  },
-  {
-    "name": "MatMul_BERT_1x12",
-    "file": "MatMul_BERT_1x12.onnx",
-    "op_type": "MatMul",
-    "model": "BERT",
-    "input_shapes": [
-      [
-        1,
-        12,
-        128,
-        64
-      ],
-      [
-        1,
-        12,
-        64,
-        128
-      ]
-    ],
-    "output_shape": [
-      1,
-      12,
-      128,
-      64
+      3072
     ]
   },
   {
@@ -3571,6 +3545,32 @@
     ]
   },
   {
+    "name": "MatMul_BERT_1x12",
+    "file": "MatMul_BERT_1x12.onnx",
+    "op_type": "MatMul",
+    "model": "BERT",
+    "input_shapes": [
+      [
+        1,
+        12,
+        128,
+        64
+      ],
+      [
+        1,
+        12,
+        64,
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      12,
+      128,
+      64
+    ]
+  },
+  {
     "name": "MatMul_BERT_3072x768",
     "file": "MatMul_BERT_3072x768.onnx",
     "op_type": "MatMul",
@@ -3589,7 +3589,7 @@
     "output_shape": [
       1,
       128,
-      3072
+      768
     ]
   },
   {
@@ -3611,33 +3611,7 @@
     "output_shape": [
       4,
       256,
-      144
-    ]
-  },
-  {
-    "name": "MatMul_MVIT_4x4",
-    "file": "MatMul_MVIT_4x4.onnx",
-    "op_type": "MatMul",
-    "model": "MVIT",
-    "input_shapes": [
-      [
-        4,
-        4,
-        256,
-        36
-      ],
-      [
-        4,
-        4,
-        36,
-        256
-      ]
-    ],
-    "output_shape": [
-      4,
-      4,
-      256,
-      36
+      432
     ]
   },
   {
@@ -3667,50 +3641,6 @@
     ]
   },
   {
-    "name": "MatMul_MVIT_288x144",
-    "file": "MatMul_MVIT_288x144.onnx",
-    "op_type": "MatMul",
-    "model": "MVIT",
-    "input_shapes": [
-      [
-        4,
-        256,
-        288
-      ],
-      [
-        288,
-        144
-      ]
-    ],
-    "output_shape": [
-      4,
-      256,
-      288
-    ]
-  },
-  {
-    "name": "MatMul_MVIT_192x576",
-    "file": "MatMul_MVIT_192x576.onnx",
-    "op_type": "MatMul",
-    "model": "MVIT",
-    "input_shapes": [
-      [
-        4,
-        64,
-        192
-      ],
-      [
-        192,
-        576
-      ]
-    ],
-    "output_shape": [
-      4,
-      64,
-      192
-    ]
-  },
-  {
     "name": "MatMul_MVIT_4x4",
     "file": "MatMul_MVIT_4x4.onnx",
     "op_type": "MatMul",
@@ -3732,8 +3662,52 @@
     "output_shape": [
       4,
       4,
+      256,
+      36
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_288x144",
+    "file": "MatMul_MVIT_288x144.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        256,
+        288
+      ],
+      [
+        288,
+        144
+      ]
+    ],
+    "output_shape": [
+      4,
+      256,
+      144
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_192x576",
+    "file": "MatMul_MVIT_192x576.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        64,
+        192
+      ],
+      [
+        192,
+        576
+      ]
+    ],
+    "output_shape": [
+      4,
       64,
-      48
+      576
     ]
   },
   {
@@ -3763,50 +3737,6 @@
     ]
   },
   {
-    "name": "MatMul_MVIT_384x192",
-    "file": "MatMul_MVIT_384x192.onnx",
-    "op_type": "MatMul",
-    "model": "MVIT",
-    "input_shapes": [
-      [
-        4,
-        64,
-        384
-      ],
-      [
-        384,
-        192
-      ]
-    ],
-    "output_shape": [
-      4,
-      64,
-      384
-    ]
-  },
-  {
-    "name": "MatMul_MVIT_240x720",
-    "file": "MatMul_MVIT_240x720.onnx",
-    "op_type": "MatMul",
-    "model": "MVIT",
-    "input_shapes": [
-      [
-        4,
-        16,
-        240
-      ],
-      [
-        240,
-        720
-      ]
-    ],
-    "output_shape": [
-      4,
-      16,
-      240
-    ]
-  },
-  {
     "name": "MatMul_MVIT_4x4",
     "file": "MatMul_MVIT_4x4.onnx",
     "op_type": "MatMul",
@@ -3828,8 +3758,52 @@
     "output_shape": [
       4,
       4,
+      64,
+      48
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_384x192",
+    "file": "MatMul_MVIT_384x192.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        64,
+        384
+      ],
+      [
+        384,
+        192
+      ]
+    ],
+    "output_shape": [
+      4,
+      64,
+      192
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_240x720",
+    "file": "MatMul_MVIT_240x720.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        16,
+        240
+      ],
+      [
+        240,
+        720
+      ]
+    ],
+    "output_shape": [
+      4,
       16,
-      60
+      720
     ]
   },
   {
@@ -3859,6 +3833,32 @@
     ]
   },
   {
+    "name": "MatMul_MVIT_4x4",
+    "file": "MatMul_MVIT_4x4.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        4,
+        256,
+        36
+      ],
+      [
+        4,
+        4,
+        36,
+        256
+      ]
+    ],
+    "output_shape": [
+      4,
+      4,
+      16,
+      60
+    ]
+  },
+  {
     "name": "MatMul_MVIT_480x240",
     "file": "MatMul_MVIT_480x240.onnx",
     "op_type": "MatMul",
@@ -3877,7 +3877,7 @@
     "output_shape": [
       4,
       16,
-      480
+      240
     ]
   },
   {

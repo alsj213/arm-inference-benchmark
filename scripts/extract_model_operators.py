@@ -256,19 +256,23 @@ def _classify_input(shape, ot):
         if ndim == 1:
             return "bias"
         if ndim == 4:
-            # data: N×C×H×W, weight: K×C×kh×kw
-            # data 通常 C 较小 (3, 16, 32, 64...) 且 H,W 较大
-            # weight 通常 C 和 K 都较大, 且 kh,kw 小 (1,1 或 3,3)
             _, c, h, w = shape
-            if h > 3 and w > 3:
-                return "data"
-            else:
+            # data: 空间维度 >> 核大小 (通常 > 7)
+            # weight: 空间维度 == 核大小 (1, 3, 5, 7)
+            # 用阈值区分: 空间维 ≤ 7 → weight, > 7 → data
+            if h <= 7 and w <= 7:
                 return "weight"
+            else:
+                return "data"
         return "unknown"
     elif ot == "MatMul":
-        if ndim >= 2:
-            return "data"  # MatMul 第一个是 data，第二个是 weight
-        return "weight"
+        # 第一个输入是 data, 第二个是 weight (2D)
+        return "data"
+    elif ot in ("LayerNormalization",):
+        # LayerNorm: data (2D+), weight (1D), bias (1D)
+        if ndim == 1:
+            return "bias"
+        return "data"
     else:
         return "data"
 
@@ -306,12 +310,25 @@ def generate_onnx(op, output_path):
     graph_inputs = []
     initializers = []
     input_names = []
+    data_count = 0  # 计数 data 输入，MatMul 第二个 data 应该是 weight
 
     for inp_name, shape, orig_idx in ordered:
         if shape is None:
             continue
 
         kind = _classify_input(shape, ot)
+        # MatMul 特殊处理: 第一个输入是 data，其余都当 weight
+        if ot == "MatMul":
+            if data_count == 0:
+                kind = "data"
+            else:
+                kind = "weight"
+        elif ot in ("LayerNormalization",):
+            if kind == "bias":
+                pass  # keep bias classification
+        if kind == "data":
+            data_count += 1
+
         is_weight_like = (kind == "weight" or kind == "bias")
 
         if is_weight_like:
@@ -336,18 +353,23 @@ def generate_onnx(op, output_path):
 
     if ot == "Conv":
         weight_shapes = [s for _, s, _ in ordered if _classify_input(s, ot) == "weight"]
+        bias_shapes = [s for _, s, _ in ordered if _classify_input(s, ot) == "bias"]
         weight_s = weight_shapes[0] if weight_shapes else [1, 1, 1, 1]
         ks = attrs.get("kernel_shape", [1, 1])
         strides = attrs.get("strides", [1, 1])
         pads = attrs.get("pads", [0, 0, 0, 0])
-        out_c = weight_s[0]
+        groups = attrs.get("group", 1)
+        out_c = weight_s[0]  # K (output channels)
         out_h = (data_shape[2] + 2*pads[0] - ks[0]) // strides[0] + 1
         out_w = (data_shape[3] + 2*pads[1] - ks[1]) // strides[1] + 1
         out_shape = [data_shape[0], out_c, out_h, out_w]
     elif ot == "MatMul":
-        weight_shapes = [s for _, s, _ in ordered if _classify_input(s, ot) == "weight"]
-        b_s = weight_shapes[0] if weight_shapes else data_shape
-        if len(data_shape) >= 2 and len(b_s) >= 2:
+        # 第二个输入 (weight) 的最后一维是输出维度
+        if len(op["input_shapes"]) >= 2:
+            b_s = op["input_shapes"][1]  # weight shape
+        else:
+            b_s = data_shape
+        if len(b_s) >= 2:
             out_shape = list(data_shape[:-1]) + [b_s[-1]]
         else:
             out_shape = [data_shape[0], b_s[-1]]
@@ -362,9 +384,50 @@ def generate_onnx(op, output_path):
         out_shape = list(data_shape)
 
     output_name = node.output[0] if node.output else "output"
-    outputs = [helper.make_tensor_value_info(output_name, TensorProto.FLOAT, out_shape)]
 
-    # 重建节点属性
+    # 5. 处理 rank 不匹配: MatMul 3D输入 → 插 Reshape
+    graph_nodes = []
+    actual_input_names = list(input_names)
+
+    if ot == "MatMul" and len(data_shape) > 2:
+        # 插入 Reshape 将 [B, M, K] → [B*M, K]
+        orig_name = input_names[0]
+        flat_name = orig_name + "_flat"
+        batch_size = 1
+        for d in data_shape[:-1]:
+            batch_size *= d
+        k_dim = data_shape[-1]
+
+        # Reshape 输入
+        reshape_input = helper.make_node(
+            "Reshape", inputs=[orig_name, f"{orig_name}_shape"],
+            outputs=[flat_name], name=f"{orig_name}_reshape"
+        )
+        reshape_shape = helper.make_tensor(
+            f"{orig_name}_shape", TensorProto.INT64, dims=[2],
+            vals=np.array([batch_size, k_dim], dtype=np.int64).tolist()
+        )
+        graph_nodes.append(reshape_input)
+        initializers.append(reshape_shape)
+
+        actual_input_names[0] = flat_name
+        # 更新 MatMul 输出名
+        matmul_out = output_name + "_mm"
+        output_name = matmul_out
+
+        # MatMul 后的 Reshape
+        unflat_name = node.output[0] if node.output else "output"
+        reshape_output = helper.make_node(
+            "Reshape", inputs=[matmul_out, f"{unflat_name}_shape"],
+            outputs=[unflat_name], name=f"{unflat_name}_reshape"
+        )
+        reshape_out_shape = helper.make_tensor(
+            f"{unflat_name}_shape", TensorProto.INT64, dims=[len(out_shape)],
+            vals=np.array(out_shape, dtype=np.int64).tolist()
+        )
+        initializers.append(reshape_out_shape)
+
+    # 主算子
     new_attrs = []
     for k, v in attrs.items():
         if isinstance(v, list):
@@ -375,15 +438,23 @@ def generate_onnx(op, output_path):
             new_attrs.append(helper.make_attribute(k, v))
 
     new_node = helper.make_node(
-        op_type=ot, inputs=input_names, outputs=[output_name],
+        op_type=ot, inputs=actual_input_names, outputs=[output_name],
         name=output_name
     )
     for a in new_attrs:
         if a.name not in [na.name for na in new_node.attribute]:
             new_node.attribute.append(a)
 
+    graph_nodes.append(new_node)
+
+    if ot == "MatMul" and len(data_shape) > 2:
+        graph_nodes.append(reshape_output)
+
+    final_output_name = node.output[0] if node.output else "output"
+    outputs = [helper.make_tensor_value_info(final_output_name, TensorProto.FLOAT, out_shape)]
+
     graph = helper.make_graph(
-        nodes=[new_node], name=output_name,
+        nodes=graph_nodes, name=output_name,
         inputs=graph_inputs, outputs=outputs,
         initializer=initializers
     )
