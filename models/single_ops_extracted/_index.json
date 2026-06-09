@@ -1,0 +1,3813 @@
+[
+  {
+    "name": "Concat_YOLO_C16_S160",
+    "file": "Concat_YOLO_C16_S160.onnx",
+    "op_type": "Concat",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        16,
+        160,
+        160
+      ],
+      [
+        1,
+        16,
+        160,
+        160
+      ],
+      [
+        1,
+        16,
+        160,
+        160
+      ]
+    ],
+    "output_shape": [
+      1,
+      48,
+      160,
+      160
+    ]
+  },
+  {
+    "name": "Concat_YOLO_C32_S80",
+    "file": "Concat_YOLO_C32_S80.onnx",
+    "op_type": "Concat",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        32,
+        80,
+        80
+      ],
+      [
+        1,
+        32,
+        80,
+        80
+      ],
+      [
+        1,
+        32,
+        80,
+        80
+      ],
+      [
+        1,
+        32,
+        80,
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      80,
+      80
+    ]
+  },
+  {
+    "name": "Concat_YOLO_C64_S40",
+    "file": "Concat_YOLO_C64_S40.onnx",
+    "op_type": "Concat",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        64,
+        40,
+        40
+      ],
+      [
+        1,
+        64,
+        40,
+        40
+      ],
+      [
+        1,
+        64,
+        40,
+        40
+      ],
+      [
+        1,
+        64,
+        40,
+        40
+      ]
+    ],
+    "output_shape": [
+      1,
+      256,
+      40,
+      40
+    ]
+  },
+  {
+    "name": "Concat_YOLO_C128_S20",
+    "file": "Concat_YOLO_C128_S20.onnx",
+    "op_type": "Concat",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        128,
+        20,
+        20
+      ],
+      [
+        1,
+        128,
+        20,
+        20
+      ],
+      [
+        1,
+        128,
+        20,
+        20
+      ]
+    ],
+    "output_shape": [
+      1,
+      384,
+      20,
+      20
+    ]
+  },
+  {
+    "name": "Concat_YOLO_C256_S40",
+    "file": "Concat_YOLO_C256_S40.onnx",
+    "op_type": "Concat",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        256,
+        40,
+        40
+      ],
+      [
+        1,
+        128,
+        40,
+        40
+      ]
+    ],
+    "output_shape": [
+      1,
+      384,
+      40,
+      40
+    ]
+  },
+  {
+    "name": "Concat_YOLO_C128_S80",
+    "file": "Concat_YOLO_C128_S80.onnx",
+    "op_type": "Concat",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        128,
+        80,
+        80
+      ],
+      [
+        1,
+        64,
+        80,
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      192,
+      80,
+      80
+    ]
+  },
+  {
+    "name": "Concat_YOLO_C64_L6400",
+    "file": "Concat_YOLO_C64_L6400.onnx",
+    "op_type": "Concat",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        64,
+        6400
+      ],
+      [
+        1,
+        64,
+        1600
+      ],
+      [
+        1,
+        64,
+        400
+      ]
+    ],
+    "output_shape": [
+      1,
+      192,
+      6400
+    ]
+  },
+  {
+    "name": "Concat_YOLO_C80_L6400",
+    "file": "Concat_YOLO_C80_L6400.onnx",
+    "op_type": "Concat",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        80,
+        6400
+      ],
+      [
+        1,
+        80,
+        1600
+      ],
+      [
+        1,
+        80,
+        400
+      ]
+    ],
+    "output_shape": [
+      1,
+      240,
+      6400
+    ]
+  },
+  {
+    "name": "Concat_YOLO_C2_L8400",
+    "file": "Concat_YOLO_C2_L8400.onnx",
+    "op_type": "Concat",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        2,
+        8400
+      ],
+      [
+        1,
+        2,
+        8400
+      ]
+    ],
+    "output_shape": [
+      1,
+      4,
+      8400
+    ]
+  },
+  {
+    "name": "Concat_YOLO_C4_L8400",
+    "file": "Concat_YOLO_C4_L8400.onnx",
+    "op_type": "Concat",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        4,
+        8400
+      ],
+      [
+        1,
+        80,
+        8400
+      ]
+    ],
+    "output_shape": [
+      1,
+      84,
+      8400
+    ]
+  },
+  {
+    "name": "Concat_MVIT_C96_S32",
+    "file": "Concat_MVIT_C96_S32.onnx",
+    "op_type": "Concat",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        96,
+        32,
+        32
+      ],
+      [
+        1,
+        96,
+        32,
+        32
+      ]
+    ],
+    "output_shape": [
+      1,
+      192,
+      32,
+      32
+    ]
+  },
+  {
+    "name": "Concat_MVIT_C128_S16",
+    "file": "Concat_MVIT_C128_S16.onnx",
+    "op_type": "Concat",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        128,
+        16,
+        16
+      ],
+      [
+        1,
+        128,
+        16,
+        16
+      ]
+    ],
+    "output_shape": [
+      1,
+      256,
+      16,
+      16
+    ]
+  },
+  {
+    "name": "Concat_MVIT_C160_S8",
+    "file": "Concat_MVIT_C160_S8.onnx",
+    "op_type": "Concat",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        160,
+        8,
+        8
+      ],
+      [
+        1,
+        160,
+        8,
+        8
+      ]
+    ],
+    "output_shape": [
+      1,
+      320,
+      8,
+      8
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C32_S1_K16",
+    "file": "Conv1x1_MBV2_C32_S1_K16.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        16,
+        32,
+        1,
+        1
+      ],
+      [
+        16
+      ]
+    ],
+    "output_shape": [
+      16,
+      16,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C16_S1_K96",
+    "file": "Conv1x1_MBV2_C16_S1_K96.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        96,
+        16,
+        1,
+        1
+      ],
+      [
+        96
+      ]
+    ],
+    "output_shape": [
+      96,
+      96,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C96_S1_K24",
+    "file": "Conv1x1_MBV2_C96_S1_K24.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        24,
+        96,
+        1,
+        1
+      ],
+      [
+        24
+      ]
+    ],
+    "output_shape": [
+      24,
+      24,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C24_S1_K144",
+    "file": "Conv1x1_MBV2_C24_S1_K144.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        144,
+        24,
+        1,
+        1
+      ],
+      [
+        144
+      ]
+    ],
+    "output_shape": [
+      144,
+      144,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C144_S1_K24",
+    "file": "Conv1x1_MBV2_C144_S1_K24.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        24,
+        144,
+        1,
+        1
+      ],
+      [
+        24
+      ]
+    ],
+    "output_shape": [
+      24,
+      24,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C144_S1_K32",
+    "file": "Conv1x1_MBV2_C144_S1_K32.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        32,
+        144,
+        1,
+        1
+      ],
+      [
+        32
+      ]
+    ],
+    "output_shape": [
+      32,
+      32,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C32_S1_K192",
+    "file": "Conv1x1_MBV2_C32_S1_K192.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        192,
+        32,
+        1,
+        1
+      ],
+      [
+        192
+      ]
+    ],
+    "output_shape": [
+      192,
+      192,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C192_S1_K32",
+    "file": "Conv1x1_MBV2_C192_S1_K32.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        32,
+        192,
+        1,
+        1
+      ],
+      [
+        32
+      ]
+    ],
+    "output_shape": [
+      32,
+      32,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C192_S1_K64",
+    "file": "Conv1x1_MBV2_C192_S1_K64.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        64,
+        192,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      64,
+      64,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C64_S1_K384",
+    "file": "Conv1x1_MBV2_C64_S1_K384.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        384,
+        64,
+        1,
+        1
+      ],
+      [
+        384
+      ]
+    ],
+    "output_shape": [
+      384,
+      384,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C384_S1_K64",
+    "file": "Conv1x1_MBV2_C384_S1_K64.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        64,
+        384,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      64,
+      64,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C384_S1_K96",
+    "file": "Conv1x1_MBV2_C384_S1_K96.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        96,
+        384,
+        1,
+        1
+      ],
+      [
+        96
+      ]
+    ],
+    "output_shape": [
+      96,
+      96,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C96_S1_K576",
+    "file": "Conv1x1_MBV2_C96_S1_K576.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        576,
+        96,
+        1,
+        1
+      ],
+      [
+        576
+      ]
+    ],
+    "output_shape": [
+      576,
+      576,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C576_S1_K96",
+    "file": "Conv1x1_MBV2_C576_S1_K96.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        96,
+        576,
+        1,
+        1
+      ],
+      [
+        96
+      ]
+    ],
+    "output_shape": [
+      96,
+      96,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C576_S1_K160",
+    "file": "Conv1x1_MBV2_C576_S1_K160.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        160,
+        576,
+        1,
+        1
+      ],
+      [
+        160
+      ]
+    ],
+    "output_shape": [
+      160,
+      160,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C160_S1_K960",
+    "file": "Conv1x1_MBV2_C160_S1_K960.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        960,
+        160,
+        1,
+        1
+      ],
+      [
+        960
+      ]
+    ],
+    "output_shape": [
+      960,
+      960,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C960_S1_K160",
+    "file": "Conv1x1_MBV2_C960_S1_K160.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        160,
+        960,
+        1,
+        1
+      ],
+      [
+        160
+      ]
+    ],
+    "output_shape": [
+      160,
+      160,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C960_S1_K320",
+    "file": "Conv1x1_MBV2_C960_S1_K320.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        320,
+        960,
+        1,
+        1
+      ],
+      [
+        320
+      ]
+    ],
+    "output_shape": [
+      320,
+      320,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MBV2_C320_S1_K1280",
+    "file": "Conv1x1_MBV2_C320_S1_K1280.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        1280,
+        320,
+        1,
+        1
+      ],
+      [
+        1280
+      ]
+    ],
+    "output_shape": [
+      1280,
+      1280,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C64_S1_K64",
+    "file": "Conv1x1_R50_C64_S1_K64.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        64,
+        64,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      64,
+      64,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C64_S1_K256",
+    "file": "Conv1x1_R50_C64_S1_K256.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        256,
+        64,
+        1,
+        1
+      ],
+      [
+        256
+      ]
+    ],
+    "output_shape": [
+      256,
+      256,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C256_S1_K64",
+    "file": "Conv1x1_R50_C256_S1_K64.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        64,
+        256,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      64,
+      64,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C128_S1_K512",
+    "file": "Conv1x1_R50_C128_S1_K512.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        512,
+        128,
+        1,
+        1
+      ],
+      [
+        512
+      ]
+    ],
+    "output_shape": [
+      512,
+      512,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C512_S1_K128",
+    "file": "Conv1x1_R50_C512_S1_K128.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        128,
+        512,
+        1,
+        1
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      128,
+      128,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C256_S1_K1024",
+    "file": "Conv1x1_R50_C256_S1_K1024.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        1024,
+        256,
+        1,
+        1
+      ],
+      [
+        1024
+      ]
+    ],
+    "output_shape": [
+      1024,
+      1024,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C1024_S1_K256",
+    "file": "Conv1x1_R50_C1024_S1_K256.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        256,
+        1024,
+        1,
+        1
+      ],
+      [
+        256
+      ]
+    ],
+    "output_shape": [
+      256,
+      256,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C512_S1_K2048",
+    "file": "Conv1x1_R50_C512_S1_K2048.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        2048,
+        512,
+        1,
+        1
+      ],
+      [
+        2048
+      ]
+    ],
+    "output_shape": [
+      2048,
+      2048,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C2048_S1_K512",
+    "file": "Conv1x1_R50_C2048_S1_K512.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        512,
+        2048,
+        1,
+        1
+      ],
+      [
+        512
+      ]
+    ],
+    "output_shape": [
+      512,
+      512,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C32_S160_K32",
+    "file": "Conv1x1_YOLO_C32_S160_K32.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        32,
+        160,
+        160
+      ],
+      [
+        32,
+        32,
+        1,
+        1
+      ],
+      [
+        32
+      ]
+    ],
+    "output_shape": [
+      1,
+      32,
+      160,
+      160
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C48_S160_K32",
+    "file": "Conv1x1_YOLO_C48_S160_K32.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        48,
+        160,
+        160
+      ],
+      [
+        32,
+        48,
+        1,
+        1
+      ],
+      [
+        32
+      ]
+    ],
+    "output_shape": [
+      1,
+      32,
+      160,
+      160
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C64_S80_K64",
+    "file": "Conv1x1_YOLO_C64_S80_K64.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        64,
+        80,
+        80
+      ],
+      [
+        64,
+        64,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      80,
+      80
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C128_S80_K64",
+    "file": "Conv1x1_YOLO_C128_S80_K64.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        128,
+        80,
+        80
+      ],
+      [
+        64,
+        128,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      80,
+      80
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C128_S40_K128",
+    "file": "Conv1x1_YOLO_C128_S40_K128.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        128,
+        40,
+        40
+      ],
+      [
+        128,
+        128,
+        1,
+        1
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      40,
+      40
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C256_S40_K128",
+    "file": "Conv1x1_YOLO_C256_S40_K128.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        256,
+        40,
+        40
+      ],
+      [
+        128,
+        256,
+        1,
+        1
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      40,
+      40
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C256_S20_K256",
+    "file": "Conv1x1_YOLO_C256_S20_K256.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        256,
+        20,
+        20
+      ],
+      [
+        256,
+        256,
+        1,
+        1
+      ],
+      [
+        256
+      ]
+    ],
+    "output_shape": [
+      1,
+      256,
+      20,
+      20
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C384_S20_K256",
+    "file": "Conv1x1_YOLO_C384_S20_K256.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        384,
+        20,
+        20
+      ],
+      [
+        256,
+        384,
+        1,
+        1
+      ],
+      [
+        256
+      ]
+    ],
+    "output_shape": [
+      1,
+      256,
+      20,
+      20
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C512_S20_K256",
+    "file": "Conv1x1_YOLO_C512_S20_K256.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        512,
+        20,
+        20
+      ],
+      [
+        256,
+        512,
+        1,
+        1
+      ],
+      [
+        256
+      ]
+    ],
+    "output_shape": [
+      1,
+      256,
+      20,
+      20
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C384_S40_K128",
+    "file": "Conv1x1_YOLO_C384_S40_K128.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        384,
+        40,
+        40
+      ],
+      [
+        128,
+        384,
+        1,
+        1
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      40,
+      40
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C192_S40_K128",
+    "file": "Conv1x1_YOLO_C192_S40_K128.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        192,
+        40,
+        40
+      ],
+      [
+        128,
+        192,
+        1,
+        1
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      40,
+      40
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C192_S80_K64",
+    "file": "Conv1x1_YOLO_C192_S80_K64.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        192,
+        80,
+        80
+      ],
+      [
+        64,
+        192,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      80,
+      80
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C96_S80_K64",
+    "file": "Conv1x1_YOLO_C96_S80_K64.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        96,
+        80,
+        80
+      ],
+      [
+        64,
+        96,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      80,
+      80
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C80_S80_K80",
+    "file": "Conv1x1_YOLO_C80_S80_K80.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        80,
+        80,
+        80
+      ],
+      [
+        80,
+        80,
+        1,
+        1
+      ],
+      [
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      80,
+      80,
+      80
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C64_S40_K64",
+    "file": "Conv1x1_YOLO_C64_S40_K64.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        64,
+        40,
+        40
+      ],
+      [
+        64,
+        64,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      40,
+      40
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C80_S40_K80",
+    "file": "Conv1x1_YOLO_C80_S40_K80.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        80,
+        40,
+        40
+      ],
+      [
+        80,
+        80,
+        1,
+        1
+      ],
+      [
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      80,
+      40,
+      40
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C64_S20_K64",
+    "file": "Conv1x1_YOLO_C64_S20_K64.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        64,
+        20,
+        20
+      ],
+      [
+        64,
+        64,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      20,
+      20
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C80_S20_K80",
+    "file": "Conv1x1_YOLO_C80_S20_K80.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        80,
+        20,
+        20
+      ],
+      [
+        80,
+        80,
+        1,
+        1
+      ],
+      [
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      80,
+      20,
+      20
+    ]
+  },
+  {
+    "name": "Conv1x1_YOLO_C16_S4_K1",
+    "file": "Conv1x1_YOLO_C16_S4_K1.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        16,
+        4,
+        8400
+      ],
+      [
+        1,
+        16,
+        1,
+        1
+      ]
+    ],
+    "output_shape": [
+      1,
+      1,
+      4,
+      8400
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C16_S128_K64",
+    "file": "Conv1x1_MVIT_C16_S128_K64.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        16,
+        128,
+        128
+      ],
+      [
+        64,
+        16,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      128,
+      128
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C64_S128_K32",
+    "file": "Conv1x1_MVIT_C64_S128_K32.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        64,
+        128,
+        128
+      ],
+      [
+        32,
+        64,
+        1,
+        1
+      ],
+      [
+        32
+      ]
+    ],
+    "output_shape": [
+      1,
+      32,
+      128,
+      128
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C32_S128_K128",
+    "file": "Conv1x1_MVIT_C32_S128_K128.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        32,
+        128,
+        128
+      ],
+      [
+        128,
+        32,
+        1,
+        1
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      128,
+      128
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C128_S64_K64",
+    "file": "Conv1x1_MVIT_C128_S64_K64.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        128,
+        64,
+        64
+      ],
+      [
+        64,
+        128,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C64_S64_K256",
+    "file": "Conv1x1_MVIT_C64_S64_K256.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        64,
+        64,
+        64
+      ],
+      [
+        256,
+        64,
+        1,
+        1
+      ],
+      [
+        256
+      ]
+    ],
+    "output_shape": [
+      1,
+      256,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C256_S64_K64",
+    "file": "Conv1x1_MVIT_C256_S64_K64.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        256,
+        64,
+        64
+      ],
+      [
+        64,
+        256,
+        1,
+        1
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C256_S32_K96",
+    "file": "Conv1x1_MVIT_C256_S32_K96.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        256,
+        32,
+        32
+      ],
+      [
+        96,
+        256,
+        1,
+        1
+      ],
+      [
+        96
+      ]
+    ],
+    "output_shape": [
+      1,
+      96,
+      32,
+      32
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C96_S32_K96",
+    "file": "Conv1x1_MVIT_C96_S32_K96.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        96,
+        32,
+        32
+      ],
+      [
+        96,
+        96,
+        3,
+        3
+      ],
+      [
+        96
+      ]
+    ],
+    "output_shape": [
+      1,
+      96,
+      32,
+      32
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C144_S32_K96",
+    "file": "Conv1x1_MVIT_C144_S32_K96.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        144,
+        32,
+        32
+      ],
+      [
+        96,
+        144,
+        1,
+        1
+      ],
+      [
+        96
+      ]
+    ],
+    "output_shape": [
+      1,
+      96,
+      32,
+      32
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C192_S32_K96",
+    "file": "Conv1x1_MVIT_C192_S32_K96.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        192,
+        32,
+        32
+      ],
+      [
+        96,
+        192,
+        3,
+        3
+      ],
+      [
+        96
+      ]
+    ],
+    "output_shape": [
+      1,
+      96,
+      32,
+      32
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C384_S16_K128",
+    "file": "Conv1x1_MVIT_C384_S16_K128.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        384,
+        16,
+        16
+      ],
+      [
+        128,
+        384,
+        1,
+        1
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      16,
+      16
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C128_S16_K128",
+    "file": "Conv1x1_MVIT_C128_S16_K128.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        128,
+        16,
+        16
+      ],
+      [
+        128,
+        128,
+        3,
+        3
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      16,
+      16
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C192_S16_K128",
+    "file": "Conv1x1_MVIT_C192_S16_K128.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        192,
+        16,
+        16
+      ],
+      [
+        128,
+        192,
+        1,
+        1
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      16,
+      16
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C256_S16_K128",
+    "file": "Conv1x1_MVIT_C256_S16_K128.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        256,
+        16,
+        16
+      ],
+      [
+        128,
+        256,
+        3,
+        3
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      16,
+      16
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C512_S8_K160",
+    "file": "Conv1x1_MVIT_C512_S8_K160.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        512,
+        8,
+        8
+      ],
+      [
+        160,
+        512,
+        1,
+        1
+      ],
+      [
+        160
+      ]
+    ],
+    "output_shape": [
+      1,
+      160,
+      8,
+      8
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C160_S8_K160",
+    "file": "Conv1x1_MVIT_C160_S8_K160.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        160,
+        8,
+        8
+      ],
+      [
+        160,
+        160,
+        3,
+        3
+      ],
+      [
+        160
+      ]
+    ],
+    "output_shape": [
+      1,
+      160,
+      8,
+      8
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C240_S8_K160",
+    "file": "Conv1x1_MVIT_C240_S8_K160.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        240,
+        8,
+        8
+      ],
+      [
+        160,
+        240,
+        1,
+        1
+      ],
+      [
+        160
+      ]
+    ],
+    "output_shape": [
+      1,
+      160,
+      8,
+      8
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C320_S8_K160",
+    "file": "Conv1x1_MVIT_C320_S8_K160.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        320,
+        8,
+        8
+      ],
+      [
+        160,
+        320,
+        3,
+        3
+      ],
+      [
+        160
+      ]
+    ],
+    "output_shape": [
+      1,
+      160,
+      8,
+      8
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C256_S1_K128_S2",
+    "file": "Conv1x1_R50_C256_S1_K128_S2.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        128,
+        256,
+        1,
+        1
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      128,
+      128,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C256_S1_S2",
+    "file": "Conv1x1_R50_C256_S1_S2.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        512,
+        256,
+        1,
+        1
+      ]
+    ],
+    "output_shape": [
+      512,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C512_S1_K256_S2",
+    "file": "Conv1x1_R50_C512_S1_K256_S2.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        256,
+        512,
+        1,
+        1
+      ],
+      [
+        256
+      ]
+    ],
+    "output_shape": [
+      256,
+      256,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C512_S1_S2",
+    "file": "Conv1x1_R50_C512_S1_S2.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        1024,
+        512,
+        1,
+        1
+      ]
+    ],
+    "output_shape": [
+      1024,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C1024_S1_K512_S2",
+    "file": "Conv1x1_R50_C1024_S1_K512_S2.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        512,
+        1024,
+        1,
+        1
+      ],
+      [
+        512
+      ]
+    ],
+    "output_shape": [
+      512,
+      512,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_R50_C1024_S1_S2",
+    "file": "Conv1x1_R50_C1024_S1_S2.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        2048,
+        1024,
+        1,
+        1
+      ]
+    ],
+    "output_shape": [
+      2048,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv1x1_MVIT_C3_S256_K16_S2",
+    "file": "Conv1x1_MVIT_C3_S256_K16_S2.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        3,
+        256,
+        256
+      ],
+      [
+        16,
+        3,
+        3,
+        3
+      ],
+      [
+        16
+      ]
+    ],
+    "output_shape": [
+      1,
+      16,
+      128,
+      128
+    ]
+  },
+  {
+    "name": "Conv3x3_R50_C64_S3",
+    "file": "Conv3x3_R50_C64_S3.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        64,
+        64,
+        3,
+        3
+      ]
+    ],
+    "output_shape": [
+      64,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv3x3_R50_C128_S3",
+    "file": "Conv3x3_R50_C128_S3.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        128,
+        128,
+        3,
+        3
+      ]
+    ],
+    "output_shape": [
+      128,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv3x3_R50_C256_S3",
+    "file": "Conv3x3_R50_C256_S3.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        256,
+        256,
+        3,
+        3
+      ]
+    ],
+    "output_shape": [
+      256,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv3x3_R50_C512_S3",
+    "file": "Conv3x3_R50_C512_S3.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        512,
+        512,
+        3,
+        3
+      ]
+    ],
+    "output_shape": [
+      512,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C16_S160_K16",
+    "file": "Conv3x3_YOLO_C16_S160_K16.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        16,
+        160,
+        160
+      ],
+      [
+        16,
+        16,
+        3,
+        3
+      ],
+      [
+        16
+      ]
+    ],
+    "output_shape": [
+      1,
+      16,
+      158,
+      158
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C32_S80_K32",
+    "file": "Conv3x3_YOLO_C32_S80_K32.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        32,
+        80,
+        80
+      ],
+      [
+        32,
+        32,
+        3,
+        3
+      ],
+      [
+        32
+      ]
+    ],
+    "output_shape": [
+      1,
+      32,
+      78,
+      78
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C64_S40_K64",
+    "file": "Conv3x3_YOLO_C64_S40_K64.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        64,
+        40,
+        40
+      ],
+      [
+        64,
+        64,
+        3,
+        3
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      38,
+      38
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C128_S20_K128",
+    "file": "Conv3x3_YOLO_C128_S20_K128.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        128,
+        20,
+        20
+      ],
+      [
+        128,
+        128,
+        3,
+        3
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      18,
+      18
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C64_S80_K80",
+    "file": "Conv3x3_YOLO_C64_S80_K80.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        64,
+        80,
+        80
+      ],
+      [
+        80,
+        64,
+        3,
+        3
+      ],
+      [
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      80,
+      78,
+      78
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C80_S80_K80",
+    "file": "Conv3x3_YOLO_C80_S80_K80.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        80,
+        80,
+        80
+      ],
+      [
+        80,
+        80,
+        3,
+        3
+      ],
+      [
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      80,
+      78,
+      78
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C128_S40_K80",
+    "file": "Conv3x3_YOLO_C128_S40_K80.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        128,
+        40,
+        40
+      ],
+      [
+        80,
+        128,
+        3,
+        3
+      ],
+      [
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      80,
+      38,
+      38
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C80_S40_K80",
+    "file": "Conv3x3_YOLO_C80_S40_K80.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        80,
+        40,
+        40
+      ],
+      [
+        80,
+        80,
+        3,
+        3
+      ],
+      [
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      80,
+      38,
+      38
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C256_S20_K80",
+    "file": "Conv3x3_YOLO_C256_S20_K80.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        256,
+        20,
+        20
+      ],
+      [
+        80,
+        256,
+        3,
+        3
+      ],
+      [
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      80,
+      18,
+      18
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C64_S20_K64",
+    "file": "Conv3x3_YOLO_C64_S20_K64.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        64,
+        20,
+        20
+      ],
+      [
+        64,
+        64,
+        3,
+        3
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      18,
+      18
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C80_S20_K80",
+    "file": "Conv3x3_YOLO_C80_S20_K80.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        80,
+        20,
+        20
+      ],
+      [
+        80,
+        80,
+        3,
+        3
+      ],
+      [
+        80
+      ]
+    ],
+    "output_shape": [
+      1,
+      80,
+      18,
+      18
+    ]
+  },
+  {
+    "name": "Conv3x3_MBV2_C3_S3_K32_S2",
+    "file": "Conv3x3_MBV2_C3_S3_K32_S2.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        32,
+        3,
+        3,
+        3
+      ],
+      [
+        32
+      ]
+    ],
+    "output_shape": [
+      32,
+      32,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C3_S640_K16_S2",
+    "file": "Conv3x3_YOLO_C3_S640_K16_S2.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        3,
+        640,
+        640
+      ],
+      [
+        16,
+        3,
+        3,
+        3
+      ],
+      [
+        16
+      ]
+    ],
+    "output_shape": [
+      1,
+      16,
+      319,
+      319
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C16_S320_K32_S2",
+    "file": "Conv3x3_YOLO_C16_S320_K32_S2.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        16,
+        320,
+        320
+      ],
+      [
+        32,
+        16,
+        3,
+        3
+      ],
+      [
+        32
+      ]
+    ],
+    "output_shape": [
+      1,
+      32,
+      159,
+      159
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C32_S160_K64_S2",
+    "file": "Conv3x3_YOLO_C32_S160_K64_S2.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        32,
+        160,
+        160
+      ],
+      [
+        64,
+        32,
+        3,
+        3
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      79,
+      79
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C64_S80_K128_S2",
+    "file": "Conv3x3_YOLO_C64_S80_K128_S2.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        64,
+        80,
+        80
+      ],
+      [
+        128,
+        64,
+        3,
+        3
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      39,
+      39
+    ]
+  },
+  {
+    "name": "Conv3x3_YOLO_C128_S40_K256_S2",
+    "file": "Conv3x3_YOLO_C128_S40_K256_S2.onnx",
+    "op_type": "Conv",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        128,
+        40,
+        40
+      ],
+      [
+        256,
+        128,
+        3,
+        3
+      ],
+      [
+        256
+      ]
+    ],
+    "output_shape": [
+      1,
+      256,
+      19,
+      19
+    ]
+  },
+  {
+    "name": "Conv7x7_R50_C3_S7_S2",
+    "file": "Conv7x7_R50_C3_S7_S2.onnx",
+    "op_type": "Conv",
+    "model": "R50",
+    "input_shapes": [
+      [
+        64,
+        3,
+        7,
+        7
+      ]
+    ],
+    "output_shape": [
+      64,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MBV2_C1_S3_K32",
+    "file": "DWConv_MBV2_C1_S3_K32.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        32,
+        1,
+        3,
+        3
+      ],
+      [
+        32
+      ]
+    ],
+    "output_shape": [
+      32,
+      32,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MBV2_C1_S3_K144",
+    "file": "DWConv_MBV2_C1_S3_K144.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        144,
+        1,
+        3,
+        3
+      ],
+      [
+        144
+      ]
+    ],
+    "output_shape": [
+      144,
+      144,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MBV2_C1_S3_K192",
+    "file": "DWConv_MBV2_C1_S3_K192.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        192,
+        1,
+        3,
+        3
+      ],
+      [
+        192
+      ]
+    ],
+    "output_shape": [
+      192,
+      192,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MBV2_C1_S3_K384",
+    "file": "DWConv_MBV2_C1_S3_K384.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        384,
+        1,
+        3,
+        3
+      ],
+      [
+        384
+      ]
+    ],
+    "output_shape": [
+      384,
+      384,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MBV2_C1_S3_K576",
+    "file": "DWConv_MBV2_C1_S3_K576.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        576,
+        1,
+        3,
+        3
+      ],
+      [
+        576
+      ]
+    ],
+    "output_shape": [
+      576,
+      576,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MBV2_C1_S3_K960",
+    "file": "DWConv_MBV2_C1_S3_K960.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        960,
+        1,
+        3,
+        3
+      ],
+      [
+        960
+      ]
+    ],
+    "output_shape": [
+      960,
+      960,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MVIT_C64_S128_K64",
+    "file": "DWConv_MVIT_C64_S128_K64.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        64,
+        128,
+        128
+      ],
+      [
+        64,
+        1,
+        3,
+        3
+      ],
+      [
+        64
+      ]
+    ],
+    "output_shape": [
+      1,
+      64,
+      128,
+      128
+    ]
+  },
+  {
+    "name": "DWConv_MVIT_C256_S64_K256",
+    "file": "DWConv_MVIT_C256_S64_K256.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        256,
+        64,
+        64
+      ],
+      [
+        256,
+        1,
+        3,
+        3
+      ],
+      [
+        256
+      ]
+    ],
+    "output_shape": [
+      1,
+      256,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "DWConv_MBV2_C1_S3_K96_S2",
+    "file": "DWConv_MBV2_C1_S3_K96_S2.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        96,
+        1,
+        3,
+        3
+      ],
+      [
+        96
+      ]
+    ],
+    "output_shape": [
+      96,
+      96,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MBV2_C1_S3_K144_S2",
+    "file": "DWConv_MBV2_C1_S3_K144_S2.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        144,
+        1,
+        3,
+        3
+      ],
+      [
+        144
+      ]
+    ],
+    "output_shape": [
+      144,
+      144,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MBV2_C1_S3_K192_S2",
+    "file": "DWConv_MBV2_C1_S3_K192_S2.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        192,
+        1,
+        3,
+        3
+      ],
+      [
+        192
+      ]
+    ],
+    "output_shape": [
+      192,
+      192,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MBV2_C1_S3_K576_S2",
+    "file": "DWConv_MBV2_C1_S3_K576_S2.onnx",
+    "op_type": "Conv",
+    "model": "MBV2",
+    "input_shapes": [
+      [
+        576,
+        1,
+        3,
+        3
+      ],
+      [
+        576
+      ]
+    ],
+    "output_shape": [
+      576,
+      576,
+      1,
+      1
+    ]
+  },
+  {
+    "name": "DWConv_MVIT_C128_S128_K128_S2",
+    "file": "DWConv_MVIT_C128_S128_K128_S2.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        128,
+        128,
+        128
+      ],
+      [
+        128,
+        1,
+        3,
+        3
+      ],
+      [
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "DWConv_MVIT_C256_S64_K256_S2",
+    "file": "DWConv_MVIT_C256_S64_K256_S2.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        256,
+        64,
+        64
+      ],
+      [
+        256,
+        1,
+        3,
+        3
+      ],
+      [
+        256
+      ]
+    ],
+    "output_shape": [
+      1,
+      256,
+      32,
+      32
+    ]
+  },
+  {
+    "name": "DWConv_MVIT_C384_S32_K384_S2",
+    "file": "DWConv_MVIT_C384_S32_K384_S2.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        384,
+        32,
+        32
+      ],
+      [
+        384,
+        1,
+        3,
+        3
+      ],
+      [
+        384
+      ]
+    ],
+    "output_shape": [
+      1,
+      384,
+      16,
+      16
+    ]
+  },
+  {
+    "name": "DWConv_MVIT_C512_S16_K512_S2",
+    "file": "DWConv_MVIT_C512_S16_K512_S2.onnx",
+    "op_type": "Conv",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        1,
+        512,
+        16,
+        16
+      ],
+      [
+        512,
+        1,
+        3,
+        3
+      ],
+      [
+        512
+      ]
+    ],
+    "output_shape": [
+      1,
+      512,
+      8,
+      8
+    ]
+  },
+  {
+    "name": "LayerNorm_BERT_L128_H768",
+    "file": "LayerNorm_BERT_L128_H768.onnx",
+    "op_type": "LayerNormalization",
+    "model": "BERT",
+    "input_shapes": [
+      [
+        1,
+        128,
+        768
+      ],
+      [
+        768
+      ],
+      [
+        768
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      768
+    ]
+  },
+  {
+    "name": "LayerNorm_MVIT_L256_H144",
+    "file": "LayerNorm_MVIT_L256_H144.onnx",
+    "op_type": "LayerNormalization",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        256,
+        144
+      ],
+      [
+        144
+      ],
+      [
+        144
+      ]
+    ],
+    "output_shape": [
+      4,
+      256,
+      144
+    ]
+  },
+  {
+    "name": "LayerNorm_MVIT_L64_H192",
+    "file": "LayerNorm_MVIT_L64_H192.onnx",
+    "op_type": "LayerNormalization",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        64,
+        192
+      ],
+      [
+        192
+      ],
+      [
+        192
+      ]
+    ],
+    "output_shape": [
+      4,
+      64,
+      192
+    ]
+  },
+  {
+    "name": "LayerNorm_MVIT_L16_H240",
+    "file": "LayerNorm_MVIT_L16_H240.onnx",
+    "op_type": "LayerNormalization",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        16,
+        240
+      ],
+      [
+        240
+      ],
+      [
+        240
+      ]
+    ],
+    "output_shape": [
+      4,
+      16,
+      240
+    ]
+  },
+  {
+    "name": "MatMul_BERT_768x3072",
+    "file": "MatMul_BERT_768x3072.onnx",
+    "op_type": "MatMul",
+    "model": "BERT",
+    "input_shapes": [
+      [
+        1,
+        128,
+        768
+      ],
+      [
+        768,
+        3072
+      ]
+    ],
+    "output_shape": [
+      1,
+      3072
+    ]
+  },
+  {
+    "name": "MatMul_BERT_1x12",
+    "file": "MatMul_BERT_1x12.onnx",
+    "op_type": "MatMul",
+    "model": "BERT",
+    "input_shapes": [
+      [
+        1,
+        12,
+        128,
+        64
+      ],
+      [
+        1,
+        12,
+        64,
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      12
+    ]
+  },
+  {
+    "name": "MatMul_BERT_1x12",
+    "file": "MatMul_BERT_1x12.onnx",
+    "op_type": "MatMul",
+    "model": "BERT",
+    "input_shapes": [
+      [
+        1,
+        12,
+        128,
+        64
+      ],
+      [
+        1,
+        12,
+        64,
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      12
+    ]
+  },
+  {
+    "name": "MatMul_BERT_3072x768",
+    "file": "MatMul_BERT_3072x768.onnx",
+    "op_type": "MatMul",
+    "model": "BERT",
+    "input_shapes": [
+      [
+        1,
+        128,
+        3072
+      ],
+      [
+        3072,
+        768
+      ]
+    ],
+    "output_shape": [
+      1,
+      768
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_144x432",
+    "file": "MatMul_MVIT_144x432.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        256,
+        144
+      ],
+      [
+        144,
+        432
+      ]
+    ],
+    "output_shape": [
+      4,
+      432
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_4x4",
+    "file": "MatMul_MVIT_4x4.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        4,
+        256,
+        36
+      ],
+      [
+        4,
+        4,
+        36,
+        256
+      ]
+    ],
+    "output_shape": [
+      4,
+      4
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_4x4",
+    "file": "MatMul_MVIT_4x4.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        4,
+        256,
+        36
+      ],
+      [
+        4,
+        4,
+        36,
+        256
+      ]
+    ],
+    "output_shape": [
+      4,
+      4
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_288x144",
+    "file": "MatMul_MVIT_288x144.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        256,
+        288
+      ],
+      [
+        288,
+        144
+      ]
+    ],
+    "output_shape": [
+      4,
+      144
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_192x576",
+    "file": "MatMul_MVIT_192x576.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        64,
+        192
+      ],
+      [
+        192,
+        576
+      ]
+    ],
+    "output_shape": [
+      4,
+      576
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_4x4",
+    "file": "MatMul_MVIT_4x4.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        4,
+        256,
+        36
+      ],
+      [
+        4,
+        4,
+        36,
+        256
+      ]
+    ],
+    "output_shape": [
+      4,
+      4
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_4x4",
+    "file": "MatMul_MVIT_4x4.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        4,
+        256,
+        36
+      ],
+      [
+        4,
+        4,
+        36,
+        256
+      ]
+    ],
+    "output_shape": [
+      4,
+      4
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_384x192",
+    "file": "MatMul_MVIT_384x192.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        64,
+        384
+      ],
+      [
+        384,
+        192
+      ]
+    ],
+    "output_shape": [
+      4,
+      192
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_240x720",
+    "file": "MatMul_MVIT_240x720.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        16,
+        240
+      ],
+      [
+        240,
+        720
+      ]
+    ],
+    "output_shape": [
+      4,
+      720
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_4x4",
+    "file": "MatMul_MVIT_4x4.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        4,
+        256,
+        36
+      ],
+      [
+        4,
+        4,
+        36,
+        256
+      ]
+    ],
+    "output_shape": [
+      4,
+      4
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_4x4",
+    "file": "MatMul_MVIT_4x4.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        4,
+        256,
+        36
+      ],
+      [
+        4,
+        4,
+        36,
+        256
+      ]
+    ],
+    "output_shape": [
+      4,
+      4
+    ]
+  },
+  {
+    "name": "MatMul_MVIT_480x240",
+    "file": "MatMul_MVIT_480x240.onnx",
+    "op_type": "MatMul",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        16,
+        480
+      ],
+      [
+        480,
+        240
+      ]
+    ],
+    "output_shape": [
+      4,
+      240
+    ]
+  },
+  {
+    "name": "MaxPool_YOLO_C128_S20",
+    "file": "MaxPool_YOLO_C128_S20.onnx",
+    "op_type": "MaxPool",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        128,
+        20,
+        20
+      ]
+    ],
+    "output_shape": [
+      1,
+      128,
+      20,
+      20
+    ]
+  },
+  {
+    "name": "Softmax_YOLO_8400x4",
+    "file": "Softmax_YOLO_8400x4.onnx",
+    "op_type": "Softmax",
+    "model": "YOLO",
+    "input_shapes": [
+      [
+        1,
+        8400,
+        4,
+        16
+      ]
+    ],
+    "output_shape": [
+      1,
+      8400,
+      4,
+      16
+    ]
+  },
+  {
+    "name": "Softmax_BERT_12x128",
+    "file": "Softmax_BERT_12x128.onnx",
+    "op_type": "Softmax",
+    "model": "BERT",
+    "input_shapes": [
+      [
+        1,
+        12,
+        128,
+        128
+      ]
+    ],
+    "output_shape": [
+      1,
+      12,
+      128,
+      128
+    ]
+  },
+  {
+    "name": "Softmax_MVIT_4x256",
+    "file": "Softmax_MVIT_4x256.onnx",
+    "op_type": "Softmax",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        4,
+        256,
+        256
+      ]
+    ],
+    "output_shape": [
+      4,
+      4,
+      256,
+      256
+    ]
+  },
+  {
+    "name": "Softmax_MVIT_4x64",
+    "file": "Softmax_MVIT_4x64.onnx",
+    "op_type": "Softmax",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        4,
+        64,
+        64
+      ]
+    ],
+    "output_shape": [
+      4,
+      4,
+      64,
+      64
+    ]
+  },
+  {
+    "name": "Softmax_MVIT_4x16",
+    "file": "Softmax_MVIT_4x16.onnx",
+    "op_type": "Softmax",
+    "model": "MVIT",
+    "input_shapes": [
+      [
+        4,
+        4,
+        16,
+        16
+      ]
+    ],
+    "output_shape": [
+      4,
+      4,
+      16,
+      16
+    ]
+  }
+]
