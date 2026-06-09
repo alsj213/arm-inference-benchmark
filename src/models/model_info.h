@@ -8,6 +8,7 @@ struct ModelInfo {
     std::string name;
     std::vector<int> input_shape;
     std::string base_path;
+    std::string input_name;  // ONNX 模型的第一个数据输入名
 
     std::string get_model_path(const std::string& backend) const {
         if (backend == "mnn" || backend == "MNN" || backend == "mnn_gpu" || backend == "MNN_GPU") {

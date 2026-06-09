@@ -112,17 +112,24 @@ bool TVMBackend::init(const BenchmarkConfig& config) {
         return false;
     }
 
-    // ── 5. 推断输入名称 ──
-    // ONNX 输入名因模型而异: MobileNetV2="input", ResNet50="data", YOLOv8n="images", BERT="input_ids"
-    if (so_path.find("bert") != std::string::npos) {
-        input_name_ = "input_ids";
-    } else if (so_path.find("resnet50") != std::string::npos) {
-        input_name_ = "data";
-    } else if (so_path.find("yolov8n") != std::string::npos) {
-        input_name_ = "images";
-    } else {
-        input_name_ = "input";
+    // ── 5. 获取输入名称 ──
+    // 优先使用 config 传入的 input_name (从 models.json 读取)
+    if (!config.input_name.empty()) {
+        input_name_ = config.input_name;
     }
+    // 回退: 根据模型文件名推断
+    if (input_name_.empty()) {
+        if (so_path.find("bert") != std::string::npos) {
+            input_name_ = "input_ids";
+        } else if (so_path.find("resnet50") != std::string::npos) {
+            input_name_ = "data";
+        } else if (so_path.find("yolov8n") != std::string::npos) {
+            input_name_ = "images";
+        } else {
+            input_name_ = "input";
+        }
+    }
+    printf("TVM: input_name=%s\n", input_name_.c_str());
 
     // ── 6. 检测模型输入数量 ──
     num_model_inputs_ = 1;

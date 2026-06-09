@@ -19,7 +19,8 @@ def generate(json_path, output_path):
         name = m['name']
         shape = ', '.join(str(d) for d in m['input_shape'])
         base = m['base_path']
-        lines.append(f'static ModelInfo s_{name}_info{{"{name}", {{{shape}}}, "{base}"}};')
+        iname = m.get('input_name', 'input')
+        lines.append(f'static ModelInfo s_{name}_info{{"{name}", {{{shape}}}, "{base}", "{iname}"}};')
         lines.append(f'ModelInfo get_{name}_info() {{ return s_{name}_info; }}')
         lines.append('')
 

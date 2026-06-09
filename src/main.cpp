@@ -204,6 +204,7 @@ int main(int argc, char** argv) {
             config.model_path = model_info.get_model_path(backend_name);
             config.weights_path = model_info.get_weights_path(backend_name);
             config.input_shape = model_info.input_shape;
+            config.input_name = model_info.input_name;
             config.backend_type = parse_backend(backend_name);
             config.precision = parse_precision(args.precision);
             config.num_threads = args.threads;
