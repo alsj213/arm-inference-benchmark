@@ -1,0 +1,8 @@
+{
+  "Conv1x1_K16_C64_M784": {
+    "status": "tuned",
+    "untuned": "/home/liu/project/newwork/benchmark/tools/tvm/compiled_models/Conv1x1_K16_C64_M784_untuned_tvm.so",
+    "tuned": "/home/liu/project/newwork/benchmark/tools/tvm/compiled_models/Conv1x1_K16_C64_M784_tuned_tvm.so",
+    "tasks": 2
+  }
+}
