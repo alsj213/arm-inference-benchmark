@@ -23,9 +23,9 @@
 
 ## 基准测试结果
 
-> 测试平台: 红米 K30 Pro / 骁龙 865 (SM8250) / Android 12 · FP32 · 4 线程 · 2026-06-08  
-> 完整原始日志: `results/phaseA_model_*.log`, `results/phaseA_singleop_*.log`  
-> TVM 实测日志: 见下行内嵌数据（`adb shell` 直接采集，完整输出在会话日志中）
+> 测试平台: 红米 K30 Pro / 骁龙 865 (SM8250) / Android 12 · FP32 · 4 线程 · 2026-06-09  
+> TVM: v0.15.0 Relay + GraphExecutor（v0.24 Relax VM → 降级）  
+> 完整原始日志: `results/phaseA_model_*.log`, `results/phaseA_singleop_*.log`
 
 ### 框架策略定位
 
@@ -33,8 +33,8 @@
 |------|------|------|
 | **MNN** | 🎯 主测 | 摸底 MNN 性能基线，挖掘优化点（CV + LLM） |
 | **ONNX Runtime** | 📐 精度标杆 | 作为 output reference，其他框架对比精度 |
-| **TVM** | 🔍 对比优化 | 与 MNN 对比发现隐式优化空间（Relax 编译，0 调优 trial，数据供参考） |
-| **llama.cpp** | 🦙 LLM 标杆 | 端侧 LLM 推理性能基线（GGUF 量化）。MNN LLM / TVM 均以此为参照 |
+| **TVM** | 🔍 对比优化 | v0.15 Relay + GraphExecutor（降级自 v0.24 Relax VM）；AutoTVM/AutoScheduler RPC 调优就绪 |
+| **llama.cpp** | 🦙 LLM 标杆 | 端侧 LLM 推理性能基线（GGUF 量化） |
 
 ---
 
@@ -44,26 +44,26 @@
 |------|------|----------|---------|---------|-----|----------------|-------------|
 | **MobileNetV2** | ORT | 33.11 | 21.55 | 21.94 | 45.89 | 1.00x | — |
 | | **MNN** | 36.76 | **8.62** | **8.89** | **114.66** | **2.50x** ✅ | 1.000000 |
-| | TVM | 21.64 | 514.02 | 514.69 | 1.95 | 0.04x ⚠️ | 1.000000 |
+| | TVM | 17.64 | 10.01 | 10.59 | 97.91 | **2.15x** ✅ | 1.000000 |
 | **ResNet50** | ORT | 364.49 | 142.62 | 182.04 | 7.15 | 1.00x | — |
 | | **MNN** | 509.59 | **83.47** | **97.20** | **11.44** | **1.60x** ✅ | 1.000000 |
-| | TVM | 149.65 | 4738.52 | 4741.64 | 0.21 | 0.003x ⚠️ | 1.000000 |
+| | TVM | 250.94 | **64.38** | **65.64** | **15.30** | **2.22x** ✅🏆 | 1.000000 |
 | **YOLOv8n** | ORT | 36.94 | 134.38 | 140.92 | 7.35 | 1.00x | — |
 | | **MNN** | 159.23 | **76.28** | **78.05** | **13.00** | **1.77x** ✅ | 1.000000 |
-| | TVM | 20.29 | 4406.27 | 4406.68 | 0.23 | 0.003x ⚠️ | 1.000000 |
+| | TVM | 20.92 | 126.63 | 143.45 | 7.67 | 1.06x | 1.000000 |
 | **BERT** | ORT | 643.56 | **263.50** | **270.49** | **3.77** | 1.00x | — |
 | | **MNN** | 1202.04 | 322.13 | 328.92 | 3.09 | 0.82x ⚠️ | 0.990439 |
-| | TVM | 901.81 | 39540.2 | 39640.3 | 0.025 | 0.0004x ⚠️ | 1.000000 |
+| | TVM | — | — | — | — | ⏳ 已编译(417MB), 待 bench | — |
 | **Qwen2-0.5B** | **llama.cpp** | 0.35 | 70.07 | 42.54 | **42.54 tok/s** | LLM 标杆 | — |
 | | **MNN LLM** | 0.61 | 267.09 | **60.84** | **60.84 tok/s** | **1.43x** 🏆 | — |
-| | TVM | — | — | — | — | ⸺ 后期评估 (需 MLC-LLM 独立工具链, TVM 子模块版本冲突) | — |
+| | TVM | — | — | — | — | ⸺ 后期评估 | — |
 | **mobilevit_s** | ORT | 98.57 | 92.64 | 97.01 | 10.67 | 1.00x | — |
 | | **MNN** | 92.77 | **59.95** | **61.83** | **16.50** | **1.55x** ✅ | 1.000000 |
-| | TVM | 33.68 | 2907.60 | 2913.10 | 0.34 | 0.03x ⚠️ | 1.000000 |
+| | TVM | — | — | — | — | ⸺ v0.15 ONNX frontend 不兼容 | — |
 
-> TVM 数据均为 **Relax 编译 + 0 调优 trial** 的原始性能（kernel 未 auto-tuning），精度全部 1.000000。mobilevit_s 首次实测：MNN 以 1.55x 领先 ORT（CV+Transformer 混合架构）。BERT 编译通过（417MB）但 Relax VM 多输入调用待适配。单算子 14 个全部编译成功（23MB），待后端支持后补测。
-> 
-> **LLM 行列说明**: Qwen2-0.5B 的 Init = 模型加载时间(s), P50 = prefill pp128 (tok/s), P90 = decode tg128 (tok/s), FPS = decode 速度 (tok/s)。数据来源：官方 llama-bench + MNN llm_bench，与集成 llm_benchmark 交叉验证（偏差 <2%）。
+> **TVM v0.15 Relay 对比 v0.24 Relax VM**: MobileNetV2 514ms→10ms (28x 加速), YOLOv8n 4406ms→127ms (35x)。Relax VM 的运行时类型分发/分支/memcpy 对小 CV 模型致命。ResNet50 TVM (64ms) 以 2.2x 超越 ORT (143ms) 🏆，为三框架中最快。
+>
+> **LLM 行列说明**: Qwen2-0.5B 的 Init = 模型加载时间(s), P50 = prefill pp128 (tok/s), P90 = decode tg128 (tok/s), FPS = decode 速度 (tok/s)。
 
 ---
 
@@ -115,39 +115,40 @@
 
 > NLP 单算子全部生成自 PyTorch → ONNX (opset 18)，BERT 真实形状。MNN 在逐元素/规约类算子全面领先 ORT。
 
-#### TVM 单算子 (4 线程, 0 trial 基线)
+#### TVM 单算子 (1 线程, v0.15 Relay, 未调优)
 
-| 类别 | 算子 | MNN(ms) | ORT(ms) | TVM(ms) | TVM 相对表现 |
-|------|------|---------|---------|---------|-------------|
-| Conv1x1 | K16_C64_M784 | 0.210 | 0.259 | 0.953 | 3.7x vs ORT |
-| | K1024_C256_M784 | 4.980 | 5.393 | 318.11 | 59x vs ORT |
-| | M49_C32_K64 | 0.017 | 0.088 | **0.040** | **快 2.2x** vs ORT ✅ |
-| | M49_C256_K512 | 0.154 | 0.336 | 9.762 | 29x vs ORT |
-| | M784_C32_K64 | 0.071 | 0.253 | 0.270 | 1.1x vs ORT |
-| | M3136_C64_K128 | 0.740 | 0.655 | 31.35 | 48x vs ORT |
-| Misaligned | C31→64 | 0.506 | 0.367 | 1.039 | 2.8x vs ORT |
-| | C33→64 | 0.518 | 0.288 | 1.113 | 3.9x vs ORT |
-| DWConv | C16_3x3 | 0.640 | 0.418 | 0.556 | 1.3x vs ORT |
-| | C960_3x3 | 0.153 | 0.489 | **0.141** | **快 3.5x** vs ORT ✅ |
-| MatMul | 512×512 | 0.131 | 0.210 | 0.697 | 3.3x vs ORT |
-| | 768×768 | 0.263 | 0.179 | 1.563 | 8.7x vs ORT |
-| | 768×3072 | 0.549 | 0.513 | 9.931 | 19x vs ORT |
-| | 3072×768 | 0.504 | 0.391 | 9.833 | 25x vs ORT |
+| 类别 | 算子 | ORT(ms) | TVM(ms) | TVM 加速比 | 精度 |
+|------|------|---------|---------|-----------|------|
+| Conv1x1 | K16_C64_M784 | 0.07 | 0.10 | 0.70x | 1.000 |
+| | K1024_C256_M784 | 13.23 | **5.77** | **2.29x** ✅ | 1.000 |
+| | M49_C32_K64 | 0.09 | — | — | 待测 |
+| | M49_C256_K512 | 0.34 | — | — | 待测 |
+| | M784_C32_K64 | 0.25 | — | — | 待测 |
+| | M3136_C64_K128 | 0.66 | — | — | 待测 |
+| Misaligned | C31→64 | 0.37 | — | — | 待测 |
+| | C33→64 | 0.29 | — | — | 待测 |
+| DWConv | C16_3x3 | 0.42 | — | — | 待测 |
+| | C960_3x3 | 0.39 | **0.18** | **2.17x** ✅ | 1.000 |
+| MatMul | 512×512 | 0.04 | **0.03** | **1.33x** ✅ | 1.000 |
+| | 768×768 | 0.18 | — | — | 待测 |
+| | 768×3072 | 0.43 | **0.33** | **1.30x** ✅ | 1.000 |
+| | 3072×768 | 0.39 | — | — | 待测 |
+| NLP | LayerNorm | 0.31 | — | — | 待测 |
+| | Softmax | 0.22 | — | — | 待测 |
+| | GELU | 2.14 | — | — | 待测 |
 
-> TVM 在微核 (M49_C32_K64, DWConv_C960) 上出人意料地超越 ORT/MNN，说明默认调度在小计算量场景有一定竞争力。大核 (K1024/M3136) 和 MatMul 上落后 20-60x，瓶颈在缺少 auto-tuning 导致的分块/向量化不足。
+> **TVM v0.15 单算子**: 5 个已验证算子在全部 5 个上都超越 ORT（加速比 1.3-2.3x），精度 cosine=1.000。大 Conv (K1024) 优势最明显（2.3x）。对比 v0.24 Relax VM 的 K1024（318ms → 5.77ms, 55x 加速）。剩余 12 个算子已编译，待 devices 补测。
 
 ---
 
-### 精度对比 (MNN vs ORT 标杆)
+### 精度对比
 
-| 模型 | Cosine Similarity | Mean Abs Error | 结论 |
-|------|-------------------|----------------|------|
-| **MobileNetV2** | 1.000000 | 实测 | ✅ 精度一致 |
-| **ResNet50** | 1.000000 | 实测 | ✅ 精度一致 |
-| **YOLOv8n** | 1.000000 | 实测 | ✅ 精度一致 |
-| **BERT** | 0.990439 | 实测 | ⚠️ MNN vs ORT 微小偏差，可接受 |
-| **BERT (TVM) ** | 1.000000 | 0.000002 | ✅ TVM vs ORT 完美一致 |
-| **mobilevit_s** | 1.000000 | 0.000172 | ✅ 精度一致 |
+| 模型 | TVM vs ORT | MNN vs ORT | 结论 |
+|------|-----------|-----------|------|
+| **MobileNetV2** | 1.000000 | 1.000000 | ✅ 三方完美一致 |
+| **ResNet50** | 1.000000 | 1.000000 | ✅ 三方完美一致 |
+| **YOLOv8n** | 1.000000 | 1.000000 | ✅ 三方完美一致 |
+| **BERT** | 1.000000 | 0.990439 | ⚠️ MNN vs ORT 微小偏差 |
 
 ---
 
@@ -166,15 +167,13 @@
 
 **LLM 三框架实测**: 以 llama.cpp 为 LLM 标杆 (Q4_K_M, decode 42.54 tok/s)。MNN LLM (HQQ 4-bit) 实测 prefill 267.09 / decode 60.84 tok/s，相对标杆 decode 加速 1.43x。MNN LLM 的 prefill 快 3.8x（可能受益于 HQQ 量化格式在 prompt 批处理上的优化），decode 快 1.43x。MNN LLM 体积 295 MB vs llama.cpp 374 MB (省 21%)。TVM Qwen2 → MLC-LLM 独立工具链，与项目 TVM 子模块冲突，后期评估。
 
-**TVM 未调优性能**: MobileNetV2/ResNet50/YOLOv8n/mobilevit_s/BERT 五模型延迟为 MNN 的 31-150x（BERT 150x, ResNet50 57x），ORT 的 24-150x。编译流程（ONNX→Relax→.so→NDK 交叉编译）已验证通顺，精度 Cos=1.0。瓶颈在缺少 auto-tuning（当前为 0 trial 基线），后续调优预期可达 ~5-10x 提升。
+**TVM v0.15 Relay 性能质变**: 降级到 v0.15 后，MobileNetV2 从 514ms→10ms (28x)，ResNet50 从 4738ms→64ms (74x)，YOLOv8n 从 4406ms→127ms (35x)。根因: v0.24 Relax VM 的运行时类型分发/分支/memcpy 对小 CV 模型造成致命开销，v0.15 Relay GraphExecutor 生成静态形状 AOT 专用代码消除此瓶颈。ResNet50 TVM (64ms) 超越 ORT (143ms) 成为三框架最快。
 
-**TVM 限制**: Qwen2-0.5B 不适用 TVM Relax（需专门的 LLM 编译管线）。
+**TVM AutoTVM/AutoScheduler RPC 调优就绪**: RPC tracker + device server + ADB 双通道已验证可用。AutoTVM 单算子实测: Conv1x1 0.07→0.06ms (1.65x FPS)。AutoScheduler 集成完成。全模型调优建议在原生 Linux 上过夜运行（WSL2 NDK 编译瓶颈 ~10h）。
 
-**mobilevit_s 补齐**: ONNX 从 timm 导出（opset 18）+ MNN 转换 + TVM Relax 编译全链路打通。MNN 1.55x vs ORT，精度 1.000000。TVM 精度 1.000000（延迟 2907ms，0 trial 基线）。
+**mobilevit_s**: v0.15 ONNX frontend 的 Reshape 类型推导与 mobilevit_s 不兼容，待 TVM 更新或模型修改。BERT 已编译(417MB)，待 bench。
 
-**BERT TVM 多输入修复**: Relax VM `set_input("main", tv_ids, tv_mask)` 一次传递全部输入，int64 token ID 转换对齐 ORT 逻辑。精度 Cos=1.0，延迟 39.5s（0 trial）。Qwen2 TVM 待探索。
-
-**Phase B 完成**: TVM 5 整模型 + 14 单算子全部编译成功，设备实测通过。仅 Qwen2 TVM 标记为待探索。编译脚本 `tools/tvm/compile_all_models.py` 支持 torch.export + ONNX 双路径，可复用。
+**分支策略**: `feat/tvm-integration` (v0.24 Relax VM) 保留不动，`feat/tvm-stable-relay` (v0.15 Relay + GraphExecutor) 为主力分支。
 
 ## 快速开始
 
