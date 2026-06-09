@@ -156,16 +156,6 @@
       "base_path": "models/single_ops_extracted"
     },
     {
-      "name": "Conv3x3_R50_C512_S7_K512",
-      "input_shape": [
-        1,
-        512,
-        7,
-        7
-      ],
-      "base_path": "models/single_ops_extracted"
-    },
-    {
       "name": "Conv3x3_YOLO_C64_S20_K64",
       "input_shape": [
         1,
@@ -320,6 +310,156 @@
         16
       ],
       "base_path": "models/single_ops_extracted"
+    },
+    {
+      "name": "Conv1x1_K1024_C256_M784",
+      "input_shape": [
+        1,
+        256,
+        28,
+        28
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "Conv1x1_K16_C64_M784",
+      "input_shape": [
+        1,
+        64,
+        28,
+        28
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "Conv1x1_M3136_C64_K128",
+      "input_shape": [
+        1,
+        64,
+        56,
+        56
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "Conv1x1_M49_C256_K512",
+      "input_shape": [
+        1,
+        256,
+        7,
+        7
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "Conv1x1_M49_C32_K64",
+      "input_shape": [
+        1,
+        32,
+        7,
+        7
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "Conv1x1_M784_C32_K64",
+      "input_shape": [
+        1,
+        32,
+        28,
+        28
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "Conv1x1_Misaligned_C31_K64",
+      "input_shape": [
+        1,
+        31,
+        56,
+        56
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "Conv1x1_Misaligned_C33_K64",
+      "input_shape": [
+        1,
+        33,
+        56,
+        56
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "DWConv_C16_3x3",
+      "input_shape": [
+        1,
+        16,
+        112,
+        112
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "DWConv_C960_3x3",
+      "input_shape": [
+        1,
+        960,
+        7,
+        7
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "GELU_BERT",
+      "input_shape": [
+        1,
+        128,
+        3072
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "MatMul_3072x768",
+      "input_shape": [
+        1,
+        3072
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "MatMul_512x512x512",
+      "input_shape": [
+        1,
+        512
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "MatMul_768x3072",
+      "input_shape": [
+        1,
+        768
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "MatMul_768x768x768",
+      "input_shape": [
+        1,
+        768
+      ],
+      "base_path": "models/single_ops"
+    },
+    {
+      "name": "Softmax_BERT",
+      "input_shape": [
+        1,
+        128,
+        128
+      ],
+      "base_path": "models/single_ops"
     }
   ]
 }
