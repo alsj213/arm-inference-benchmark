@@ -138,6 +138,7 @@
 | | GELU | 2.14 | — | — | 待测 |
 
 > **最新三框架完整对比**: 41 算子 ORT/MNN/TVM 全量数据 → [`results/single_op_benchmark_2026-06-09.md`](results/single_op_benchmark_2026-06-09.md)<br>
+> **根因分析**: MNN vs TVM 性能分水岭深度分析 → [`docs/tvm_mnn_analysis.md`](docs/tvm_mnn_analysis.md)<br>
 > 几何平均: MNN/ORT=1.61x, TVM/ORT=1.32x, TVM/MNN=0.82x。TVM 16/41 最快, MNN 22/41 最快。
 
 ---
