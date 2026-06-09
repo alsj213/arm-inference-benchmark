@@ -113,8 +113,13 @@ bool TVMBackend::init(const BenchmarkConfig& config) {
     }
 
     // ── 5. 推断输入名称 ──
+    // ONNX 输入名因模型而异: MobileNetV2="input", ResNet50="data", YOLOv8n="images", BERT="input_ids"
     if (so_path.find("bert") != std::string::npos) {
         input_name_ = "input_ids";
+    } else if (so_path.find("resnet50") != std::string::npos) {
+        input_name_ = "data";
+    } else if (so_path.find("yolov8n") != std::string::npos) {
+        input_name_ = "images";
     } else {
         input_name_ = "input";
     }
