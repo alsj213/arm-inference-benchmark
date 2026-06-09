@@ -137,7 +137,8 @@
 | | Softmax | 0.22 | — | — | 待测 |
 | | GELU | 2.14 | — | — | 待测 |
 
-> **TVM v0.15 单算子**: 5 个已验证算子在全部 5 个上都超越 ORT（加速比 1.3-2.3x），精度 cosine=1.000。大 Conv (K1024) 优势最明显（2.3x）。对比 v0.24 Relax VM 的 K1024（318ms → 5.77ms, 55x 加速）。剩余 12 个算子已编译，待 devices 补测。
+> **最新三框架完整对比**: 41 算子 ORT/MNN/TVM 全量数据 → [`results/single_op_benchmark_2026-06-09.md`](results/single_op_benchmark_2026-06-09.md)<br>
+> 几何平均: MNN/ORT=1.61x, TVM/ORT=1.32x, TVM/MNN=0.82x。TVM 16/41 最快, MNN 22/41 最快。
 
 ---
 
