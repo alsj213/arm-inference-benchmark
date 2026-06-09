@@ -149,7 +149,7 @@ def tune_autotvm(model_name: str, max_trials: int = 800):
 
 
 def tune_autoscheduler(model_name: str, num_trials: int = 1000):
-    """AutoScheduler (Ansor) 无模板调优 — 搜索空间更大"""
+    """AutoScheduler (Ansor) 无模板调优 — 更广搜索空间，RPC 设备实测"""
     import onnx
     onnx_model = onnx.load(str(MODELS[model_name]["onnx"]))
     input_name = onnx_model.graph.input[0].name
@@ -158,50 +158,56 @@ def tune_autoscheduler(model_name: str, num_trials: int = 1000):
     mod, params = from_onnx(onnx_model, shape={input_name: shape}, freeze_params=True)
     print(f"Loaded {model_name}")
 
-    # 提取 search tasks
-    print("Extracting tasks...")
+    # 1. Extract search tasks
+    print("Extracting AutoScheduler tasks...")
+    target = tvm.target.Target(TARGET_ARM)
     tasks, task_weights = auto_scheduler.extract_tasks(
-        mod["main"], params, target=tvm.target.Target(TARGET_ARM)
+        mod["main"], params, target=target, opt_level=3
     )
-    print(f"AutoScheduler: {len(tasks)} tasks")
+    print(f"AutoScheduler: {len(tasks)} tasks, weights={task_weights}")
 
-    # RPC runner
-    remote = get_rpc_runner()
+    if not tasks:
+        print("No tasks to tune!")
+        return None
 
     log_file = str(OUTPUT_DIR / "tuning_logs" / f"{model_name}_autoscheduler.log")
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
-    measure_ctx = auto_scheduler.LocalRPCMeasureContext(
-        repeat=3, number=5, timeout=120,
-        min_repeat_ms=150,
-    )
-
+    # 2. Configure RPC measurement
     tune_option = auto_scheduler.TuningOptions(
         num_measure_trials=num_trials,
+        builder=auto_scheduler.LocalBuilder(
+            build_func="ndk", timeout=120
+        ),
         runner=auto_scheduler.RPCRunner(
             RPC_KEY,
             host=RPC_TRACKER_HOST,
             port=RPC_TRACKER_PORT,
+            priority=1,
             timeout=120,
-            number=5,
-            repeat=3,
-        ),
-        builder=auto_scheduler.LocalBuilder(
-            build_func="ndk", timeout=120
+            number=3,        # 每次 3 runs 取平均
+            repeat=2,        # 重复 2 组
+            min_repeat_ms=150,
+            cooldown_interval=0.5,
         ),
         measure_callbacks=[auto_scheduler.RecordToFile(log_file)],
     )
 
+    # 3. Run tuning
     t0 = time.time()
-    auto_scheduler.tune_generic(tasks, task_weights, tune_option)
+    print(f"\nAutoScheduler starting: {num_trials} trials across {len(tasks)} tasks...")
+    task_scheduler = auto_scheduler.TaskScheduler(tasks, task_weights)
+    task_scheduler.tune(tune_option)
     elapsed = time.time() - t0
-    print(f"AutoScheduler done in {elapsed/60:.1f} minutes")
+    print(f"\nAutoScheduler done in {elapsed/60:.1f} minutes")
 
-    # Compile with best schedules
+    # 4. Compile with best schedules
     print("Compiling tuned model...")
     with auto_scheduler.ApplyHistoryBest(log_file):
-        with tvm.transform.PassContext(opt_level=3,
-                config={"relay.backend.use_auto_scheduler": True}):
+        with tvm.transform.PassContext(
+            opt_level=3,
+            config={"relay.backend.use_auto_scheduler": True}
+        ):
             lib = relay.build(mod, target=TARGET_ARM, params=params)
 
     so_path = OUTPUT_DIR / f"{model_name}_autoscheduler_tuned_tvm.so"
