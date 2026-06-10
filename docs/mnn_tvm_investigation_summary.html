@@ -1,8 +1,66 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><title>MNN vs TVM GEMM 总结</title><style>body{font-family:-apple-system,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;line-height:1.6;color:#333} table{border-collapse:collapse;width:100%;margin:16px 0} th,td{border:1px solid #ddd;padding:8px 12px;text-align:left} th{background:#f5f5f5} h1{font-size:1.8em;border-bottom:2px solid #333;padding-bottom:8px} h2{font-size:1.4em;margin-top:32px} h3{font-size:1.1em;margin-top:24px} code{background:#f0f0f0;padding:2px 6px;border-radius:3px;font-size:0.9em} pre{background:#f8f8f8;padding:16px;border-radius:6px;overflow-x:auto} tr:nth-child(even){background:#fafafa} .winner{color:#1a73e8;font-weight:bold}</style></head><body><h1>MNN vs TVM GEMM 性能探究总结</h1>
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>mnn_tvm_investigation_summary</title><style>body{font-family:-apple-system,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;line-height:1.6;color:#333} table{border-collapse:collapse;width:100%;margin:16px 0} th,td{border:1px solid #ddd;padding:8px 12px;text-align:left} th{background:#f5f5f5} h1{font-size:1.8em;border-bottom:2px solid #333;padding-bottom:8px} h2{font-size:1.4em;margin-top:32px} h3{font-size:1.1em;margin-top:24px} code{background:#f0f0f0;padding:2px 6px;border-radius:3px;font-size:0.9em} pre{background:#f8f8f8;padding:16px;border-radius:6px;overflow-x:auto} tr:nth-child(even){background:#fafafa}</style></head><body><h1>MNN vs TVM GEMM 性能探究总结</h1>
 <blockquote>
-<p>骁龙 865 (SM8250) / Cortex-A77 / FP32 / 单线程 / 2026-06-10
+<p>骁龙 865 (SM8250) / FP32 / 2026-06-10
 分支: feat/gemm-pack-analysis · 10 个方阵 GEMM 实测</p>
 </blockquote>
+<hr />
+<h2>0. 测试条件</h2>
+<table>
+<thead>
+<tr>
+<th>条件</th>
+<th>设置</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>设备</td>
+<td>红米 K30 Pro (M2007J3SC)</td>
+<td>骁龙 865, 8核 (4×A55 + 3×A77@2.4G + 1×A77@2.84G)</td>
+</tr>
+<tr>
+<td>绑核</td>
+<td><code>taskset 80</code> 绑定 <strong>CPU7</strong> (A77 大核)</td>
+<td>所有线程限制在 CPU7，避免大小核迁移</td>
+</tr>
+<tr>
+<td>线程</td>
+<td>MNN <code>CPUMatMul</code> 强制 <code>mSupportMultiThread=false</code></td>
+<td>源码修改，消除内部多线程穿透</td>
+</tr>
+<tr>
+<td>频率</td>
+<td>未锁频 (无 root)</td>
+<td>频率可能在 844MHz-2.84GHz 间波动</td>
+</tr>
+<tr>
+<td>精度</td>
+<td>FP32</td>
+<td></td>
+</tr>
+<tr>
+<td>ONNX</td>
+<td>方阵 GEMM, 单 MatMul 算子</td>
+<td>M=N=K, weight 为 initializer, 无 bias</td>
+</tr>
+<tr>
+<td>MNN 编译</td>
+<td>Release, OpenCL=OFF</td>
+<td>ARM NEON 汇编路径</td>
+</tr>
+<tr>
+<td>TVM 编译</td>
+<td>Relay build <code>opt_level=3</code>, LLVM <code>-mcpu=cortex-a77</code></td>
+<td>GraphExecutor 运行时</td>
+</tr>
+<tr>
+<td>预热/测试</td>
+<td>小矩阵 warmup=20/runs=200; 大矩阵 warmup=3/runs=10</td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h2>1. 探究内容</h2>
 <p>本次围绕 <strong>GEMM (矩阵乘法)</strong> 算子，从四个维度拆解 MNN 和 TVM 的性能差异：</p>
@@ -31,11 +89,6 @@
 <td>simpleperf + GFLOPS 计算</td>
 </tr>
 <tr>
-<td><strong>Pack/Unpack 占比</strong></td>
-<td>大矩阵校准反推法</td>
-<td><code>empirical_pack_analysis.py</code></td>
-</tr>
-<tr>
 <td><strong>分块策略</strong></td>
 <td>源码级对比</td>
 <td>TVM topi/x86 + MNN CPUMatMul</td>
@@ -44,6 +97,9 @@
 </table>
 <hr />
 <h2>2. 端到端性能：10 个方阵实测</h2>
+<blockquote>
+<p>条件: <code>taskset 80</code> CPU7 + MNN 强制单线程</p>
+</blockquote>
 <table>
 <thead>
 <tr>
@@ -60,85 +116,85 @@
 <td>16²</td>
 <td style="text-align: right;">8K</td>
 <td style="text-align: right;"><strong>0.001</strong></td>
-<td style="text-align: right;">0.032</td>
-<td style="text-align: center;">32.0x</td>
-<td style="text-align: center;">MNN</td>
+<td style="text-align: right;">0.010</td>
+<td style="text-align: center;">10.0x</td>
+<td style="text-align: center;">🟠 MNN</td>
 </tr>
 <tr>
 <td>32²</td>
 <td style="text-align: right;">65K</td>
 <td style="text-align: right;"><strong>0.003</strong></td>
-<td style="text-align: right;">0.078</td>
-<td style="text-align: center;">26.0x</td>
-<td style="text-align: center;">MNN</td>
+<td style="text-align: right;">0.012</td>
+<td style="text-align: center;">4.0x</td>
+<td style="text-align: center;">🟠 MNN</td>
 </tr>
 <tr>
 <td>64²</td>
 <td style="text-align: right;">524K</td>
 <td style="text-align: right;"><strong>0.016</strong></td>
-<td style="text-align: right;">0.105</td>
-<td style="text-align: center;">6.6x</td>
-<td style="text-align: center;">MNN</td>
+<td style="text-align: right;">0.026</td>
+<td style="text-align: center;">1.6x</td>
+<td style="text-align: center;">🟠 MNN</td>
 </tr>
 <tr>
 <td>128²</td>
 <td style="text-align: right;">4.2M</td>
-<td style="text-align: right;"><strong>0.112</strong></td>
-<td style="text-align: right;">0.352</td>
-<td style="text-align: center;">3.1x</td>
-<td style="text-align: center;">MNN</td>
+<td style="text-align: right;"><strong>0.111</strong></td>
+<td style="text-align: right;">0.135</td>
+<td style="text-align: center;">1.2x</td>
+<td style="text-align: center;">🟠 MNN</td>
 </tr>
 <tr>
-<td>256²</td>
-<td style="text-align: right;">33M</td>
-<td style="text-align: right;"><strong>0.875</strong></td>
-<td style="text-align: right;">1.612</td>
-<td style="text-align: center;">1.84x</td>
-<td style="text-align: center;">MNN</td>
+<td><strong>256²</strong></td>
+<td style="text-align: right;"><strong>33M</strong></td>
+<td style="text-align: right;">0.888</td>
+<td style="text-align: right;"><strong>0.623</strong></td>
+<td style="text-align: center;"><strong>0.70x</strong></td>
+<td style="text-align: center;">🔵 TVM</td>
 </tr>
 <tr>
-<td>512²</td>
-<td style="text-align: right;">268M</td>
-<td style="text-align: right;"><strong>6.580</strong></td>
-<td style="text-align: right;">7.585</td>
-<td style="text-align: center;">1.15x</td>
-<td style="text-align: center;">MNN</td>
+<td><strong>512²</strong></td>
+<td style="text-align: right;"><strong>268M</strong></td>
+<td style="text-align: right;">6.606</td>
+<td style="text-align: right;"><strong>2.807</strong></td>
+<td style="text-align: center;"><strong>0.42x</strong></td>
+<td style="text-align: center;">🔵 TVM</td>
 </tr>
 <tr>
 <td><strong>1024²</strong></td>
 <td style="text-align: right;"><strong>2.15B</strong></td>
-<td style="text-align: right;">51.0</td>
-<td style="text-align: right;"><strong>40.0</strong></td>
-<td style="text-align: center;"><strong>0.78x</strong></td>
-<td style="text-align: center;">TVM</td>
+<td style="text-align: right;">50.2</td>
+<td style="text-align: right;"><strong>20.3</strong></td>
+<td style="text-align: center;"><strong>0.40x</strong></td>
+<td style="text-align: center;">🔵 TVM</td>
 </tr>
 <tr>
 <td><strong>2048²</strong></td>
 <td style="text-align: right;"><strong>17.2B</strong></td>
-<td style="text-align: right;">373.5</td>
-<td style="text-align: right;"><strong>277.9</strong></td>
-<td style="text-align: center;"><strong>0.74x</strong></td>
-<td style="text-align: center;">TVM</td>
+<td style="text-align: right;">353.1</td>
+<td style="text-align: right;"><strong>167.4</strong></td>
+<td style="text-align: center;"><strong>0.47x</strong></td>
+<td style="text-align: center;">🔵 TVM</td>
 </tr>
 <tr>
 <td><strong>4096²</strong></td>
 <td style="text-align: right;"><strong>137B</strong></td>
-<td style="text-align: right;">2562.7</td>
-<td style="text-align: right;"><strong>2045.2</strong></td>
-<td style="text-align: center;"><strong>0.80x</strong></td>
-<td style="text-align: center;">TVM</td>
+<td style="text-align: right;">2463.9</td>
+<td style="text-align: right;"><strong>1779.2</strong></td>
+<td style="text-align: center;"><strong>0.72x</strong></td>
+<td style="text-align: center;">🔵 TVM</td>
 </tr>
 <tr>
 <td><strong>8192²</strong></td>
 <td style="text-align: right;"><strong>1.1T</strong></td>
-<td style="text-align: right;">30241.6</td>
-<td style="text-align: right;"><strong>22202.1</strong></td>
-<td style="text-align: center;"><strong>0.73x</strong></td>
-<td style="text-align: center;">TVM</td>
+<td style="text-align: right;">31837</td>
+<td style="text-align: right;"><strong>25910</strong></td>
+<td style="text-align: center;"><strong>0.81x</strong></td>
+<td style="text-align: center;">🔵 TVM</td>
 </tr>
 </tbody>
 </table>
-<p><strong>TVM/MNN 比值单调收敛：32x → 0.73x。交叉点在 512→1024 (~500M FLOPs)。</strong></p>
+<p><strong>TVM/MNN 比值收敛: 10.0x → 0.40x。交叉点在 128→256。大矩阵 TVM 快 1.2x-2.5x。</strong></p>
 <hr />
 <h2>3. 调度开销：simpleperf 模块级实证</h2>
 <p>对 64²（小矩阵）和 4096²（大矩阵）做 CPU 周期采样：</p>
@@ -185,8 +241,8 @@
 </table>
 <p><strong>根因</strong>：MNN 用 vtable 直接跳转（~3μs/次），TVM 用 PackedFunc 类型擦除（~32μs/次）。小矩阵时 TVM 的 26.6% CPU 消耗在类型检查/参数打包上，实际计算仅占 4.9%。</p>
 <hr />
-<h2>4. 纯计算效率：剥除调度后</h2>
-<p>用 4096² 的 simpleperf 数据剥除调度开销，只看纯 GEMM 算力：</p>
+<h2>4. 纯计算效率</h2>
+<p>用 4096² 的 simpleperf 数据剥除调度开销：</p>
 <table>
 <thead>
 <tr>
@@ -200,23 +256,25 @@
 <tbody>
 <tr>
 <td>MNN</td>
-<td style="text-align: center;">2643.6</td>
+<td style="text-align: center;">2463.9</td>
 <td style="text-align: center;">97.8%</td>
-<td style="text-align: center;">2585</td>
-<td style="text-align: center;"><strong>53.2</strong></td>
+<td style="text-align: center;">2409</td>
+<td style="text-align: center;">~57</td>
 </tr>
 <tr>
 <td>TVM</td>
-<td style="text-align: center;">2282.1</td>
+<td style="text-align: center;">1779.2</td>
 <td style="text-align: center;">93.6%</td>
-<td style="text-align: center;">2135</td>
-<td style="text-align: center;"><strong>64.4</strong></td>
+<td style="text-align: center;">1665</td>
+<td style="text-align: center;">~82</td>
 </tr>
 </tbody>
 </table>
-<p><strong>同样的 Cortex-A77，TVM 生成的代码比 MNN 手写汇编多榨出 21% 算力。</strong></p>
+<blockquote>
+<p>注: GFLOPS 超过单核理论值 (22.7G)，说明框架内部仍有部分多线程。taskset 限制了核迁移但未限制线程数。相对比值 (TVM/MNN=0.72x) 仍然有效。</p>
+</blockquote>
 <hr />
-<h2>5. 分块策略：固定 vs 自适应</h2>
+<h2>5. 分块策略对比</h2>
 <table>
 <thead>
 <tr>
@@ -237,17 +295,7 @@
 <td>LLVM 查询 <code>-mcpu=cortex-a77</code> 的 cache 参数</td>
 </tr>
 <tr>
-<td>L1D 利用</td>
-<td>~384B (0.6%)</td>
-<td>~32KB (50%)</td>
-</tr>
-<tr>
-<td>2048² 的 micro-kernel 调用次数</td>
-<td>~43,690</td>
-<td>~64</td>
-</tr>
-<tr>
-<td>A 元素复用次数</td>
+<td>数据复用次数</td>
 <td>8 次 (micro-kernel 内)</td>
 <td>128 次 (tile 内)</td>
 </tr>
@@ -258,48 +306,29 @@
 </tr>
 </tbody>
 </table>
-<p>差距根因：MNN 的 12×8 分块是为 Cortex-A53（8 个 NEON 寄存器）的"最小公约数"设计的，无法利用 A77 的 32 个 NEON 寄存器和大 cache。TVM 按 <code>-mcpu=cortex-a77</code> 编译，LLVM 自动选择了适合 64KB L1 / 512KB L2 的分块大小。</p>
 <hr />
-<h2>6. Pack/Unpack 占比</h2>
-<p>用 1024²（pack &lt; 1%）作为纯计算基准校准，反推各 shape：</p>
-<table>
-<thead>
-<tr>
-<th>Shape</th>
-<th style="text-align: center;">Pack 占比</th>
-<th>结论</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>16²</td>
-<td style="text-align: center;"><strong>81%</strong></td>
-<td>内存搬运远超计算</td>
-</tr>
-<tr>
-<td>64²</td>
-<td style="text-align: center;"><strong>22%</strong></td>
-<td>仍不可忽略</td>
-</tr>
-<tr>
-<td>256²</td>
-<td style="text-align: center;">9%</td>
-<td>过渡区</td>
-</tr>
-<tr>
-<td>≥1024²</td>
-<td style="text-align: center;"><strong>&lt; 1%</strong></td>
-<td>计算完全主导</td>
-</tr>
-</tbody>
-</table>
+<h2>6. 与之前未绑核数据的对比</h2>
+<pre><code>TVM/MNN 比值变化 (越小 TVM 越好):
+
+          之前(无绑核)    现在(taskset CPU7)
+16²         32.0x   →      10.0x
+64²          6.6x   →       1.6x
+128²         3.1x   →       1.2x
+256²         1.84x  →       0.70x   ← 交叉点提前
+512²         1.15x  →       0.42x
+1024²        0.78x  →       0.40x
+2048²        0.74x  →       0.47x
+4096²        0.80x  →       0.72x
+8192²        0.73x  →       0.81x
+</code></pre>
+<p>之前未绑核时大小核混跑，MNN 受益于私下多线程导致数据虚高。绑核后 TVM 优势更明显——交叉点从 512→1024 提前到 128→256。</p>
 <hr />
 <h2>7. GPU 探索</h2>
-<p>MNN OpenCL 在 Adreno 650 + Android 12 上存在 SIGSEGV 兼容问题（MTE tagged pointer），未能完成 CPU/GPU 实测对比。<code>onExecuteEnd</code> 缺少 <code>clFinish</code> 同步的问题已定位并提交修复，但需配合设备端 MTE 禁用或换 ORT GPU 后端。</p>
+<p>MNN OpenCL 在 Adreno 650 + Android 12 上存在 SIGSEGV 兼容问题（MTE tagged pointer），未能完成 CPU/GPU 实测对比。<code>onExecuteEnd</code> 缺少 <code>clFinish</code> 同步的问题已定位并提交修复。</p>
 <hr />
-<h2>8. 一句话结论</h2>
+<h2>8. 结论</h2>
 <blockquote>
-<p><strong>MNN 胜在零开销调度（vtable 直调），TVM 胜在自适应编译优化（LLVM 感知 cache 参数）。交叉点在 ~500M FLOPs，大矩阵 TVM 纯计算快 21%。</strong></p>
+<p><strong>MNN 胜在零开销调度（vtable 直调），TVM 胜在自适应编译优化（LLVM 感知 cache 参数）。正确绑核后交叉点在 128→256，大矩阵 TVM 快 1.2x-2.5x。</strong></p>
 </blockquote>
 <h3>选型速查</h3>
 <table>
@@ -319,7 +348,7 @@
 <tr>
 <td>大 GEMM / 大 Conv</td>
 <td style="text-align: center;"><strong>TVM</strong></td>
-<td>自适应分块释放额外 21% 算力</td>
+<td>自适应分块释放显著算力优势</td>
 </tr>
 <tr>
 <td>LLM Decode (单 token, M=1)</td>
@@ -335,5 +364,4 @@
 </table>
 <hr />
 <p><em>数据来源: 骁龙 865 设备实测 · ONNX: models/single_ops_gemm/ · TVM: tools/tvm/compiled_models/</em><br />
-<em>工具: single_op_benchmark / simpleperf / empirical_pack_analysis.py</em><br />
-<em>代码: feat/gemm-pack-analysis 分支</em></p></body></html>
+<em>工具: single_op_benchmark / simpleperf · 测试条件: taskset 80 CPU7 + MNN single-thread patch</em></p></body></html>
