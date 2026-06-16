@@ -12,7 +12,9 @@
 | **MNN** | **活跃** | `BENCHMARK_MNN=ON` | git 子模块，add_subdirectory | `.mnn`（MNNConvert 转换） |
 | **ONNX Runtime** | **活跃** | `BENCHMARK_ORT=ON` | git 子模块，单独编译 | `.onnx`（无需转换） |
 | **TVM** | **活跃** | `BENCHMARK_TVM=ON` | git 子模块已检出 | `_tvm.so`（Relax 编译） |
-| **llama.cpp** | **活跃** | `BENCHMARK_LLAMACPP=ON` | git 子模块已检出 | GGUF |
+| **llama.cpp** | **活跃** | `BENCHMARK_LLAMACPP=OFF`（按需启用） | git 子模块已检出 | GGUF |
+| **NCNN** | **活跃** | `BENCHMARK_NCNN=ON` | git 子模块 | `.param` + `.bin` |
+| **MindSpore Lite** | **活跃** | `BENCHMARK_MINDSPORE_LITE=ON` | 手动部署 | `.ms` |
 | TNN | 已停用 | `BENCHMARK_TNN=OFF` | git 子模块已检出 | TNN 格式 |
 | TFLite | 已停用 | `BENCHMARK_TFLITE=OFF` | AAR 提取 .so | `.tflite` |
 | QNN | 已停用 | `BENCHMARK_QNN=OFF` | 需手动下载 SDK | QNN 格式 |
@@ -26,14 +28,38 @@ benchmark/
 │   ├── single_op_benchmark.cpp  # 单算子基准测试
 │   ├── llm_benchmark.cpp        # LLM 测试（仅 llama.cpp 启用时）
 │   ├── common/           # 公共模块（benchmark基类、配置、工具函数）
-│   ├── backends/         # 8个后端实现（完整保留，停用的用编译宏隔离）
+│   ├── backends/         # 多个后端实现（完整保留，停用的用编译宏隔离）
 │   └── models/           # 6个模型信息定义（MobileNetV2/ResNet50/YOLOv8n/BERT/Qwen2-0.5B/mobilevit_s）
-├── scripts/              # 28个脚本（构建/测试/环境管理/模型转换/profiling/报告生成）
-├── models/               # 模型文件（onnx/mnn/tflite/ncnn/tnn/tvm）
+├── scripts/              # 脚本（按功能分组到 7 个子目录）
+│   ├── build/           # 构建
+│   ├── benchmark/       # 基准测试
+│   ├── convert/         # 模型转换
+│   ├── profile/         # 性能分析
+│   ├── analyze/         # 结果分析
+│   ├── setup/           # 环境设置
+│   └── utils/           # 工具
+├── models/               # 模型文件
+│   ├── source/          # 原始源模型
+│   │   ├── classification/
+│   │   ├── detection/
+│   │   └── nlp/
+│   ├── exported/        # 各框架导出产物
+│   │   ├── mnn/
+│   │   └── tvm/
+│   ├── single_ops/      # 单算子测试模型
+│   │   ├── basic/
+│   │   ├── gemm/
+│   │   └── stair/
+│   └── llm/             # LLM 大模型
 ├── third_party/          # 第三方依赖（git子模块 / 手动下载）
 ├── cmake/                # Android NDK 工具链
 ├── .benchmarkrc.yml      # mobile-bench 插件配置
 ├── docs/                 # 文档 + 测试结果
+│   ├── 01-guides/       # 使用指南
+│   ├── 02-analysis/     # 分析报告
+│   ├── 03-plans/        # 项目计划
+│   ├── 04-designs/      # 设计方案
+│   └── figures/         # 图片资源
 ├── results/              # 测试结果输出
 ├── tools/                # 转换工具（MNNConvert、FlameGraph）
 ├── build_android/        # Android Release 构建
@@ -51,20 +77,20 @@ benchmark/
 
 ## 构建系统
 
-- **Android Release**: `./scripts/build_android.sh` → `build_android/`
-- **Android Debug**: `./scripts/build_android.sh --debug` → `build_android_debug/`
-- **主机侧工具**: `./scripts/build_host_tools.sh` → `build_host_tools/`
+- **Android Release**: `./scripts/build/build-android.sh` → `build_android/`
+- **Android Debug**: `./scripts/build/build-android.sh --debug` → `build_android_debug/`
+- **主机侧工具**: `./scripts/build/build-host-tools.sh` → `build_host_tools/`
 - CMakeLists.txt 根目录定义 option，third_party/ 处理各框架依赖，src/ 生成 benchmark_inference 和 single_op_benchmark 可执行文件
 - ONNX Runtime 需要先单独编译（参见 `third_party/CMakeLists.txt` 中 ORT 部分）
 
 ## 测试流程
 
-1. **编译**: `build_android.sh` 编译 Android 二进制
-2. **设置环境**: `setup_test_environment.sh` 锁 CPU 性能频率 + 清缓存
-3. **运行测试**: `run_benchmark_android.sh` 推送二进制/模型/so 到手机执行
-4. **恢复环境**: `restore_test_environment.sh` 恢复 CPU 调度器
-5. **生成报告**: `generate_report.py` 解析日志生成 Markdown 报告
-6. **一键执行**: `build_and_run.sh`
+1. **编译**: `./scripts/build/build-android.sh` 编译 Android 二进制
+2. **设置环境**: `./scripts/setup/setup-test-env.sh` 锁 CPU 性能频率 + 清缓存
+3. **运行测试**: `./scripts/benchmark/run-android.sh` 推送二进制/模型/so 到手机执行
+4. **恢复环境**: `./scripts/setup/restore-test-env.sh` 恢复 CPU 调度器
+5. **生成报告**: `./scripts/analyze/generate-report.py` 解析日志生成 Markdown 报告
+6. **一键执行**: `./scripts/benchmark/build-and-run.sh`
 
 ## 精度对比
 
@@ -81,22 +107,22 @@ benchmark/
 
 ```bash
 # Android 编译
-./scripts/build_android.sh [--debug]
+./scripts/build/build-android.sh [--debug]
 
 # 锁频 + 清缓存（自动检测 root 权限）
-./scripts/setup_test_environment.sh
+./scripts/setup/setup-test-env.sh
 
 # 推送并运行
-./scripts/run_benchmark_android.sh [--debug]
+./scripts/benchmark/run-android.sh [--debug]
 
 # Profiling 集成
-./scripts/profile_benchmark.sh
+./scripts/profile/profile-benchmark.sh
 
 # 模型转换
-./scripts/convert_models.sh
+./scripts/convert/convert-models.sh
 
 # 恢复环境
-./scripts/restore_test_environment.sh
+./scripts/setup/restore-test-env.sh
 ```
 
 ## 强制规则
@@ -129,19 +155,19 @@ git log --oneline -1   # 当前 commit
 **Step 3: 检查/编译二进制**
 ```bash
 ls -lh build_android/src/benchmark_inference  # 验证产物
-# 如需重新编译则执行 build_android.sh
+# 如需重新编译则执行 ./scripts/build/build-android.sh
 ```
 
 **Step 4: 检查模型文件**
 ```
-ls -lh models/nlp/bert/bert.onnx  # BERT 示例
+ls -lh models/source/nlp/bert/bert.onnx  # BERT 示例
 # 缺失则执行下载和转换
 ```
 
 **Step 5: 运行并记录原始日志** — 必须使用 `tee` 保留原始输出
 ```bash
 export ANDROID_NDK=/home/liu/android-ndk
-./scripts/run_benchmark_android.sh ... | tee results/latest_benchmark.log
+./scripts/benchmark/run-android.sh ... | tee results/latest_benchmark.log
 ```
 
 **Step 6: 输出结果摘要** — 直接从日志中提取真实数据，不得凭空填写

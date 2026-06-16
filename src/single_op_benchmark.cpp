@@ -24,47 +24,47 @@
 static const std::map<std::string, std::vector<std::string>> CATEGORY_MODELS = {
     // ═══════ Conv1x1: 网络提取 + 形状分桶（15） ═══════
     {"conv1x1", {
-        "models/single_ops/Conv1x1_K16_C64_M784.onnx",
-        "models/single_ops/Conv1x1_K1024_C256_M784.onnx",
-        "models/single_ops/Conv1x1_M49_C32_K64.onnx",
-        "models/single_ops/Conv1x1_M49_C256_K512.onnx",
-        "models/single_ops/Conv1x1_M784_C32_K64.onnx",
-        "models/single_ops/Conv1x1_M3136_C64_K128.onnx",
+        "models/single_ops/basic/Conv1x1_K16_C64_M784.onnx",
+        "models/single_ops/basic/Conv1x1_K1024_C256_M784.onnx",
+        "models/single_ops/basic/Conv1x1_M49_C32_K64.onnx",
+        "models/single_ops/basic/Conv1x1_M49_C256_K512.onnx",
+        "models/single_ops/basic/Conv1x1_M784_C32_K64.onnx",
+        "models/single_ops/basic/Conv1x1_M3136_C64_K128.onnx",
     }},
 
     // ═══════ Conv1x1 特化路径：C 对齐退化 ═══════
     {"conv1x1_misaligned", {
-        "models/single_ops/Conv1x1_Misaligned_C31_K64.onnx",
-        "models/single_ops/Conv1x1_Misaligned_C33_K64.onnx",
+        "models/single_ops/basic/Conv1x1_Misaligned_C31_K64.onnx",
+        "models/single_ops/basic/Conv1x1_Misaligned_C33_K64.onnx",
     }},
 
     // ═══════ DWConv（8） ═══════
     {"dwconv", {
-        "models/single_ops/DWConv_C16_3x3.onnx",
-        "models/single_ops/DWConv_C960_3x3.onnx",
+        "models/single_ops/basic/DWConv_C16_3x3.onnx",
+        "models/single_ops/basic/DWConv_C960_3x3.onnx",
     }},
 
     // ═══════ MatMul（15） ═══════
     {"matmul", {
-        "models/single_ops/MatMul_512x512x512.onnx",
-        "models/single_ops/MatMul_768x768x768.onnx",
-        "models/single_ops/MatMul_3072x768.onnx",
-        "models/single_ops/MatMul_768x3072.onnx",
+        "models/single_ops/basic/MatMul_512x512x512.onnx",
+        "models/single_ops/basic/MatMul_768x768x768.onnx",
+        "models/single_ops/basic/MatMul_3072x768.onnx",
+        "models/single_ops/basic/MatMul_768x3072.onnx",
     }},
 
     // ═══════ LayerNorm (BERT: [1,128,768] normalized_shape=768) ═══════
     {"layernorm", {
-        "models/single_ops/LayerNorm_BERT.onnx",
+        "models/single_ops/basic/LayerNorm_BERT.onnx",
     }},
 
     // ═══════ Softmax (BERT attention: [1,128,128] dim=-1) ═══════
     {"softmax", {
-        "models/single_ops/Softmax_BERT.onnx",
+        "models/single_ops/basic/Softmax_BERT.onnx",
     }},
 
     // ═══════ GELU (BERT FFN: [1,128,3072]) ═══════
     {"gelu", {
-        "models/single_ops/GELU_BERT.onnx",
+        "models/single_ops/basic/GELU_BERT.onnx",
     }},
 };
 
