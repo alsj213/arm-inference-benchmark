@@ -302,7 +302,7 @@ results/profiling/20260430_205808_mobilenetv2_onnxrt_debug/
 │   ├── out.folded                # 火焰图折叠数据 (897MB)
 │   └── flamegraph.svg            # 火焰图 (215KB)
 └── docs/
-    └── ort_profiling_report_20260430.md  # 本报告
+    └── ort-profiling-report.md  # 本报告
 ```
 
 ### 查看火焰图

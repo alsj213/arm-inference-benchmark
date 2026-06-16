@@ -49,7 +49,7 @@ echo "  OK"
 # ── Step 4: 编译并推送 benchmark 二进制 ──
 echo "[4/6] Building benchmark binary..."
 cd "$PROJECT_DIR"
-./scripts/build_android.sh 2>&1 | tail -5
+./scripts/build/build-android.sh 2>&1 | tail -5
 $ADB push build_android/src/benchmark_inference /data/local/tmp/
 echo "  OK"
 

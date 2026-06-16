@@ -3,7 +3,7 @@
 # 生成火焰图和函数热点报告
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/profiling_utils.sh"
+source "$SCRIPT_DIR/profiling-utils.sh"
 
 # 默认参数
 BACKEND="mnn"

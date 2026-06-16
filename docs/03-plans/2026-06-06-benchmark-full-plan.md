@@ -56,7 +56,7 @@ benchmark/
 │   ├── phase4_bert_optimization/         # [新增] Phase 4 BERT 优化闭环数据
 │   └── phase5_llm_profiling/             # [新增] Phase 5 LLM 推理分析数据
 ├── docs/
-│   └── superpowers/plans/
+│   └── 03-plans/
 │       └── 2026-06-06-benchmark-full-plan.md  # 本文件
 └── .benchmarkrc.yml                      # [修改] 增加 GPU 后端 + 新模型配置
 ```
@@ -1812,6 +1812,6 @@ python3 scripts/analyze_roofline.py --input results/phase2_hotspot_benchmark/ --
 > **计划版本:** v1.1  
 > **创建日期:** 2026-06-06  
 > **最后更新:** 2026-06-06 (v1.1: TVM 移至附录 D，主线聚焦 MNN/ORT/llama.cpp 三框架)  
-> **基于文档:** `docs/ARM推理Benchmark项目指导.md` + `docs/项目完整计划.md`  
+> **基于文档:** `docs/01-guides/android-benchmark-guide.md` + `docs/03-plans/full-plan.md`  
 > **目标硬件:** 骁龙 865 (SM8250) / 红米 K30S  
 > **预估总工期:** 28 天 (业余投入，移除 TVM 后主线压缩 2 天)

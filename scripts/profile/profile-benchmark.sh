@@ -3,7 +3,7 @@
 # 支持 simpleperf、atrace、perfetto、框架内置 profiling
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/profiling_utils.sh"
+source "$SCRIPT_DIR/profiling-utils.sh"
 
 # 默认参数
 BACKEND="mnn"

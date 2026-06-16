@@ -524,7 +524,7 @@ benchmark/
 │       ├── tvm-ffi/include/      # TVM FFI C++ 头文件
 │       └── dlpack/include/       # DLPack 头文件
 └── docs/
-    └── tvm_deployment_guide.md   # 本文档
+    └── tvm-deployment-guide.md   # 本文档
 ```
 
 ---
