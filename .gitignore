@@ -65,6 +65,7 @@ third_party/*/CMakeFiles/
 # Model files (large binary files)
 # ==============================================
 *.onnx
+*.onnx.data
 *.bin
 *.param
 *.mnn
@@ -92,6 +93,18 @@ models/source/classification/*.param
 models/source/classification/*.bin
 models/source/detection/*
 models/source/nlp/*
+
+# ==============================================
+# TVM compiled artifacts
+# ==============================================
+tools/tvm/compiled_models/
+tools/tvm/build/
+
+# ==============================================
+# Profiling data
+# ==============================================
+*.perf.data
+*.trace
 
 # ==============================================
 # Results
