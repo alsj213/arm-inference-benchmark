@@ -8,7 +8,7 @@
         224,
         224
       ],
-      "base_path": "models/classification/mobilenetv2",
+      "base_path": "models/source/classification/mobilenetv2",
       "input_name": "input"
     },
     {
@@ -19,7 +19,7 @@
         224,
         224
       ],
-      "base_path": "models/classification/resnet50",
+      "base_path": "models/source/classification/resnet50",
       "input_name": "data"
     },
     {
@@ -30,7 +30,7 @@
         640,
         640
       ],
-      "base_path": "models/detection/yolov8n",
+      "base_path": "models/source/detection/yolov8n",
       "input_name": "images"
     },
     {
@@ -39,7 +39,7 @@
         1,
         128
       ],
-      "base_path": "models/nlp/bert",
+      "base_path": "models/source/nlp/bert",
       "input_name": "input_ids"
     },
     {
@@ -47,7 +47,7 @@
       "input_shape": [
         1
       ],
-      "base_path": "models/nlp/qwen2_0.5b"
+      "base_path": "models/llm/qwen2_0.5b"
     },
     {
       "name": "mobilevit_s",
@@ -57,7 +57,7 @@
         256,
         256
       ],
-      "base_path": "models/classification/mobilevit_s",
+      "base_path": "models/source/classification/mobilevit_s",
       "input_name": "input"
     },
     {
@@ -68,7 +68,7 @@
         8,
         8
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "getitem_99"
     },
     {
@@ -79,7 +79,7 @@
         80,
         80
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "/model.4/Split_output_0"
     },
     {
@@ -90,7 +90,7 @@
         20,
         20
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "/model.8/Split_output_0"
     },
     {
@@ -101,7 +101,7 @@
         112,
         112
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "320"
     },
     {
@@ -112,7 +112,7 @@
         32,
         32
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "silu_10"
     },
     {
@@ -123,7 +123,7 @@
         256,
         256
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -134,7 +134,7 @@
         56,
         56
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "resnetv17_stage1_activation0"
     },
     {
@@ -145,7 +145,7 @@
         56,
         56
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "resnetv17_stage1_activation2"
     },
     {
@@ -156,7 +156,7 @@
         40,
         40
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "/model.11/Concat_output_0"
     },
     {
@@ -167,7 +167,7 @@
         224,
         224
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -178,7 +178,7 @@
         20,
         20
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "/model.22/cv2.2/cv2.2.0/act/Mul_output_0"
     },
     {
@@ -189,7 +189,7 @@
         160,
         160
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "/model.2/cv2/act/Mul_output_0"
     },
     {
@@ -200,7 +200,7 @@
         224,
         224
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "data"
     },
     {
@@ -211,7 +211,7 @@
         14,
         14
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "376"
     },
     {
@@ -222,7 +222,7 @@
         14,
         14
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "429"
     },
     {
@@ -233,7 +233,7 @@
         128,
         128
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "silu_1"
     },
     {
@@ -244,7 +244,7 @@
         32,
         32
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "silu_16"
     },
     {
@@ -254,7 +254,7 @@
         128,
         768
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "add_1"
     },
     {
@@ -264,7 +264,7 @@
         256,
         144
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "view_1"
     },
     {
@@ -274,7 +274,7 @@
         128,
         3072
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "gelu"
     },
     {
@@ -284,7 +284,7 @@
         256,
         288
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "silu_12"
     },
     {
@@ -295,7 +295,7 @@
         112,
         112
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "resnetv17_relu0_fwd"
     },
     {
@@ -306,7 +306,7 @@
         20,
         20
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "/model.9/cv1/act/Mul_output_0"
     },
     {
@@ -317,7 +317,7 @@
         128,
         128
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "val_102"
     },
     {
@@ -328,7 +328,7 @@
         256,
         256
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "val_276"
     },
     {
@@ -339,7 +339,7 @@
         4,
         16
       ],
-      "base_path": "models/single_ops_extracted",
+      "base_path": "models/single_ops/basic",
       "input_name": "/model.22/dfl/Transpose_output_0"
     },
     {
@@ -350,7 +350,7 @@
         28,
         28
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -361,7 +361,7 @@
         28,
         28
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -372,7 +372,7 @@
         56,
         56
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -383,7 +383,7 @@
         7,
         7
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -394,7 +394,7 @@
         7,
         7
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -405,7 +405,7 @@
         28,
         28
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -416,7 +416,7 @@
         56,
         56
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -427,7 +427,7 @@
         56,
         56
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -438,7 +438,7 @@
         112,
         112
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -449,7 +449,7 @@
         7,
         7
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -459,7 +459,7 @@
         128,
         3072
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -468,7 +468,7 @@
         1,
         3072
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -477,7 +477,7 @@
         1,
         512
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -486,7 +486,7 @@
         1,
         768
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -495,7 +495,7 @@
         1,
         768
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     },
     {
@@ -505,7 +505,7 @@
         128,
         128
       ],
-      "base_path": "models/single_ops",
+      "base_path": "models/single_ops/basic",
       "input_name": "input"
     }
   ]

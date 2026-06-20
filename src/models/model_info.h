@@ -12,7 +12,7 @@ struct ModelInfo {
 
     std::string get_model_path(const std::string& backend) const {
         if (backend == "mnn" || backend == "MNN" || backend == "mnn_gpu" || backend == "MNN_GPU") {
-            return base_path + "/" + name + "_MNN.mnn";
+            return "models/exported/mnn/" + name + ".mnn";
         }
         if (backend == "ncnn" || backend == "NCNN") {
             return base_path + "/" + name + "_ncnn.param";

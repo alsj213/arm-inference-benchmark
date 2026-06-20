@@ -68,7 +68,7 @@ static bool run_llamacpp(const Args& args) {
     printf("========================================\n\n");
 
     std::string model_path = args.model.empty()
-        ? "models/nlp/qwen2_0.5b/qwen2-0_5b-instruct-q4_k_m.gguf"
+        ? "models/llm/qwen2_0.5b/qwen2-0_5b-instruct-q4_k_m.gguf"
         : args.model;
 
     printf("Model: %s\n", model_path.c_str());
@@ -143,7 +143,7 @@ static bool run_mnn_llm(const Args& args) {
     printf("========================================\n\n");
 
     std::string config_path = args.model.empty()
-        ? "models/nlp/qwen2_0.5b/mnn_llm/config.json"
+        ? "models/llm/qwen2_0.5b/mnn_llm/config.json"
         : args.model;
 
     printf("Config: %s\n", config_path.c_str());

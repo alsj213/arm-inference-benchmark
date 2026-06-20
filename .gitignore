@@ -85,6 +85,13 @@ models/classification/*.param
 models/classification/*.bin
 models/detection/*
 models/nlp/*
+models/source/classification/*.onnx
+models/source/classification/*.mnn
+models/source/classification/*.tflite
+models/source/classification/*.param
+models/source/classification/*.bin
+models/source/detection/*
+models/source/nlp/*
 
 # ==============================================
 # Results
@@ -107,19 +114,6 @@ ENV/
 .venv/
 *.egg
 
-# OS
-.DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-*.log
-*.tmp
-
 # Documentation build
 docs/_build/
 docs/build/
@@ -136,3 +130,25 @@ tools/FlameGraph/
 # Model backup files
 *.bak
 tools/bin/
+
+# ==============================================
+# IDE
+# ==============================================
+.zed/
+
+# ==============================================
+# LLM 模型文件
+# ==============================================
+models/llm/*
+!models/llm/.gitkeep
+
+# LLM 大权重文件扩展名
+*.gguf
+*.safetensors
+*.mtok
+*.mv
+*.msc
+
+# LLM 缓存
+models/llm/.cache/
+models/llm/.cache_ms/

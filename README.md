@@ -211,8 +211,8 @@ cd ../..
 
 ```bash
 export ANDROID_NDK=/home/liu/android-ndk
-./scripts/build_android.sh       # Release
-# ./scripts/build_android.sh --debug   # Debug（profiling 需要符号信息）
+./scripts/build/build-android.sh       # Release
+# ./scripts/build/build-android.sh --debug   # Debug（profiling 需要符号信息）
 ```
 
 产物: `build_android/src/benchmark_inference` (约 1.8MB，MNN 为共享库)
@@ -220,14 +220,14 @@ export ANDROID_NDK=/home/liu/android-ndk
 ### 4. 下载模型
 
 ```bash
-python scripts/download_pretrained.py
-./scripts/build_host_tools.sh && ./scripts/convert_models.sh
+python scripts/convert/download-pretrained.py
+./scripts/build/build-host-tools.sh && ./scripts/convert/convert-models.sh
 ```
 
 ### 5. 运行测试
 
 ```bash
-./scripts/run_benchmark_android.sh --backend mnn --model mobilenetv2 --threads 4 --runs 50
+./scripts/benchmark/run-android.sh --backend mnn --model mobilenetv2 --threads 4 --runs 50
 ```
 
 脚本自动执行：锁频 → 推送二进制/模型/so → 运行 benchmark → 恢复环境。
@@ -256,10 +256,10 @@ python scripts/download_pretrained.py
 adb shell "cd /data/local/tmp/benchmark && MNN_PROFILING=1 LD_LIBRARY_PATH=. ./benchmark_inference --model mobilenetv2 --backend mnn"
 
 # simpleperf 火焰图
-./scripts/simpleperf_profile.sh --backend mnn --model mobilenetv2 --duration 10
+./scripts/profile/simpleperf-profile.sh --backend mnn --model mobilenetv2 --duration 10
 
 # 集成 profiling 入口
-./scripts/profile_benchmark.sh --backend mnn --model mobilenetv2 --profile simpleperf
+./scripts/profile/profile-benchmark.sh --backend mnn --model mobilenetv2 --profile simpleperf
 ```
 
 ## 项目结构
@@ -275,8 +275,8 @@ benchmark/
 │   ├── models/               # 6 个模型信息定义（MobileNetV2/ResNet50/YOLOv8n/BERT/Qwen2-0.5B/mobilevit_s）
 │   ├── single_op_benchmark.cpp # 单算子测试
 │   └── llm_benchmark.cpp     # LLM 推理测试
-├── scripts/                  # 22 个脚本
-├── models/                   # 模型文件
+├── scripts/                  # 脚本（按功能分组到 7 个子目录）
+├── models/                   # 模型文件（source + exported + single_ops + llm）
 ├── third_party/              # 第三方依赖（git 子模块）
 │   ├── MNN/                 # libMNN.so（共享库）
 │   └── onnxruntime/         # libonnxruntime.so（需单独编译）
@@ -300,7 +300,7 @@ benchmark/
 | TNN | `BENCHMARK_TNN=OFF` | 已停用 |
 | QNN | `BENCHMARK_QNN=OFF` | 已停用 |
 
-> TVM 部署详情见 [docs/tvm_deployment_guide.md](docs/tvm_deployment_guide.md)
+> TVM 部署详情见 [docs/01-guides/tvm-deployment-guide.md](docs/01-guides/tvm-deployment-guide.md)
 
 ## Claude Code 插件
 

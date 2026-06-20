@@ -53,7 +53,7 @@ bool TFLiteBackend::init(const BenchmarkConfig& config) {
   std::ifstream model_file(config.model_path, std::ios::binary | std::ios::ate);
   if (!model_file.is_open()) {
     printf("TFLite: Model not found, using validation mode\n");
-    printf("TFLite: Expected: models/classification/mobilenetv2/mobilenetv2.tflite\n");
+    printf("TFLite: Expected: models/source/classification/mobilenetv2/mobilenetv2.tflite\n");
     use_real_inference_ = false;
     return true;
   }
