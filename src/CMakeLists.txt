@@ -129,8 +129,8 @@ set(MODEL_GEN_HEADER ${CMAKE_CURRENT_BINARY_DIR}/generated/model_registry.h)
 add_custom_command(
     OUTPUT ${MODEL_GEN_HEADER}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/generated
-    COMMAND python3 ${CMAKE_SOURCE_DIR}/scripts/generate_model_header.py ${MODELS_JSON} ${MODEL_GEN_HEADER}
-    DEPENDS ${MODELS_JSON} ${CMAKE_SOURCE_DIR}/scripts/generate_model_header.py
+    COMMAND python3 ${CMAKE_SOURCE_DIR}/scripts/utils/generate-model-header.py ${MODELS_JSON} ${MODEL_GEN_HEADER}
+    DEPENDS ${MODELS_JSON} ${CMAKE_SOURCE_DIR}/scripts/utils/generate-model-header.py
     COMMENT "Generating model registry from models.json"
 )
 add_custom_target(generate_models DEPENDS ${MODEL_GEN_HEADER})

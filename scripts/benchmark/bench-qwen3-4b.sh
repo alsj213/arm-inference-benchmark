@@ -1,6 +1,6 @@
 #!/bin/bash
 # Qwen3-4B Benchmark: MNN LLM vs llama.cpp
-# 用法: ./scripts/bench_qwen3_4b.sh
+# 用法: ./scripts/benchmark/bench-qwen3-4b.sh
 set -e
 
 ADB="/mnt/e/andorid/adb/adb.exe"
@@ -31,14 +31,16 @@ $ADB push models/llm/Qwen3-4B-Q4_K_M.gguf $MODEL_DIR/Qwen3-4B-Q4_K_M.gguf 2>&1 |
 echo "Pushing Q8_0 GGUF (4.3GB)..."
 $ADB push models/llm/Qwen3-4B-Q8_0.gguf $MODEL_DIR/Qwen3-4B-Q8_0.gguf 2>&1 | tail -1
 
-# Step 3: Push MNN LLM models (if available)
-if [ -f "models/llm/Qwen3-4B-MNN-Q4.mnn" ]; then
-    echo "Pushing MNN Q4 model..."
-    $ADB push models/llm/Qwen3-4B-MNN-Q4.mnn $MODEL_DIR/
+# Step 3: Push MNN LLM model directories (exported by llmexport.py)
+if [ -d "models/llm/Qwen3-4B-MNN-Q4" ]; then
+    echo "Pushing MNN Q4 model dir..."
+    $ADB shell "mkdir -p $MODEL_DIR/mnn_q4"
+    $ADB push models/llm/Qwen3-4B-MNN-Q4/ $MODEL_DIR/mnn_q4/ 2>&1 | tail -1
 fi
-if [ -f "models/llm/Qwen3-4B-MNN-Q8.mnn" ]; then
-    echo "Pushing MNN Q8 model..."
-    $ADB push models/llm/Qwen3-4B-MNN-Q8.mnn $MODEL_DIR/
+if [ -d "models/llm/Qwen3-4B-MNN-Q8" ]; then
+    echo "Pushing MNN Q8 model dir..."
+    $ADB shell "mkdir -p $MODEL_DIR/mnn_q8"
+    $ADB push models/llm/Qwen3-4B-MNN-Q8/ $MODEL_DIR/mnn_q8/ 2>&1 | tail -1
 fi
 
 echo ""
@@ -85,11 +87,11 @@ run_mnn_bench() {
         --benchmark" 2>&1 | tee -a "$RESULT_FILE"
 }
 
-if [ -f "models/llm/Qwen3-4B-MNN-Q4.mnn" ]; then
-    run_mnn_bench "Qwen3-4B-MNN-Q4.mnn" "Q4"
+if [ -d "models/llm/Qwen3-4B-MNN-Q4" ]; then
+    run_mnn_bench "mnn_q4/Qwen3-4B-MNN-Q4/config.json" "Q4"
 fi
-if [ -f "models/llm/Qwen3-4B-MNN-Q8.mnn" ]; then
-    run_mnn_bench "Qwen3-4B-MNN-Q8.mnn" "Q8"
+if [ -d "models/llm/Qwen3-4B-MNN-Q8" ]; then
+    run_mnn_bench "mnn_q8/Qwen3-4B-MNN-Q8/config.json" "Q8"
 fi
 
 # Step 7: 恢复环境
