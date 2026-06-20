@@ -1,0 +1,338 @@
+[
+  {
+    "name": "GEMM_Square_16x16",
+    "onnx": "models/single_ops_gemm/GEMM_Square_16x16.onnx",
+    "M": 16,
+    "K": 16,
+    "N": 16,
+    "flops": 8192,
+    "axis": "square",
+    "input_name": "input",
+    "input_shape": [
+      16,
+      16
+    ]
+  },
+  {
+    "name": "GEMM_Square_32x32",
+    "onnx": "models/single_ops_gemm/GEMM_Square_32x32.onnx",
+    "M": 32,
+    "K": 32,
+    "N": 32,
+    "flops": 65536,
+    "axis": "square",
+    "input_name": "input",
+    "input_shape": [
+      32,
+      32
+    ]
+  },
+  {
+    "name": "GEMM_Square_64x64",
+    "onnx": "models/single_ops_gemm/GEMM_Square_64x64.onnx",
+    "M": 64,
+    "K": 64,
+    "N": 64,
+    "flops": 524288,
+    "axis": "square",
+    "input_name": "input",
+    "input_shape": [
+      64,
+      64
+    ]
+  },
+  {
+    "name": "GEMM_Square_128x128",
+    "onnx": "models/single_ops_gemm/GEMM_Square_128x128.onnx",
+    "M": 128,
+    "K": 128,
+    "N": 128,
+    "flops": 4194304,
+    "axis": "square",
+    "input_name": "input",
+    "input_shape": [
+      128,
+      128
+    ]
+  },
+  {
+    "name": "GEMM_Square_256x256",
+    "onnx": "models/single_ops_gemm/GEMM_Square_256x256.onnx",
+    "M": 256,
+    "K": 256,
+    "N": 256,
+    "flops": 33554432,
+    "axis": "square",
+    "input_name": "input",
+    "input_shape": [
+      256,
+      256
+    ]
+  },
+  {
+    "name": "GEMM_Square_512x512",
+    "onnx": "models/single_ops_gemm/GEMM_Square_512x512.onnx",
+    "M": 512,
+    "K": 512,
+    "N": 512,
+    "flops": 268435456,
+    "axis": "square",
+    "input_name": "input",
+    "input_shape": [
+      512,
+      512
+    ]
+  },
+  {
+    "name": "GEMM_Square_1024x1024",
+    "onnx": "models/single_ops_gemm/GEMM_Square_1024x1024.onnx",
+    "M": 1024,
+    "K": 1024,
+    "N": 1024,
+    "flops": 2147483648,
+    "axis": "square",
+    "input_name": "input",
+    "input_shape": [
+      1024,
+      1024
+    ]
+  },
+  {
+    "name": "GEMM_KScan_K16_M256_N256",
+    "onnx": "models/single_ops_gemm/GEMM_KScan_K16_M256_N256.onnx",
+    "M": 256,
+    "K": 16,
+    "N": 256,
+    "flops": 2097152,
+    "axis": "kscan",
+    "input_name": "input",
+    "input_shape": [
+      256,
+      16
+    ]
+  },
+  {
+    "name": "GEMM_KScan_K32_M256_N256",
+    "onnx": "models/single_ops_gemm/GEMM_KScan_K32_M256_N256.onnx",
+    "M": 256,
+    "K": 32,
+    "N": 256,
+    "flops": 4194304,
+    "axis": "kscan",
+    "input_name": "input",
+    "input_shape": [
+      256,
+      32
+    ]
+  },
+  {
+    "name": "GEMM_KScan_K64_M256_N256",
+    "onnx": "models/single_ops_gemm/GEMM_KScan_K64_M256_N256.onnx",
+    "M": 256,
+    "K": 64,
+    "N": 256,
+    "flops": 8388608,
+    "axis": "kscan",
+    "input_name": "input",
+    "input_shape": [
+      256,
+      64
+    ]
+  },
+  {
+    "name": "GEMM_KScan_K128_M256_N256",
+    "onnx": "models/single_ops_gemm/GEMM_KScan_K128_M256_N256.onnx",
+    "M": 256,
+    "K": 128,
+    "N": 256,
+    "flops": 16777216,
+    "axis": "kscan",
+    "input_name": "input",
+    "input_shape": [
+      256,
+      128
+    ]
+  },
+  {
+    "name": "GEMM_KScan_K512_M256_N256",
+    "onnx": "models/single_ops_gemm/GEMM_KScan_K512_M256_N256.onnx",
+    "M": 256,
+    "K": 512,
+    "N": 256,
+    "flops": 67108864,
+    "axis": "kscan",
+    "input_name": "input",
+    "input_shape": [
+      256,
+      512
+    ]
+  },
+  {
+    "name": "GEMM_KScan_K1024_M256_N256",
+    "onnx": "models/single_ops_gemm/GEMM_KScan_K1024_M256_N256.onnx",
+    "M": 256,
+    "K": 1024,
+    "N": 256,
+    "flops": 134217728,
+    "axis": "kscan",
+    "input_name": "input",
+    "input_shape": [
+      256,
+      1024
+    ]
+  },
+  {
+    "name": "GEMM_MNScan_M16_K256_N16",
+    "onnx": "models/single_ops_gemm/GEMM_MNScan_M16_K256_N16.onnx",
+    "M": 16,
+    "K": 256,
+    "N": 16,
+    "flops": 131072,
+    "axis": "mnscan",
+    "input_name": "input",
+    "input_shape": [
+      16,
+      256
+    ]
+  },
+  {
+    "name": "GEMM_MNScan_M32_K256_N32",
+    "onnx": "models/single_ops_gemm/GEMM_MNScan_M32_K256_N32.onnx",
+    "M": 32,
+    "K": 256,
+    "N": 32,
+    "flops": 524288,
+    "axis": "mnscan",
+    "input_name": "input",
+    "input_shape": [
+      32,
+      256
+    ]
+  },
+  {
+    "name": "GEMM_MNScan_M64_K256_N64",
+    "onnx": "models/single_ops_gemm/GEMM_MNScan_M64_K256_N64.onnx",
+    "M": 64,
+    "K": 256,
+    "N": 64,
+    "flops": 2097152,
+    "axis": "mnscan",
+    "input_name": "input",
+    "input_shape": [
+      64,
+      256
+    ]
+  },
+  {
+    "name": "GEMM_MNScan_M128_K256_N128",
+    "onnx": "models/single_ops_gemm/GEMM_MNScan_M128_K256_N128.onnx",
+    "M": 128,
+    "K": 256,
+    "N": 128,
+    "flops": 8388608,
+    "axis": "mnscan",
+    "input_name": "input",
+    "input_shape": [
+      128,
+      256
+    ]
+  },
+  {
+    "name": "GEMM_MNScan_M512_K256_N512",
+    "onnx": "models/single_ops_gemm/GEMM_MNScan_M512_K256_N512.onnx",
+    "M": 512,
+    "K": 256,
+    "N": 512,
+    "flops": 134217728,
+    "axis": "mnscan",
+    "input_name": "input",
+    "input_shape": [
+      512,
+      256
+    ]
+  },
+  {
+    "name": "GEMM_MNScan_M1024_K256_N1024",
+    "onnx": "models/single_ops_gemm/GEMM_MNScan_M1024_K256_N1024.onnx",
+    "M": 1024,
+    "K": 256,
+    "N": 1024,
+    "flops": 536870912,
+    "axis": "mnscan",
+    "input_name": "input",
+    "input_shape": [
+      1024,
+      256
+    ]
+  },
+  {
+    "name": "GEMM_BERT_FFN1_S128_H768_I3072",
+    "onnx": "models/single_ops_gemm/GEMM_BERT_FFN1_S128_H768_I3072.onnx",
+    "M": 128,
+    "K": 768,
+    "N": 3072,
+    "flops": 603979776,
+    "axis": "nonsquare",
+    "input_name": "input",
+    "input_shape": [
+      128,
+      768
+    ]
+  },
+  {
+    "name": "GEMM_BERT_Proj_S128_H3072_O768",
+    "onnx": "models/single_ops_gemm/GEMM_BERT_Proj_S128_H3072_O768.onnx",
+    "M": 128,
+    "K": 3072,
+    "N": 768,
+    "flops": 603979776,
+    "axis": "nonsquare",
+    "input_name": "input",
+    "input_shape": [
+      128,
+      3072
+    ]
+  },
+  {
+    "name": "GEMM_Attention_128x768x128",
+    "onnx": "models/single_ops_gemm/GEMM_Attention_128x768x128.onnx",
+    "M": 128,
+    "K": 768,
+    "N": 128,
+    "flops": 25165824,
+    "axis": "nonsquare",
+    "input_name": "input",
+    "input_shape": [
+      128,
+      768
+    ]
+  },
+  {
+    "name": "GEMM_LLM_FFN_1x4096x14336",
+    "onnx": "models/single_ops_gemm/GEMM_LLM_FFN_1x4096x14336.onnx",
+    "M": 1,
+    "K": 4096,
+    "N": 14336,
+    "flops": 117440512,
+    "axis": "nonsquare",
+    "input_name": "input",
+    "input_shape": [
+      1,
+      4096
+    ]
+  },
+  {
+    "name": "GEMM_LLM_AttnProj_1x4096x4096",
+    "onnx": "models/single_ops_gemm/GEMM_LLM_AttnProj_1x4096x4096.onnx",
+    "M": 1,
+    "K": 4096,
+    "N": 4096,
+    "flops": 33554432,
+    "axis": "nonsquare",
+    "input_name": "input",
+    "input_shape": [
+      1,
+      4096
+    ]
+  }
+]
