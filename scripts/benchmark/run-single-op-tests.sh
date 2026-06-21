@@ -69,7 +69,7 @@ echo "op,backend,mean_ms,min_ms,max_ms,std_ms" > "$RESULTS_FILE"
 
 # 推送文件到设备
 echo "Pushing binary and libraries..."
-$ADB push "$PROJECT_ROOT/build_android/src/single_op_benchmark" /data/local/tmp/
+$ADB push "$PROJECT_ROOT/build_android/src/single_op/single_op_benchmark" /data/local/tmp/
 $ADB push "$PROJECT_ROOT/build_android/third_party/ncnn/libncnn.so" /data/local/tmp/
 $ADB push "$PROJECT_ROOT/build_android/third_party/MNN/libMNN.so" /data/local/tmp/
 $ADB push "$PROJECT_ROOT/build_android/third_party/onnxruntime/libonnxruntime.so" /data/local/tmp/ 2>/dev/null || true
