@@ -23,10 +23,16 @@
 
 ```
 benchmark/
-├── src/                  # 核心源代码
-│   ├── main.cpp         # 入口 + 参数解析 + 测试编排
-│   ├── single_op_benchmark.cpp  # 单算子基准测试
-│   ├── llm_benchmark.cpp        # LLM 测试（仅 llama.cpp 启用时）
+├── src/                  # 核心源代码（三条主线）
+│   ├── cnn/             # CNN 推理基准测试
+│   │   ├── main.cpp     # 入口 + 参数解析 + CV 模型测试编排
+│   │   └── CMakeLists.txt
+│   ├── llm/             # LLM / VL 推理基准测试
+│   │   ├── llm_benchmark.cpp   # LLM 统一入口（text-only + VL）
+│   │   └── CMakeLists.txt
+│   ├── single_op/       # 单算子基准测试
+│   │   ├── single_op_benchmark.cpp
+│   │   └── CMakeLists.txt
 │   ├── common/           # 公共模块（benchmark基类、配置、工具函数）
 │   ├── backends/         # 多个后端实现（完整保留，停用的用编译宏隔离）
 │   └── models/           # 6个模型信息定义（MobileNetV2/ResNet50/YOLOv8n/BERT/Qwen2-0.5B/mobilevit_s）
