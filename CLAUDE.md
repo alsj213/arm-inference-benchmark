@@ -109,6 +109,33 @@ benchmark/
 - 设备 ID: `b08dee23`
 - Android NDK 交叉编译（arm64-v8a, android-29）
 
+## 使用 mobile-bench
+
+本项目默认使用 [mobile-bench](https://github.com/alsj213/claude-code-mobile-bench) 插件（本地路径 `/home/liu/project/mobile-bench`）来执行 benchmark 测试和性能分析。
+
+所有测试流程必须遵守 mobile-bench 的 7 步协议（见下方"核心命令"部分），数据真实性规则见 `mobile-bench-integrity` 规则。
+
+### 插件管理
+
+```bash
+# 本地安装
+claude plugins install /home/liu/project/mobile-bench
+
+# 更新插件（同步 benchmark 仓库变更后）
+cd /home/liu/project/mobile-bench && git pull
+
+# 配置（已存在 .benchmarkrc.yml）
+```
+
+### 支持的 Skill
+
+| Skill | 用途 | 调用方式 |
+|-------|------|---------|
+| `mobile-bench-run` | 完整 benchmark 流程（7 步协议） | 说"跑 benchmark mnn mobilenetv2" |
+| `mobile-bench-model-prep` | 模型下载/转换/编译 | 说"准备模型" |
+| `mobile-bench-profiling` | 火焰图/逐算子 profiling | 说"抓火焰图" |
+| `mobile-bench-integrate` | 集成新推理框架 | 说"集成 xx 后端" |
+
 ## 核心命令
 
 ```bash
