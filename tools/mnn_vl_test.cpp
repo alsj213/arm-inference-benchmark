@@ -53,7 +53,7 @@ int main(int argc, const char* argv[]) {
 
     // 构建 MultimodalPrompt
     MultimodalPrompt mm_prompt;
-    mm_prompt.prompt_template = "<|im_start|>user\n<img>img1</img>" + user_prompt + "<|im_end|>\n<|im_start|>assistant\n";
+    mm_prompt.prompt_template = "<|im_start|>system\nYou are a helpful assistant. Answer directly without thinking.\n<|im_end|>\n<|im_start|>user\n<img>img1</img>" + user_prompt + "<|im_end|>\n<|im_start|>assistant\n<think>\n</think>\n";
     mm_prompt.images["img1"] = {varp, width, height};
 
     // 推理

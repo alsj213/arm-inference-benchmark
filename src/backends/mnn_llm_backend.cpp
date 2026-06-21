@@ -119,10 +119,10 @@ std::string MnnLlmBackend::generate_vl(const MultimodalInput& input) {
         {input.height, input.width, 3}, NCHW, halide_type_of<uint8_t>());
     varp = _Cast<float>(varp) * _Const(1.0f / 255.0f);
 
-    // Build MultimodalPrompt (reuse same pattern as mnn_vl_test.cpp)
+    // Build MultimodalPrompt (skip thinking mode for direct answer)
     MNN::Transformer::MultimodalPrompt mm_prompt;
-    mm_prompt.prompt_template = "<|im_start|>user\n<img>img1</img>" +
-        input.prompt + "<|im_end|>\n<|im_start|>assistant\n";
+    mm_prompt.prompt_template = "<|im_start|>system\nYou are a helpful assistant. Answer directly without thinking.\n<|im_end|>\n<|im_start|>user\n<img>img1</img>" +
+        input.prompt + "<|im_end|>\n<|im_start|>assistant\n<think>\n</think>\n";
     mm_prompt.images["img1"] = {varp, input.width, input.height};
 
     // Run inference
