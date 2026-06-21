@@ -14,16 +14,17 @@
 #include <cctype>
 #include <memory>
 
-// Execute shell command and capture stdout/stderr via pipe
-static std::string exec_cmd(const std::string& cmd) {
-    std::array<char, 128> buffer;
+// Execute shell command and capture stdout/stderr via pipe.
+// Returns {output, exit_code}.
+static std::pair<std::string, int> exec_cmd(const std::string& cmd) {
+    std::array<char, 4096> buffer;
     std::string result;
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(
-        popen(cmd.c_str(), "r"), pclose);
-    if (!pipe) return "";
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+    FILE* raw = popen(cmd.c_str(), "r");
+    if (!raw) return {"", -1};
+    while (fgets(buffer.data(), buffer.size(), raw) != nullptr)
         result += buffer.data();
-    return result;
+    int exit_code = pclose(raw);
+    return {result, exit_code};
 }
 
 bool LlamaCppBackend::init(const BenchmarkConfig& config) {
@@ -312,6 +313,13 @@ LlamaCppBackend::VLBatchResult LlamaCppBackend::generate_vl(
     std::string mtmd = "./llama-mtmd-cli";
 
     // Build command with stderr merged into stdout (2>&1)
+    // Escape single quotes in prompt to prevent shell injection
+    std::string escaped_prompt = prompt;
+    size_t pos = 0;
+    while ((pos = escaped_prompt.find("'", pos)) != std::string::npos) {
+        escaped_prompt.replace(pos, 1, "'\\''");
+        pos += 4;
+    }
     char cmd[4096];
     snprintf(cmd, sizeof(cmd),
         "cd /data/local/tmp/benchmark && "
@@ -325,9 +333,12 @@ LlamaCppBackend::VLBatchResult LlamaCppBackend::generate_vl(
         "--no-warmup "
         "--perf 2>&1",
         mtmd.c_str(), gguf.c_str(), mmproj.c_str(),
-        image_path.c_str(), prompt.c_str(), max_tokens);
+        image_path.c_str(), escaped_prompt.c_str(), max_tokens);
 
-    std::string output = exec_cmd(cmd);
+    auto [output, exit_code] = exec_cmd(cmd);
+    if (exit_code != 0) {
+        printf("WARNING: llama-mtmd-cli exited with code %d (output may be partial)\n", exit_code);
+    }
 
     // Parse timing from perf output
     // Format: llama_perf_context_print: prompt eval time = X ms / Y tokens

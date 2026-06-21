@@ -68,7 +68,12 @@ third_party/*/CMakeCache.txt
 third_party/*/CMakeFiles/
 
 # ==============================================
-# Model files (large binary files)
+# Model files (本地模型文件，不跟踪)
+# ==============================================
+models/
+
+# ==============================================
+# Large binary model files
 # ==============================================
 *.onnx
 *.onnx.data

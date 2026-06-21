@@ -182,22 +182,43 @@ static bool run_llamacpp_vl(const Args& args) {
     printf("Prompt: %s\n", prompt.c_str());
     printf("Max tokens: %d\n\n", args.max_tokens);
 
-    printf("--- VL Generate ---\n");
-    auto t0 = std::chrono::high_resolution_clock::now();
-    auto result = backend.generate_vl(args.image_path, prompt, args.max_tokens);
-    auto t1 = std::chrono::high_resolution_clock::now();
-    double total_s = std::chrono::duration<double>(t1 - t0).count();
+    if (args.benchmark_only) {
+        // Simplified VL benchmark: warmup + measured run
+        printf("--- VL Benchmark (simplified) ---\n");
 
-    if (!args.benchmark_only) {
+        // Warmup
+        printf("Warmup...\n");
+        backend.generate_vl(args.image_path, prompt, 16);
+
+        // Measured run
+        auto t0 = std::chrono::high_resolution_clock::now();
+        auto result = backend.generate_vl(args.image_path, prompt, args.max_tokens);
+        auto t1 = std::chrono::high_resolution_clock::now();
+        double total_s = std::chrono::duration<double>(t1 - t0).count();
+
+        printf("\n--- Results ---\n");
+        printf("Vision time: %.2f s\n", result.vision_time_s);
+        printf("Prefill time: %.2f s\n", result.prefill_time_s);
+        printf("Decode time: %.2f s\n", result.decode_time_s);
+        printf("Total tokens: %d\n", result.total_tokens);
+        printf("Total time: %.2f s\n", total_s);
+        printf("Decode speed: ~%.2f tok/s\n", args.max_tokens / total_s);
+    } else {
+        printf("--- VL Generate ---\n");
+        auto t0 = std::chrono::high_resolution_clock::now();
+        auto result = backend.generate_vl(args.image_path, prompt, args.max_tokens);
+        auto t1 = std::chrono::high_resolution_clock::now();
+        double total_s = std::chrono::duration<double>(t1 - t0).count();
+
         printf("\n%s\n\n", result.text.c_str());
-    }
 
-    printf("--- Results ---\n");
-    printf("Vision time: %.2f s\n", result.vision_time_s);
-    printf("Prefill time: %.2f s\n", result.prefill_time_s);
-    printf("Decode time: %.2f s\n", result.decode_time_s);
-    printf("Total tokens: %d\n", result.total_tokens);
-    printf("Total time: %.2f s\n", total_s);
+        printf("--- Results ---\n");
+        printf("Vision time: %.2f s\n", result.vision_time_s);
+        printf("Prefill time: %.2f s\n", result.prefill_time_s);
+        printf("Decode time: %.2f s\n", result.decode_time_s);
+        printf("Total tokens: %d\n", result.total_tokens);
+        printf("Total time: %.2f s\n", total_s);
+    }
 
     return true;
 }
@@ -308,6 +329,10 @@ static bool run_mnn_llm_vl(const Args& args) {
     std::vector<uint8_t> img_data(fsize);
     size_t read_bytes = fread(img_data.data(), 1, fsize, fp);
     fclose(fp);
+    if (read_bytes != fsize) {
+        printf("ERROR: incomplete image read (%zu of %zu bytes)\n", read_bytes, fsize);
+        return false;
+    }
     printf("Read image: %zu bytes from %s\n", read_bytes, args.image_path.c_str());
 
     // Determine dimensions (420 default for Qwen3-VL)
@@ -357,6 +382,14 @@ static bool run_mnn_llm_vl(const Args&) {
 // ── main ──
 int main(int argc, char* argv[]) {
     Args args = parse_args(argc, argv);
+
+    // Initialize random seed
+    srand(args.seed);
+
+    // --accuracy is parsed but not yet implemented
+    if (!args.accuracy_ref.empty()) {
+        printf("WARNING: --accuracy mode is not yet implemented, running in normal mode\n");
+    }
 
     if (!args.image_path.empty()) {
         // VL mode

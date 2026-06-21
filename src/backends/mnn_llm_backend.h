@@ -53,7 +53,8 @@ class MnnLlmBackend : public BenchmarkBackend {
   std::string generate_vl(const MultimodalInput& input);
   LlmBenchResult benchmark_vl(int n_prompt, int n_gen, int n_repeat = 5);
 
-  // Logits access for accuracy comparison
+  // @TODO: implement logits extraction when MNN LLM internal API exposes logits
+  // Currently returns empty vector — needed for accuracy verification
   std::vector<float> get_last_logits() const;
 
  private:
