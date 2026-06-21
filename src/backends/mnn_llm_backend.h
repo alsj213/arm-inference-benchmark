@@ -9,6 +9,15 @@
 
 namespace MNN { namespace Transformer { class Llm; } }
 
+// ── VL (Vision-Language) inference input ──
+struct MultimodalInput {
+    std::vector<uint8_t> image_data;  // RAW RGB pixels, row-major
+    int width = 0;
+    int height = 0;
+    std::string prompt;
+    int max_tokens = 128;
+};
+
 /*!
  * \brief MNN LLM Backend — LLM inference via MNN Transformer engine
  *
@@ -40,9 +49,17 @@ class MnnLlmBackend : public BenchmarkBackend {
   };
   LlmBenchResult benchmark(int n_prompt, int n_generate, int n_repeat = 5);
 
+  // VL (Vision-Language) API
+  std::string generate_vl(const MultimodalInput& input);
+  LlmBenchResult benchmark_vl(int n_prompt, int n_gen, int n_repeat = 5);
+
+  // Logits access for accuracy comparison
+  std::vector<float> get_last_logits() const;
+
  private:
   MNN::Transformer::Llm* llm_ = nullptr;
   bool model_loaded_ = false;
+  std::vector<float> last_logits_;
 };
 
 #endif  // BENCHMARK_BACKENDS_MNN_LLM_BACKEND_H_
