@@ -134,8 +134,10 @@ fi
 adb shell mkdir -p /data/local/tmp/benchmark
 
 # Push binary
-adb push $PROJECT_ROOT/build_android/src/benchmark_inference /data/local/tmp/benchmark/
+adb push $PROJECT_ROOT/build_android/src/cnn/benchmark_inference /data/local/tmp/benchmark/
 adb shell chmod +x /data/local/tmp/benchmark/benchmark_inference
+adb push $PROJECT_ROOT/build_android/src/llm/llm_benchmark /data/local/tmp/benchmark/
+adb shell chmod +x /data/local/tmp/benchmark/llm_benchmark
 
 # Push models
 echo "Pushing models..."

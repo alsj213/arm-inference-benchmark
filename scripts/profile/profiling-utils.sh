@@ -186,15 +186,15 @@ create_result_dir() {
 # 推送 benchmark 二进制和模型
 push_benchmark_files() {
     local device_dir="/data/local/tmp/benchmark"
-    local binary_path="${1:-build_android/src/benchmark_inference}"
+    local binary_path="${1:-build_android/src/cnn/benchmark_inference}"
     local models_path="${2:-models}"
     local build_type="${3:-Release}"  # 新增参数：Release 或 Debug
 
     # 根据构建类型选择正确的二进制路径
     if [ "$build_type" = "Debug" ]; then
-        binary_path="${1:-build_android_debug/src/benchmark_inference}"
+        binary_path="${1:-build_android_debug/src/cnn/benchmark_inference}"
     else
-        binary_path="${1:-build_android/src/benchmark_inference}"
+        binary_path="${1:-build_android/src/cnn/benchmark_inference}"
     fi
 
     log_info "Using build type: $build_type"

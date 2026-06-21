@@ -50,7 +50,7 @@ echo "  OK"
 echo "[4/6] Building benchmark binary..."
 cd "$PROJECT_DIR"
 ./scripts/build/build-android.sh 2>&1 | tail -5
-$ADB push build_android/src/benchmark_inference /data/local/tmp/
+$ADB push build_android/src/cnn/benchmark_inference /data/local/tmp/
 echo "  OK"
 
 # ── Step 5: 运行三方对比 ──

@@ -83,10 +83,13 @@ cmake .. \
 make -j$(nproc)
 
 echo "=== Build complete ==="
-echo "Executable: $BUILD_DIR/src/benchmark_inference"
+echo "Executables:"
+echo "  CNN : $BUILD_DIR/src/cnn/benchmark_inference"
+echo "  LLM : $BUILD_DIR/src/llm/llm_benchmark"
+echo "  SOP : $BUILD_DIR/src/single_op/single_op_benchmark"
 echo ""
 echo "To run on device:"
-echo "  adb push $PROJECT_ROOT/build_android/src/benchmark_inference /data/local/tmp/"
+echo "  adb push $PROJECT_ROOT/build_android/src/cnn/benchmark_inference /data/local/tmp/"
 echo "  adb push models/ /data/local/tmp/benchmark-models/"
 echo "  adb shell"
 echo "  cd /data/local/tmp"

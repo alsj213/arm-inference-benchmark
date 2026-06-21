@@ -74,9 +74,9 @@ done
 
 # Select binary based on build type
 if [ "$BUILD_TYPE" = "Debug" ]; then
-    BINARY=$PROJECT_ROOT/build_android_debug/src/benchmark_inference
+    BINARY=$PROJECT_ROOT/build_android_debug/src/cnn/benchmark_inference
 else
-    BINARY=$PROJECT_ROOT/build_android/src/benchmark_inference
+    BINARY=$PROJECT_ROOT/build_android/src/cnn/benchmark_inference
 fi
 
 if [ ! -f "$BINARY" ]; then

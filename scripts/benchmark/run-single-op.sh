@@ -22,7 +22,7 @@ echo
 
 # 推送到设备
 echo "Pushing benchmark binary to device..."
-adb push "$PROJECT_ROOT/build_android/src/benchmark_inference" /data/local/tmp/ 2>/dev/null
+adb push "$PROJECT_ROOT/build_android/src/cnn/benchmark_inference" /data/local/tmp/ 2>/dev/null
 adb shell "chmod +x /data/local/tmp/benchmark_inference"
 
 echo "Pushing models to device..."
