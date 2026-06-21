@@ -1,4 +1,5 @@
 # src CMake configuration
+# 三条主线分发：cnn/ llm/ single_op
 
 # Enable exceptions for ONNX Runtime and TVM
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -UNO_EXCEPTIONS")
@@ -135,105 +136,14 @@ add_custom_command(
 )
 add_custom_target(generate_models DEPENDS ${MODEL_GEN_HEADER})
 
-# Main executable
-add_executable(benchmark_inference
-    main.cpp
-)
-
-add_dependencies(benchmark_inference generate_models)
-target_include_directories(benchmark_inference PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/generated)
-
-# Inject git commit hash for --version
-execute_process(
-    COMMAND git rev-parse --short HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_COMMIT_HASH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_QUIET
-)
-if(NOT GIT_COMMIT_HASH)
-    set(GIT_COMMIT_HASH "unknown")
-endif()
-message(STATUS "Git commit: ${GIT_COMMIT_HASH}")
-target_compile_definitions(benchmark_inference PRIVATE
-    GIT_COMMIT_HASH="${GIT_COMMIT_HASH}"
-)
-
-target_compile_options(benchmark_inference PRIVATE -fexceptions)
 target_compile_options(benchmark_common PUBLIC -fexceptions)
 
-# Copy compile definitions from benchmark_common to benchmark_inference
-# This ensures all backend macros are visible in main.cpp
-if(BENCHMARK_NCNN)
-    target_compile_definitions(benchmark_inference PRIVATE BENCHMARK_NCNN)
-endif()
-if(BENCHMARK_MNN)
-    target_compile_definitions(benchmark_inference PRIVATE BENCHMARK_MNN)
-endif()
-if(BENCHMARK_TFLITE)
-    target_compile_definitions(benchmark_inference PRIVATE BENCHMARK_TFLITE)
-endif()
-if(BENCHMARK_TNN)
-    target_compile_definitions(benchmark_inference PRIVATE BENCHMARK_TNN)
-endif()
-if(BENCHMARK_ORT)
-    target_compile_definitions(benchmark_inference PRIVATE BENCHMARK_ORT)
-endif()
-if(BENCHMARK_TVM)
-    target_compile_definitions(benchmark_inference PRIVATE BENCHMARK_TVM)
-    target_link_libraries(benchmark_inference PRIVATE tvm_runtime)
-endif()
-if(BENCHMARK_MINDSPORE_LITE)
-    target_compile_definitions(benchmark_inference PRIVATE BENCHMARK_MINDSPORE_LITE)
-endif()
+# Support for model source files via include directories
+target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/models)
 
-# Link against all required libraries (backends already linked to benchmark_common)
-target_link_libraries(benchmark_inference
-    PRIVATE
-    benchmark_common
-)
-
-# Single operator benchmark executable
-add_executable(single_op_benchmark
-    single_op_benchmark.cpp
-)
-target_compile_options(single_op_benchmark PRIVATE -fexceptions)
-
-# Copy compile definitions from main executable
-if(BENCHMARK_MNN)
-    target_compile_definitions(single_op_benchmark PRIVATE BENCHMARK_MNN)
-endif()
-if(BENCHMARK_ORT)
-    target_compile_definitions(single_op_benchmark PRIVATE BENCHMARK_ORT)
-endif()
-if(BENCHMARK_TVM)
-    target_compile_definitions(single_op_benchmark PRIVATE BENCHMARK_TVM)
-endif()
-
-target_link_libraries(single_op_benchmark
-    PRIVATE
-    benchmark_common
-)
-
-# Link backend runtime libraries for symbol resolution
-if(BENCHMARK_TVM)
-    target_link_libraries(single_op_benchmark PRIVATE tvm_runtime)
-endif()
-
-# LLM benchmark executable for llama.cpp + MNN LLM
-if(BENCHMARK_LLAMACPP OR BENCHMARK_MNN)
-    add_executable(llm_benchmark
-        llm_benchmark.cpp
-    )
-    target_compile_options(llm_benchmark PRIVATE -fexceptions)
-    if(BENCHMARK_LLAMACPP)
-        target_compile_definitions(llm_benchmark PRIVATE BENCHMARK_LLAMACPP)
-    endif()
-    if(BENCHMARK_MNN)
-        target_compile_definitions(llm_benchmark PRIVATE BENCHMARK_MNN)
-    endif()
-    target_link_libraries(llm_benchmark
-        PRIVATE
-        benchmark_common
-    )
-endif()
+# ============================================================================
+# 三条主线子目录分发
+# ============================================================================
+add_subdirectory(cnn)
+add_subdirectory(llm)
+add_subdirectory(single_op)
