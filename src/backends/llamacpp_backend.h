@@ -39,6 +39,22 @@ class LlamaCppBackend : public BenchmarkBackend {
   };
   TokenBenchResult benchmark_decode(int n_prompt, int n_gen, int n_repeat);
 
+  // VL (Vision-Language) API via mtmd-cli subprocess
+  struct VLBatchResult {
+      std::string text;
+      double vision_time_s = 0;    // image slice encode
+      double prefill_time_s = 0;   // prompt eval
+      double decode_time_s = 0;    // token generation
+      int total_tokens = 0;
+  };
+
+  // Requires: models/qwen3-vl-4b-instruct-q4_k_m.gguf + mmproj on device
+  // Uses: llama-mtmd-cli as subprocess (popen)
+  VLBatchResult generate_vl(const std::string& image_path,
+                            const std::string& prompt,
+                            int max_tokens = 128,
+                            const std::string& mmproj_path = "");
+
  private:
 #ifdef BENCHMARK_LLAMACPP
   llama_context* ctx_ = nullptr;

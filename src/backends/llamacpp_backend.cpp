@@ -10,6 +10,21 @@
 #include <sstream>
 #include <chrono>
 #include <algorithm>
+#include <array>
+#include <cctype>
+#include <memory>
+
+// Execute shell command and capture stdout/stderr via pipe
+static std::string exec_cmd(const std::string& cmd) {
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(
+        popen(cmd.c_str(), "r"), pclose);
+    if (!pipe) return "";
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+        result += buffer.data();
+    return result;
+}
 
 bool LlamaCppBackend::init(const BenchmarkConfig& config) {
   printf("=== llama.cpp LLM Backend ===\n");
@@ -277,6 +292,97 @@ LlamaCppBackend::TokenBenchResult LlamaCppBackend::benchmark_decode(
 #else
     (void)n_prompt; (void)n_gen; (void)n_repeat;
 #endif
+    return r;
+}
+
+LlamaCppBackend::VLBatchResult LlamaCppBackend::generate_vl(
+        const std::string& image_path,
+        const std::string& prompt,
+        int max_tokens,
+        const std::string& mmproj_path) {
+
+    VLBatchResult r;
+
+    // Build model paths (assumes standard device layout)
+    std::string model_dir = "models/qwen3-vl-4b";
+    std::string mmproj = mmproj_path.empty()
+        ? model_dir + "/Qwen3-VL-4B-Instruct-f16.mmproj"
+        : mmproj_path;
+    std::string gguf = model_dir + "/Qwen3-VL-4B-Instruct-q4_k_m.gguf";
+    std::string mtmd = "./llama-mtmd-cli";
+
+    // Build command with stderr merged into stdout (2>&1)
+    char cmd[4096];
+    snprintf(cmd, sizeof(cmd),
+        "cd /data/local/tmp/benchmark && "
+        "LD_LIBRARY_PATH=. %s "
+        "-m %s "
+        "--mmproj %s "
+        "--image %s "
+        "-p '%s' "
+        "-n %d "
+        "-t 4 "
+        "--no-warmup "
+        "--perf 2>&1",
+        mtmd.c_str(), gguf.c_str(), mmproj.c_str(),
+        image_path.c_str(), prompt.c_str(), max_tokens);
+
+    std::string output = exec_cmd(cmd);
+
+    // Parse timing from perf output
+    // Format: llama_perf_context_print: prompt eval time = X ms / Y tokens
+    // Format: llama_perf_context_print: eval time = X ms / Y runs
+    // Format: image slice encoded in X ms
+    // Format: image decoded in X ms
+
+    auto parse_ms = [](const std::string& text, const std::string& key) -> double {
+        auto pos = text.find(key);
+        if (pos == std::string::npos) return 0;
+        pos += key.size();
+        while (pos < text.size() && text[pos] == ' ') pos++;
+        // Read number until space or 'm'
+        std::string num;
+        while (pos < text.size() && (isdigit(text[pos]) || text[pos] == '.'))
+            num += text[pos++];
+        return num.empty() ? 0 : std::stod(num);
+    };
+
+    // vision_time = encode + decode (both in seconds)
+    r.vision_time_s = parse_ms(output, "image slice encoded in") / 1000.0
+                    + parse_ms(output, "image decoded in") / 1000.0;
+    r.prefill_time_s = parse_ms(output, "prompt eval time =") / 1000.0;
+    r.decode_time_s = parse_ms(output, "eval time =") / 1000.0;
+
+    // Extract generated text (between prompt and "llama_perf_context_print")
+    auto perf_pos = output.find("llama_perf_context_print");
+    if (perf_pos != std::string::npos) {
+        // Find the last newline before perf output
+        auto text_start = output.rfind('\n', perf_pos);
+        if (text_start != std::string::npos)
+            text_start = output.rfind('\n', text_start - 1);
+        if (text_start == std::string::npos) text_start = 0;
+        r.text = output.substr(text_start, perf_pos - text_start);
+        // Trim whitespace
+        while (!r.text.empty() && (r.text.back() == '\n' || r.text.back() == ' '))
+            r.text.pop_back();
+    }
+
+    // Parse total tokens from " / Y tokens" in prompt eval line
+    {
+        auto pos = output.find("prompt eval time =");
+        if (pos != std::string::npos) {
+            auto slash = output.find('/', pos);
+            if (slash != std::string::npos) {
+                auto tok_pos = slash + 1;
+                while (tok_pos < output.size() && output[tok_pos] == ' ') tok_pos++;
+                std::string num;
+                while (tok_pos < output.size() && isdigit(output[tok_pos]))
+                    num += output[tok_pos++];
+                r.total_tokens = num.empty() ? 0 : std::stoi(num);
+            }
+        }
+    }
+
     return r;
 }
 
