@@ -178,12 +178,42 @@ ops[i+1]->inputIndexes = {ops[i]->inputIndexes[0], ops[i]->inputIndexes[1]};
 // 不删除 Add op，保留 FlatBuffer 索引稳定性
 ```
 
-## 7. 后续行动计划
+## 7. Qwen3-VL-4B 导出状态
 
-| 优先级 | 任务 | 预计时间 |
-|-------|------|---------|
-| P0 | Qwen3-VL-4B llmexport（带融合 MNNConvert） | 30-60 min |
-| P0 | 设备上 A/B 测试 Qwen3-VL-4B 融合性能 | 15 min |
-| P1 | 提交 MNN 分支 PR（6 文件，含 kernel + geometry + converter） | - |
-| P1 | 提交 llama.cpp 分支 PR（1 文件，NEON RMSNorm） | - |
-| P2 | CPUSoftmax 改动的处理（提交或还原） | 5 min |
+已尝试 llmexport，但因 HF 权重存储在 Windows 盘（WSL `/mnt/e/`），I/O 速度极慢（~10s/文件），视觉模型导出阶段超时。
+
+**已完成**：ONNX 导出目录创建，模型加载成功
+**待完成**：视觉模型 ONNX 导出 + MNNConvert + 量化（需将权重移到 Linux 本地盘）
+
+### 加速方案
+```bash
+# 将 HF 权重从 Windows 盘复制到本地
+cp -r /mnt/e/wsl/home_liu/models/llm/qwen3-vl-4b-hf /tmp/qwen3-vl-4b-hf
+# 然后重新运行 llmexport
+```
+
+## 8. 提交状态
+
+| 分支 | 仓库 | 状态 |
+|------|------|------|
+| `opt/qwen3vl-add-rmsnorm-fusion` | alsj213/MNN | ✅ 已推送 (4 commits) |
+| `opt/qwen3vl-rmsnorm-neon` | alsj213/llama.cpp | ✅ 已推送 (1 commit) |
+| `feat/qwen3-vl-4b-benchmark` | 本仓库 | ✅ 已同步 |
+
+### MNN PR 内容 (4 commits)
+1. `[CPU:Perf] Fused Add+RMSNorm kernel` — NEON fused kernel (136行)
+2. `[CPU:Perf] Support 2-input LayerNorm in Geometry` — Geometry 放宽
+3. `[CPU:Perf] Add fused pass for Add+LayerNorm in graph optimization` — 图优化融合
+4. `[Converter:Perf] Add+LayerNorm fusion with subgraph support` — Converter 融合
+
+### llama.cpp PR 内容 (1 commit)
+1. `[CPU:Perf] NEON-accelerate RMSNorm sum-of-squares` — +43.8% prefill/decode
+
+## 9. 后续行动计划
+
+| 优先级 | 任务 | 说明 |
+|-------|------|------|
+| P0 | Qwen3-VL-4B 权重移到本地盘 + llmexport | 当前 I/O 太慢 |
+| P0 | 设备端 A/B 测试融合性能 | 需等导出完成 |
+| P1 | 创建 MNN PR（upstream: alibaba/MNN） | commit+PR描述已就绪 |
+| P1 | 创建 llama.cpp PR（upstream: ggerganov/llama.cpp） | commit+PR描述已就绪 |
