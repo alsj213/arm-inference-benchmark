@@ -58,7 +58,7 @@ class Database:
         rid_idx = cols.index("run_id")
         if not values[rid_idx]:
             import uuid
-            values[rid_idx] = datetime.datetime.now().strftime("%Y%m%d-") + uuid.uuid4().hex[:4]
+            values[rid_idx] = datetime.now().strftime("%Y%m%d-") + uuid.uuid4().hex[:4]
         # normalize framework/model to lowercase for case-insensitive queries
         fw_idx = cols.index("framework")
         values[fw_idx] = (data.get("framework") or "").lower()
