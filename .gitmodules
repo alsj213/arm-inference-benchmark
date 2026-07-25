@@ -1,21 +1,23 @@
 # ==============================================
-# Git Submodules Configuration
+# Git Submodules — tracking official release tags
 # ==============================================
 
 [submodule "third_party/MNN"]
     path = third_party/MNN
     url = https://github.com/alibaba/MNN.git
-    branch = master
+    tag = 3.6.1
 
 [submodule "third_party/tvm"]
     path = third_party/tvm
     url = https://github.com/apache/tvm.git
-    branch = main
+    tag = v0.25.0
 
 [submodule "third_party/llama.cpp"]
 	path = third_party/llama.cpp
 	url = https://github.com/ggerganov/llama.cpp.git
+	tag = b10121
 
 [submodule "third_party/onnxruntime"]
 	path = third_party/onnxruntime
 	url = https://github.com/microsoft/onnxruntime.git
+	tag = v1.28.0
