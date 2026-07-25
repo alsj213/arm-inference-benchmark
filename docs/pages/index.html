@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARM Inference Benchmark</title>
+    <style>
+        :root {
+            --bg: #f8f9fa; --card: #fff; --text: #212529;
+            --muted: #6c757d; --border: #e9ecef; --green: #28a745;
+            --blue: #0d6efd; --orange: #fd7e14;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+               background: var(--bg); color: var(--text); line-height: 1.6; }
+        .hero { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                color: white; padding: 60px 20px; text-align: center; }
+        .hero h1 { font-size: 2.4em; margin-bottom: 8px; }
+        .hero p { color: #aab; font-size: 1.1em; max-width: 600px; margin: 0 auto; }
+        .hero code { background: #ffffff22; padding: 2px 8px; border-radius: 4px; }
+        .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+        .card { background: var(--card); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08);
+                padding: 24px; margin: 20px 0; }
+        h2 { font-size: 1.3em; margin-bottom: 12px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th { background: #f1f3f5; text-align: left; padding: 8px 12px; font-size: .8em; text-transform: uppercase; color: #495057; }
+        td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+        .best { background: #d4edda55; font-weight: 600; }
+        .bar { display: inline-block; height: 16px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin: 16px 0; }
+        .kpi { background: var(--card); border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+        .kpi-val { font-size: 2em; font-weight: 700; }
+        .kpi-label { font-size: .75em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: .8em; font-weight: 600; }
+        .tag-green { background: #d4edda; color: #155724; }
+        .tag-gray { background: #e9ecef; color: #495057; }
+        .tag-blue { background: #cce5ff; color: #004085; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+        footer { text-align: center; padding: 40px 20px; color: var(--muted); font-size: .85em; }
+        a { color: var(--blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .flow { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; align-items: center; margin: 20px 0; font-family: monospace; font-size: .9em; }
+        .flow-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; }
+        .flow-arrow { color: var(--muted); font-size: 1.2em; }
+    </style>
+</head>
+<body>
+
+<section class="hero">
+    <h1>ARM Inference Benchmark</h1>
+    <p>Cross-framework ML inference benchmarking on mobile devices — fair, reproducible, verifiable</p>
+    <p style="margin-top:16px">
+        <code>benchctl run cnn resnet50 -f mnn,ort</code>
+    </p>
+    <p style="margin-top:12px;font-size:.9em">
+        <span class="tag tag-blue">MNN 3.6.1</span>
+        <span class="tag tag-blue">ONNX Runtime 1.28</span>
+        <span class="tag tag-gray">TVM</span>
+        <span class="tag tag-blue">llama.cpp</span>
+    </p>
+</section>
+
+<div class="container">
+
+    <!-- KPI -->
+    <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-val">2.5x</div><div class="kpi-label">MNN vs ORT Speedup</div></div>
+        <div class="kpi"><div class="kpi-val">8.55ms</div><div class="kpi-label">Fastest P50 (MNN)</div></div>
+        <div class="kpi"><div class="kpi-val">1.000</div><div class="kpi-label">Cosine Accuracy</div></div>
+        <div class="kpi"><div class="kpi-val">29°C</div><div class="kpi-label">Device Temperature</div></div>
+    </div>
+
+    <!-- Flow -->
+    <div class="card">
+        <h2>How It Works</h2>
+        <div class="flow">
+            <div class="flow-box">benchctl</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-box">ADB</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-box">C++ Binary</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-box">JSON Lines</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-box">SQLite</div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-box">HTML Report</div>
+        </div>
+    </div>
+
+    <!-- CNN Benchmarks -->
+    <div class="card">
+        <h2>CNN Model Benchmarks</h2>
+        <p style="color:var(--muted);font-size:.85em;margin-bottom:12px">
+            Redmi K30 Pro · Snapdragon 865 (SM8250) · FP32 · 4 threads
+        </p>
+        <table>
+            <thead><tr><th>Model</th><th>MNN</th><th>ORT</th><th>TVM</th><th>MNN vs ORT</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>MobileNetV2</strong></td>
+                    <td class="best">8.55 ms</td><td>21.68 ms</td><td>—</td>
+                    <td><span class="tag tag-green">2.5x</span></td>
+                </tr>
+                <tr>
+                    <td><strong>ResNet50</strong></td>
+                    <td>83.47 ms</td><td>142.62 ms</td><td class="best">64.38 ms</td>
+                    <td><span class="tag tag-green">1.7x</span></td>
+                </tr>
+                <tr>
+                    <td><strong>YOLOv8n</strong></td>
+                    <td class="best">76.28 ms</td><td>134.38 ms</td><td>126.63 ms</td>
+                    <td><span class="tag tag-green">1.8x</span></td>
+                </tr>
+                <tr>
+                    <td><strong>BERT</strong></td>
+                    <td>322.13 ms</td><td class="best">263.50 ms</td><td>—</td>
+                    <td><span class="tag tag-gray">0.82x</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- LLM Benchmarks -->
+    <div class="two-col">
+        <div class="card">
+            <h2>LLM Benchmarks</h2>
+            <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">Qwen2-0.5B · 4 threads</p>
+            <table>
+                <thead><tr><th>Framework</th><th>Prefill</th><th>Decode</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>MNN LLM</strong></td><td class="best">267 tok/s</td><td class="best">60.8 tok/s</td></tr>
+                    <tr><td>llama.cpp</td><td>70 tok/s</td><td>42.5 tok/s</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <h2>Accuracy</h2>
+            <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">Cosine Similarity vs ORT FP32</p>
+            <table>
+                <thead><tr><th>Model</th><th>MNN</th><th>TVM</th></tr></thead>
+                <tbody>
+                    <tr><td>MobileNetV2</td><td class="best">1.000</td><td class="best">1.000</td></tr>
+                    <tr><td>ResNet50</td><td class="best">1.000</td><td class="best">1.000</td></tr>
+                    <tr><td>YOLOv8n</td><td class="best">1.000</td><td class="best">1.000</td></tr>
+                    <tr><td>BERT</td><td>0.990</td><td class="best">1.000</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Commands -->
+    <div class="card">
+        <h2>Quick Start</h2>
+        <table>
+            <thead><tr><th>Command</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>benchctl run cnn resnet50 -f mnn,ort</code></td><td>Run benchmark</td></tr>
+                <tr><td><code>benchctl history mnn resnet50 --last 10</code></td><td>Vertical trend</td></tr>
+                <tr><td><code>benchctl verify mnn resnet50</code></td><td>Native tool cross-check</td></tr>
+                <tr><td><code>benchctl export resnet50 -f mnn,ort --format html</code></td><td>Generate HTML report</td></tr>
+                <tr><td><code>benchctl db stats</code></td><td>Database statistics</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Framework Status -->
+    <div class="card">
+        <h2>Supported Frameworks</h2>
+        <table>
+            <thead><tr><th>Framework</th><th>Version</th><th>Status</th><th>Role</th></tr></thead>
+            <tbody>
+                <tr><td><strong>MNN</strong></td><td>3.6.1</td><td><span class="tag tag-green">Active</span></td><td>Primary — CPU + GPU + LLM</td></tr>
+                <tr><td><strong>ONNX Runtime</strong></td><td>1.28.0</td><td><span class="tag tag-green">Active</span></td><td>Accuracy baseline</td></tr>
+                <tr><td><strong>TVM</strong></td><td>0.15.0</td><td><span class="tag tag-gray">Disabled</span></td><td>v0.25 API migration needed</td></tr>
+                <tr><td><strong>llama.cpp</strong></td><td>b10121</td><td><span class="tag tag-green">Active</span></td><td>LLM benchmark baseline</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<footer>
+    <p>ARM Inference Benchmark · MIT License</p>
+    <p><a href="https://github.com/alsj213/arm-inference-benchmark">github.com/alsj213/arm-inference-benchmark</a></p>
+</footer>
+
+</body>
+</html>
