@@ -49,7 +49,8 @@ class Database:
         cols = [
             "run_id", "timestamp", "git_commit", "track",
             "framework", "model", "precision", "threads",
-            "warmup", "test_runs", "metrics_json"
+            "warmup", "test_runs", "device_model", "device_temp",
+            "metrics_json",
         ]
         placeholders = ", ".join("?" * len(cols))
         values = [data.get(c) for c in cols]

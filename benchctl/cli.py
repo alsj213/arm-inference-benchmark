@@ -82,5 +82,131 @@ def db_compare(frameworks, model):
     d.close()
 
 
+# ---------------------------------------------------------------------------
+# run 命令
+# ---------------------------------------------------------------------------
+from .runner import AdbRunner
+from .db import Database
+from .tracks.base import TrackConfig
+from .tracks.cnn import CNNTrack
+from .tracks.llm import LLMTrack
+from .tracks.single_op import SingleOpTrack
+
+TRACKS = {
+    "cnn": CNNTrack(),
+    "llm": LLMTrack(),
+    "single_op": SingleOpTrack(),
+}
+
+
+@cli.command()
+@click.argument("track", type=click.Choice(["cnn", "llm", "single_op"]))
+@click.argument("model")
+@click.option(
+    "-f", "--frameworks", default="mnn,ort",
+    help="逗号分隔的框架列表 (mnn,ort,tvm,llamacpp)"
+)
+@click.option("-p", "--precision", default="fp32")
+@click.option("-t", "--threads", default=4, type=int)
+@click.option("-w", "--warmup", default=10, type=int)
+@click.option("-r", "--runs", default=100, type=int)
+@click.option("--no-save", is_flag=True, help="不保存到数据库")
+def run(track, model, frameworks, precision, threads, warmup, runs, no_save):
+    """执行基准测试.
+
+    \b
+    TRACK: cnn (CV/NLP模型) | llm (大语言模型) | single_op (单算子)
+    MODEL: resnet50 | mobilenetv2 | qwen3-4b | matmul | ...
+    """
+    track_obj = TRACKS[track]
+    fw_list = [f.strip() for f in frameworks.split(",")]
+
+    config = TrackConfig(
+        track=track,
+        binary=track_obj.binary_name(),
+        model=model,
+        frameworks=fw_list,
+        precision=precision,
+        threads=threads,
+        warmup=warmup,
+        runs=runs,
+    )
+
+    runner = AdbRunner()
+
+    # Step 1: 设备握手
+    click.echo("设备握手...")
+    try:
+        device_info = runner.check_device()
+    except RuntimeError as e:
+        click.echo(f"设备连接失败: {e}", err=True)
+        raise click.Abort()
+    click.echo(f"  设备: {device_info['model']} / {device_info['soc']}")
+
+    # Step 2: 推送二进制和库
+    click.echo(f"推送 {track_obj.binary_name()}...")
+    runner.push_binary(track_obj.binary_name())
+    runner.push_libs()
+
+    # Step 3: 获取设备温度
+    temp = runner.get_device_temp()
+    if temp:
+        click.echo(f"设备温度: {temp}C")
+
+    # Step 4: 运行 benchmark
+    args = track_obj.build_cli_args(config)
+    click.echo(f"运行: {track_obj.binary_name()} {' '.join(args)}")
+    results = runner.run_benchmark(track_obj.binary_name(), args)
+
+    # Step 5: 保存结果
+    if not no_save and results:
+        db = Database()
+        import datetime
+        import subprocess as _sp
+        import os
+        run_id = (
+            datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            + "-"
+            + os.urandom(4).hex()
+        )
+        try:
+            git_commit = (
+                _sp.run(
+                    ["git", "log", "--oneline", "-1"],
+                    capture_output=True, text=True, cwd=runner.build_dir.parent
+                )
+                .stdout.strip()
+            )
+        except Exception:
+            git_commit = "unknown"
+
+        for r in results:
+            r["run_id"] = run_id
+            r["timestamp"] = datetime.datetime.now().isoformat()
+            r["git_commit"] = git_commit
+            r["track"] = track
+            r["device_model"] = device_info["model"]
+            r["device_temp"] = temp
+            r["test_runs"] = runs
+            # 确保必填字段存在
+            for key in ("framework", "model", "precision", "threads", "warmup"):
+                if key not in r:
+                    r[key] = config.__dict__.get(key, "")
+            db.insert(r)
+        db.close()
+        click.echo(f"已保存 {len(results)} 条结果到数据库")
+
+    # Step 6: 打印摘要
+    click.echo("\n结果摘要:")
+    for r in results:
+        m = r.get("metrics", {})
+        click.echo(
+            f"  {r.get('framework', '?'):12s}"
+            f" | p50={m.get('p50_ms', 0):6.2f}ms"
+            f" | p99={m.get('p99_ms', 0):6.2f}ms"
+            f" | fps={m.get('throughput_fps', 0):6.1f}"
+        )
+
+
 if __name__ == "__main__":
     cli()
