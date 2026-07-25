@@ -3,7 +3,7 @@
 # 用法: ./scripts/benchmark/bench-qwen3-4b.sh
 set -e
 
-ADB="/mnt/e/andorid/adb/adb.exe"
+ADB="${ADB:-adb}"
 DEVICE_DIR="/data/local/tmp/benchmark"
 MODEL_DIR="$DEVICE_DIR/models/qwen3-4b"
 RESULTS_DIR="/home/liu/project/newwork/benchmark/results"

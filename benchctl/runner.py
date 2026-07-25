@@ -19,10 +19,16 @@ def load_config():
 
 
 def find_adb() -> str:
-    """找到 ADB 可执行文件路径."""
+    """Find ADB executable: env ADB > config > PATH."""
+    import os
+    # 1. ADB environment variable
+    env_adb = os.environ.get("ADB", "")
+    if env_adb and Path(env_adb).exists():
+        return env_adb
+    # 2. .benchmarkrc.yml config
     cfg = load_config()
     adb_path = cfg.get("device", {}).get("adb", "adb")
-    # 测试是否可用
+    # 3. test if usable
     try:
         subprocess.run([adb_path, "version"], capture_output=True, check=True)
         return adb_path
@@ -35,7 +41,9 @@ class AdbRunner:
 
     def __init__(self):
         self.adb = find_adb()
-        self.device_id = load_config().get("device", {}).get("id")
+        # Device ID: env ANDROID_DEVICE_ID > config, None = auto-detect
+        import os as _os
+        self.device_id = _os.environ.get("ANDROID_DEVICE_ID") or load_config().get("device", {}).get("id")
         self.build_dir = PROJECT_ROOT / "build_android"
         self.device_dir = "/data/local/tmp/benchmark"
 

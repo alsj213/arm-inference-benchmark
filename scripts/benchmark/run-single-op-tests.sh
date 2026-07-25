@@ -8,7 +8,7 @@ set -e
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SINGLE_OPS_DIR="$PROJECT_ROOT/models/single_ops"
-ADB="/mnt/e/andorid/adb/adb.exe"
+ADB="${ADB:-adb}"
 DEVICE_DIR="/data/local/tmp/single_ops"
 
 WARMUP=${WARMUP:-10}

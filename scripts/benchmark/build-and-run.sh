@@ -118,9 +118,9 @@ if [ -f "$CONFIG_FILE" ]; then
         adb() { "$ADB_PATH" "$@"; }
     fi
 fi
-if ! command -v adb &>/dev/null && [ -x "/mnt/e/andorid/adb/adb.exe" ]; then
-    export PATH=$PATH:/mnt/e/andorid/adb/
-    adb() { /mnt/e/andorid/adb/adb.exe "$@"; }
+if ! command -v adb &>/dev/null && [ -n "${ADB:-}" ] && [ -x "$ADB" ]; then
+    
+    adb() { $ADB "$@"; }
 fi
 
 # Create directory on device

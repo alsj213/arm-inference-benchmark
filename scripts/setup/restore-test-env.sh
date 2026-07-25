@@ -7,9 +7,9 @@ SCRIPT_DIR=$(cd $(dirname $0); pwd)
 PROJECT_ROOT=$(dirname $SCRIPT_DIR)
 
 # 使用 adb 从 Windows (WSL2)
-if [ -x "/mnt/e/andorid/adb/adb.exe" ]; then
+if [ -n "${ADB:-}" ] && [ -x "$ADB" ]; then
     adb() {
-        /mnt/e/andorid/adb/adb.exe "$@"
+        $ADB "$@"
     }
 fi
 

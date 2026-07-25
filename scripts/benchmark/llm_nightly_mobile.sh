@@ -3,10 +3,10 @@ set -e
 # MNN LLM Mobile Nightly Benchmark
 # Adapted from transformers/llm/benchmark/llm_nightly.sh for Android SD865
 
-ADB="/mnt/e/andorid/adb/adb.exe"
+ADB="${ADB:-adb}"
 DEVICE_DIR="/data/local/tmp/benchmark"
 MODEL_DIR="${DEVICE_DIR}/models/qwen3-0.6b-mnn"
-ANDROID_NDK="${ANDROID_NDK:-/home/liu/android-ndk}"
+ANDROID_NDK="${ANDROID_NDK:?must be set}"
 PROJECT_ROOT="$(cd $(dirname $0)/../..; pwd)"
 MNN_ROOT="${PROJECT_ROOT}/third_party/MNN"
 THREAD_NUM=4

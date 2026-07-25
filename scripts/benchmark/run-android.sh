@@ -22,8 +22,8 @@ if [ -f "$CONFIG_FILE" ]; then
         adb() { "$ADB_PATH" "$@"; }
     fi
 fi
-if ! command -v adb &>/dev/null && [ -x "/mnt/e/andorid/adb/adb.exe" ]; then
-    adb() { /mnt/e/andorid/adb/adb.exe "$@"; }
+if ! command -v adb &>/dev/null && [ -n "${ADB:-}" ] && [ -x "$ADB" ]; then
+    adb() { $ADB "$@"; }
 fi
 
 # Parse arguments for hardware control flags and build type

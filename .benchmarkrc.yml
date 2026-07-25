@@ -2,15 +2,15 @@ backends:
 - mnn
 - onnxruntime
 device:
-  adb: /mnt/e/andorid/adb/adb.exe
-  id: b08dee23
+  adb: ${ADB:-adb}
+  # id: (set via ANDROID_DEVICE_ID env var)
 models:
 - mobilenetv2
 - resnet50
 - yolov8n
 - bert
 ndk:
-  path: /home/liu/android-ndk
+  path: ${ANDROID_NDK}
 project:
   binary: benchmark_inference
   build_dir: build_android

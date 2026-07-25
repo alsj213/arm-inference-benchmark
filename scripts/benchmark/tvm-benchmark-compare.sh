@@ -3,8 +3,8 @@
 # 前提: Docker TVM 已完成编译 (tvm-codegen image), benchmark_inference 已编译
 set -euo pipefail
 
-export ADB=/mnt/e/andorid/adb/adb.exe
-export ANDROID_NDK=/home/liu/android-ndk
+export ADB="${ADB:-adb}"
+export ANDROID_NDK="${ANDROID_NDK:?must be set}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 OUTPUT_DIR="$PROJECT_DIR/tools/tvm/compiled_models"

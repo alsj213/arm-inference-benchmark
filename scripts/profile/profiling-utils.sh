@@ -23,8 +23,8 @@ detect_adb() {
     fi
 
     # WSL2 环境：Windows ADB
-    if [ -f "/mnt/e/andorid/adb/adb.exe" ]; then
-        ADB_CMD="/mnt/e/andorid/adb/adb.exe"
+    if [ -n "${ADB:-}" ] && [ -f "$ADB" ]; then
+        ADB_CMD="${ADB:-adb}"
         return 0
     fi
 
