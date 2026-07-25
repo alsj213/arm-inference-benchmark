@@ -208,5 +208,67 @@ def run(track, model, frameworks, precision, threads, warmup, runs, no_save):
         )
 
 
+# ---------------------------------------------------------------------------
+# history 命令 — 纵向对比 + 回归检测
+# ---------------------------------------------------------------------------
+
+@cli.command()
+@click.argument("framework")
+@click.argument("model")
+@click.option("--last", default=10, type=int, help="显示最近 N 条")
+@click.option("--json", "json_output", is_flag=True, help="JSON 格式输出")
+def history(framework, model, last, json_output):
+    """查看框架+模型的历史趋势 (纵向对比).
+
+    \b
+    FRAMEWORK: mnn | ort | tvm | llamacpp
+    MODEL: resnet50 | mobilenetv2 | qwen3-4b
+    """
+    db = Database()
+    rows = db.history(framework, model, limit=last)
+    db.close()
+
+    if json_output:
+        import json as j
+        click.echo(j.dumps(rows, indent=2))
+        return
+
+    if not rows:
+        click.echo(f"没有 {framework}/{model} 的历史记录")
+        return
+
+    # 计算 baseline (最早的一条)
+    baseline = rows[-1]
+    b_metrics = json.loads(baseline["metrics_json"])
+    b_p50 = b_metrics.get("p50_ms", 0)
+
+    click.echo(f"\n{framework}/{model} 性能趋势 (最近 {last} 条)\n")
+    click.echo(f"{'日期':12s} {'commit':10s} {'p50(ms)':>10s} {'变化':>10s} {'累计':>8s}")
+    click.echo("-" * 56)
+
+    for r in reversed(rows):  # 正序显示
+        m = json.loads(r["metrics_json"])
+        p50 = m.get("p50_ms", 0)
+        delta = (p50 - b_p50) / b_p50 * 100 if b_p50 else 0
+        cumulative = "BASE" if r == baseline else f"{delta:+.1f}%"
+
+        click.echo(f"{r['timestamp'][:10]:12s} "
+                   f"{r['git_commit'][:8]:10s} "
+                   f"{p50:10.2f} "
+                   f"{delta:+9.1f}% "
+                   f"{cumulative:>8s}")
+
+    # 回归检测
+    if len(rows) >= 2:
+        latest = json.loads(rows[0]["metrics_json"])
+        prev = json.loads(rows[1]["metrics_json"])
+        l_p50 = latest.get("p50_ms", 0)
+        p_p50 = prev.get("p50_ms", 0)
+        if p_p50 > 0 and l_p50 > p_p50 * 1.05:
+            click.echo(f"\n回归警告: 最新 commit 比前一次慢 {(l_p50/p_p50 - 1)*100:.1f}%")
+        elif p_p50 > 0:
+            click.echo(f"\n无回归 (最新 vs 前次: {(l_p50/p_p50 - 1)*100:.1f}%)")
+
+
 if __name__ == "__main__":
     cli()
