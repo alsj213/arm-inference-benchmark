@@ -237,7 +237,13 @@ int main(int argc, char** argv) {
 
             // Print performance results
             if (args.json_output) {
-                printf("JSON_RESULT: %s\n", result.to_json().c_str());
+                // JSON Lines format to stdout, human-readable summary to stderr
+                printf("%s\n", result.to_json().c_str());
+                fprintf(stderr, "  %-10s | p50=%6.2f ms | p99=%6.2f ms | fps=%6.1f\n",
+                    result.backend_name.c_str(),
+                    result.latency_stats.p50_ms,
+                    result.latency_stats.p99_ms,
+                    result.throughput_fps);
             } else {
                 printf("\n--- Performance Results ---\n");
                 printf("  Init time:  %.2f ms\n", result.init_time_ms);

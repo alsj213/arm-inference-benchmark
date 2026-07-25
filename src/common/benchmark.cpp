@@ -1,6 +1,9 @@
 #include "benchmark.h"
 #include "utils.h"
 
+#include "json.hpp"
+using json = nlohmann::json;
+
 #include <algorithm>
 #include <memory>
 #include <cmath>
@@ -19,6 +22,28 @@
 #ifdef BENCHMARK_LLAMACPP
 #include "backends/llamacpp_backend.h"
 #endif
+
+// ── Utility functions: run ID and timestamp ──
+std::string generate_run_id() {
+    auto now = std::chrono::system_clock::now();
+    auto t = std::chrono::system_clock::to_time_t(now);
+    std::ostringstream ss;
+    ss << std::put_time(std::gmtime(&t), "%Y%m%d-");
+    // 4-digit random hex
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 0xFFFF);
+    ss << std::hex << std::setw(4) << std::setfill('0') << dis(gen);
+    return ss.str();
+}
+
+std::string now_iso8601() {
+    auto now = std::chrono::system_clock::now();
+    auto t = std::chrono::system_clock::to_time_t(now);
+    std::ostringstream ss;
+    ss << std::put_time(std::gmtime(&t), "%Y-%m-%dT%H:%M:%SZ");
+    return ss.str();
+}
 
 // Calculate cosine similarity between two vectors
 double cosine_similarity(const std::vector<float>& a, const std::vector<float>& b) {
@@ -136,11 +161,17 @@ BenchmarkResult run_benchmark(
     const std::vector<float>& reference_output
 ) {
     BenchmarkResult result;
+    result.run_id = generate_run_id();
+    result.timestamp = now_iso8601();
     result.backend_name = backend->name();
     result.model_name = config.model_name;
     result.precision = config.precision;
+    result.precision_str = (config.precision == Precision::FP32 ? "fp32"
+                           : config.precision == Precision::FP16 ? "fp16" : "int8");
     result.num_threads = config.num_threads;
     result.use_gpu = config.use_gpu;
+    result.warmup_runs = config.warmup_runs;
+    result.test_runs = config.test_runs;
 
     // Initialize and measure init time
     utils::Timer timer;
@@ -228,32 +259,37 @@ std::unique_ptr<BenchmarkBackend> create_backend(BackendType type) {
 }
 
 std::string BenchmarkResult::to_json() const {
-    std::ostringstream ss;
-    ss << "{";
-    ss << "\"backend\":\"" << backend_name << "\",";
-    ss << "\"model\":\"" << model_name << "\",";
-    ss << "\"precision\":\"" << (precision == Precision::FP32 ? "fp32" : precision == Precision::FP16 ? "fp16" : "int8") << "\",";
-    ss << "\"threads\":" << num_threads << ",";
-    ss << "\"gpu\":" << (use_gpu ? "true" : "false") << ",";
-    ss << "\"init_time_ms\":" << init_time_ms << ",";
-    ss << "\"peak_memory_kb\":" << peak_memory_kb << ",";
-    ss << "\"latency\":{";
-    ss << "\"min\":" << latency_stats.min_ms << ",";
-    ss << "\"max\":" << latency_stats.max_ms << ",";
-    ss << "\"mean\":" << latency_stats.mean_ms << ",";
-    ss << "\"p50\":" << latency_stats.p50_ms << ",";
-    ss << "\"p90\":" << latency_stats.p90_ms << ",";
-    ss << "\"p95\":" << latency_stats.p95_ms << ",";
-    ss << "\"p99\":" << latency_stats.p99_ms << ",";
-    ss << "\"std_dev\":" << latency_stats.std_dev;
-    ss << "},";
-    ss << "\"throughput_fps\":" << throughput_fps << ",";
-    ss << "\"accuracy\":{";
-    ss << "\"passed\":" << (accuracy.passed ? "true" : "false") << ",";
-    ss << "\"cosine_similarity\":" << accuracy.cosine_similarity << ",";
-    ss << "\"mean_absolute_error\":" << accuracy.mean_absolute_error << ",";
-    ss << "\"max_absolute_error\":" << accuracy.max_absolute_error;
-    ss << "}";
-    ss << "}";
-    return ss.str();
+    json j;
+    j["run_id"] = run_id;
+    j["timestamp"] = timestamp;
+    j["git_commit"] = GIT_COMMIT_HASH;
+    j["track"] = "cnn";
+    j["model"] = model_name;
+    j["framework"] = backend_name;
+    j["precision"] = precision_str;
+    j["threads"] = num_threads;
+    j["warmup_runs"] = warmup_runs;
+    j["test_runs"] = test_runs;
+    j["init_time_ms"] = init_time_ms;
+    j["peak_memory_kb"] = peak_memory_kb;
+    j["metrics"] = {
+        {"p50_ms", latency_stats.p50_ms},
+        {"p90_ms", latency_stats.p90_ms},
+        {"p99_ms", latency_stats.p99_ms},
+        {"mean_ms", latency_stats.mean_ms},
+        {"min_ms", latency_stats.min_ms},
+        {"max_ms", latency_stats.max_ms},
+        {"std_dev", latency_stats.std_dev},
+        {"throughput_fps", throughput_fps}
+    };
+    if (accuracy.cosine_similarity > 0.0) {
+        j["accuracy"] = {
+            {"passed", accuracy.passed},
+            {"cosine_similarity", accuracy.cosine_similarity},
+            {"mean_absolute_error", accuracy.mean_absolute_error},
+            {"max_absolute_error", accuracy.max_absolute_error},
+            {"mean_relative_error", accuracy.mean_relative_error}
+        };
+    }
+    return j.dump();
 }

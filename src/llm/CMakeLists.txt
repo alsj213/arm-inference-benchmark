@@ -2,6 +2,7 @@
 if(BENCHMARK_LLAMACPP OR BENCHMARK_MNN)
     add_executable(llm_benchmark llm_benchmark.cpp)
     target_compile_options(llm_benchmark PRIVATE -fexceptions)
+    target_include_directories(llm_benchmark PRIVATE ${CMAKE_SOURCE_DIR}/third_party)
     if(BENCHMARK_LLAMACPP)
         target_compile_definitions(llm_benchmark PRIVATE BENCHMARK_LLAMACPP)
     endif()

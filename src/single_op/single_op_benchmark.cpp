@@ -11,6 +11,11 @@
 #include <unistd.h>
 #include <map>
 
+#include "json.hpp"
+using json = nlohmann::json;
+
+#include "common/benchmark.h"
+
 #include "backends/mnn_backend.h"
 #include "backends/ort_backend.h"
 #include "backends/tvm_backend.h"
@@ -115,6 +120,7 @@ void print_usage() {
     printf("  --runs <num>                    Test runs (default: 100)\n");
     printf("  --threads <num>                 Number of threads (default: 1)\n");
     printf("  --precision <fp32|fp16>         Precision (default: fp32)\n");
+    printf("  --json                          Output results as JSON lines\n");
     printf("  --help                          Show this help\n");
 }
 
@@ -281,7 +287,8 @@ static std::vector<int> parse_shape_from_name(const std::string& fname) {
 
 static bool run_single_op(const std::string& backend_name, const std::string& model_path,
                           const std::vector<int>& input_shape,
-                          int warmup, int runs, int threads, const std::string& precision) {
+                          int warmup, int runs, int threads, const std::string& precision,
+                          const std::string& category = "", bool json_output = false) {
     printf("  [%s] %s\n", backend_name.c_str(), model_path.c_str());
     fflush(stdout);
 
@@ -375,6 +382,45 @@ static bool run_single_op(const std::string& backend_name, const std::string& mo
     utils::Stats stats = utils::calculate_stats(times);
     printf("  mean=%.3fms min=%.3fms max=%.3fms std=%.3fms\n",
            stats.mean_ms, stats.min_ms, stats.max_ms, stats.std_dev);
+
+    if (json_output) {
+        // Extract operator name from model path
+        std::string op_name = model_path;
+        size_t last_slash = op_name.rfind('/');
+        if (last_slash != std::string::npos) op_name = op_name.substr(last_slash + 1);
+        size_t last_dot = op_name.rfind('.');
+        if (last_dot != std::string::npos) op_name = op_name.substr(0, last_dot);
+
+        // Build shape string
+        std::string shape_str;
+        for (size_t i = 0; i < input_shape.size(); ++i) {
+            if (i > 0) shape_str += "x";
+            shape_str += std::to_string(input_shape[i]);
+        }
+
+        json j;
+        j["run_id"] = generate_run_id();
+        j["timestamp"] = now_iso8601();
+        j["git_commit"] = GIT_COMMIT_HASH;
+        j["track"] = "single_op";
+        j["framework"] = backend_name;
+        j["category"] = category;
+        j["operator"] = op_name;
+        j["shape"] = shape_str;
+        j["precision"] = precision;
+        j["threads"] = threads;
+        j["metrics"] = {
+            {"mean_ms", stats.mean_ms},
+            {"min_ms", stats.min_ms},
+            {"max_ms", stats.max_ms},
+            {"std_dev", stats.std_dev},
+            {"p50_ms", stats.p50_ms},
+            {"p90_ms", stats.p90_ms},
+            {"p99_ms", stats.p99_ms}
+        };
+        printf("%s\n", j.dump().c_str());
+    }
+
     fflush(stdout);
     return true;
 }
@@ -388,6 +434,7 @@ int main(int argc, char** argv) {
     int runs = 100;
     int threads = 1;
     std::string precision = "fp32";
+    bool json_output = false;
 
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -407,6 +454,8 @@ int main(int argc, char** argv) {
             threads = std::atoi(argv[++i]);
         } else if (arg == "--precision" && i + 1 < argc) {
             precision = argv[++i];
+        } else if (arg == "--json") {
+            json_output = true;
         } else if (arg == "--help") {
             print_usage();
             return 0;
@@ -442,7 +491,7 @@ int main(int argc, char** argv) {
                 printf("%d", shape[i]);
             }
             printf("] ");
-            if (run_single_op(backend, mp, shape, warmup, runs, threads, precision))
+            if (run_single_op(backend, mp, shape, warmup, runs, threads, precision, category, json_output))
                 total_ok++;
             else
                 total_fail++;
@@ -457,6 +506,6 @@ int main(int argc, char** argv) {
         print_usage();
         return 1;
     }
-    run_single_op(backend, model_path, input_shape, warmup, runs, threads, precision);
+    run_single_op(backend, model_path, input_shape, warmup, runs, threads, precision, "", json_output);
     return 0;
 }

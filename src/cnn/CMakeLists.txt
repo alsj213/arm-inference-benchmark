@@ -3,6 +3,7 @@ add_executable(benchmark_inference main.cpp)
 
 add_dependencies(benchmark_inference generate_models)
 target_include_directories(benchmark_inference PRIVATE ${CMAKE_BINARY_DIR}/src/generated)
+target_include_directories(benchmark_inference PRIVATE ${CMAKE_SOURCE_DIR}/third_party)
 
 # Inject git commit hash for --version
 execute_process(

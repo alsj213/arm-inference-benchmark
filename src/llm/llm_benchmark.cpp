@@ -10,6 +10,11 @@
 #include <string>
 #include <vector>
 
+#include "json.hpp"
+using json = nlohmann::json;
+
+#include "common/benchmark.h"
+
 #ifdef BENCHMARK_LLAMACPP
 #include "backends/llamacpp_backend.h"
 #endif
@@ -32,6 +37,7 @@ struct Args {
     std::string accuracy_ref;     // --accuracy <mnn|llamacpp>
     int seed = 42;                // --seed <n>
     std::string prompt_text;      // --prompt <text>
+    bool json_output = false;     // --json
 };
 
 void print_usage(const char* prog) {
@@ -48,6 +54,7 @@ void print_usage(const char* prog) {
     printf("  --accuracy <mnn|llamacpp>       Accuracy verification mode\n");
     printf("  --seed <n>                      Random seed (default: 42)\n");
     printf("  --prompt <text>                 Custom prompt text\n");
+    printf("  --json                          Output results as JSON lines\n");
     printf("  --help                          Show this help\n");
 }
 
@@ -77,6 +84,8 @@ Args parse_args(int argc, char* argv[]) {
             args.seed = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--prompt") == 0 && i + 1 < argc) {
             args.prompt_text = argv[++i];
+        } else if (strcmp(argv[i], "--json") == 0) {
+            args.json_output = true;
         } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             print_usage(argv[0]);
             exit(0);
@@ -126,6 +135,25 @@ static bool run_llamacpp(const Args& args) {
         auto r = backend.benchmark_decode(args.n_prompt, args.max_tokens, args.n_repeat);
         printf("prefill: %.2f tok/s  |  decode: %.2f tok/s\n",
                r.prefill_tok_per_s, r.decode_tok_per_s);
+
+        if (args.json_output) {
+            json j;
+            j["run_id"] = generate_run_id();
+            j["timestamp"] = now_iso8601();
+            j["git_commit"] = GIT_COMMIT_HASH;
+            j["track"] = "llm";
+            j["framework"] = "llama.cpp";
+            j["model"] = model_path;
+            j["mode"] = "benchmark";
+            j["metrics"] = {
+                {"prefill_tok_per_s", r.prefill_tok_per_s},
+                {"decode_tok_per_s", r.decode_tok_per_s},
+                {"n_prompt", args.n_prompt},
+                {"n_gen", args.max_tokens},
+                {"n_repeat", args.n_repeat}
+            };
+            printf("%s\n", j.dump().c_str());
+        }
     } else {
         // Interactive mode
         std::string prompt = "Below is an instruction that describes a task. "
@@ -203,6 +231,25 @@ static bool run_llamacpp_vl(const Args& args) {
         printf("Total tokens: %d\n", result.total_tokens);
         printf("Total time: %.2f s\n", total_s);
         printf("Decode speed: ~%.2f tok/s\n", args.max_tokens / total_s);
+
+        if (args.json_output) {
+            json j;
+            j["run_id"] = generate_run_id();
+            j["timestamp"] = now_iso8601();
+            j["git_commit"] = GIT_COMMIT_HASH;
+            j["track"] = "llm";
+            j["framework"] = "llama.cpp";
+            j["model"] = model_path;
+            j["mode"] = "vl_benchmark";
+            j["metrics"] = {
+                {"vision_time_s", result.vision_time_s},
+                {"prefill_time_s", result.prefill_time_s},
+                {"decode_time_s", result.decode_time_s},
+                {"total_tokens", result.total_tokens},
+                {"total_time_s", total_s}
+            };
+            printf("%s\n", j.dump().c_str());
+        }
     } else {
         printf("--- VL Generate ---\n");
         auto t0 = std::chrono::high_resolution_clock::now();
@@ -264,6 +311,25 @@ static bool run_mnn_llm(const Args& args) {
         auto result = backend.benchmark(args.n_prompt, args.max_tokens, args.n_repeat);
         printf("prefill: %.2f tok/s  |  decode: %.2f tok/s\n",
                result.prefill_tok_per_s, result.decode_tok_per_s);
+
+        if (args.json_output) {
+            json j;
+            j["run_id"] = generate_run_id();
+            j["timestamp"] = now_iso8601();
+            j["git_commit"] = GIT_COMMIT_HASH;
+            j["track"] = "llm";
+            j["framework"] = "MNN_LLM";
+            j["model"] = config_path;
+            j["mode"] = "benchmark";
+            j["metrics"] = {
+                {"prefill_tok_per_s", result.prefill_tok_per_s},
+                {"decode_tok_per_s", result.decode_tok_per_s},
+                {"load_time_s", result.load_time_s},
+                {"n_prompt", result.n_prompt},
+                {"n_generate", result.n_generate}
+            };
+            printf("%s\n", j.dump().c_str());
+        }
     } else {
         // Interactive mode
         std::string prompt = "Hello, explain what machine learning is in one sentence.";
@@ -358,6 +424,24 @@ static bool run_mnn_llm_vl(const Args& args) {
         auto r = backend.benchmark_vl(args.n_prompt, args.max_tokens, args.n_repeat);
         printf("prefill: %.2f tok/s  |  decode: %.2f tok/s\n",
                r.prefill_tok_per_s, r.decode_tok_per_s);
+
+        if (args.json_output) {
+            json j;
+            j["run_id"] = generate_run_id();
+            j["timestamp"] = now_iso8601();
+            j["git_commit"] = GIT_COMMIT_HASH;
+            j["track"] = "llm";
+            j["framework"] = "MNN_LLM";
+            j["model"] = config_path;
+            j["mode"] = "vl_benchmark";
+            j["metrics"] = {
+                {"prefill_tok_per_s", r.prefill_tok_per_s},
+                {"decode_tok_per_s", r.decode_tok_per_s},
+                {"n_prompt", r.n_prompt},
+                {"n_generate", r.n_generate}
+            };
+            printf("%s\n", j.dump().c_str());
+        }
     } else {
         printf("--- VL Generate ---\n");
         auto t0 = std::chrono::high_resolution_clock::now();

@@ -1,6 +1,7 @@
 # Single operator benchmark target
 add_executable(single_op_benchmark single_op_benchmark.cpp)
 target_compile_options(single_op_benchmark PRIVATE -fexceptions)
+target_include_directories(single_op_benchmark PRIVATE ${CMAKE_SOURCE_DIR}/third_party)
 
 # Copy compile definitions from main executable
 if(BENCHMARK_MNN)

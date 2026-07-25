@@ -7,6 +7,10 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
+#include <random>
 
 struct AccuracyResult {
     bool passed;
@@ -20,6 +24,14 @@ struct AccuracyResult {
 };
 
 struct BenchmarkResult {
+    // New standardized fields
+    std::string run_id;            // UUID-like run identifier (YYYYMMDD-XXXX)
+    std::string timestamp;         // ISO 8601 UTC timestamp
+    int warmup_runs;               // Number of warmup iterations
+    int test_runs;                 // Number of measured iterations
+    std::string precision_str;     // Human-readable precision string: "fp32" | "fp16" | "int8"
+
+    // Original fields
     std::string backend_name;
     std::string model_name;
     Precision precision;
@@ -36,6 +48,10 @@ struct BenchmarkResult {
 
     std::string to_json() const;
 };
+
+// Utility functions for generating run metadata
+std::string generate_run_id();
+std::string now_iso8601();
 
 class BenchmarkBackend {
 public:
