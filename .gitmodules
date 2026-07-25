@@ -10,6 +10,7 @@
 [submodule "third_party/tvm"]
     path = third_party/tvm
     url = https://github.com/alsj213/tvm.git
+    branch = v0.15-custom
 
 [submodule "third_party/llama.cpp"]
 	path = third_party/llama.cpp
