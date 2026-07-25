@@ -18,17 +18,18 @@ class NativeVerifier:
         前提: MNN benchmark 工具已推送到设备:
           adb push third_party/MNN/build_android/benchmark.out $DEVICE_DIR/
         """
-        model_path = f"models/exported/mnn/{model_name}.mnn"
+        model_folder = f"{self.DEVICE_DIR}/models/exported/mnn"
         try:
             runner = self._get_runner()
             output = runner._adb(
                 "shell",
                 f"cd {self.DEVICE_DIR} && "
                 f"LD_LIBRARY_PATH={self.DEVICE_DIR} "
-                f"./benchmark.out {self.DEVICE_DIR}/{model_path} 10 0 {threads}"
+                f"./benchmark.out {model_folder} 10 0 0 {threads}"
             )
-            # 解析 "forward time: X.XXX ms"
-            match = re.search(r"forward time:\s*([\d.]+)\s*ms", output)
+            # 解析 "[ - ] mobilenetv2.mnn   max = X.XXX ms  min = X.XXX ms  avg = X.XXX ms"
+            pattern = rf"{model_name}\.mnn\s+max\s*=\s*([\d.]+)\s*ms\s+min\s*=\s*([\d.]+)\s*ms\s+avg\s*=\s*([\d.]+)\s*ms"
+            match = re.search(pattern, output)
             if match:
                 native_ms = float(match.group(1))
                 deviation = (harness_result_ms - native_ms) / native_ms * 100

@@ -318,7 +318,7 @@ def verify(framework, model, threads):
         click.echo(f"   偏差:     {result['deviation_pct']:+.1f}%")
         click.echo(f"   可信度:   {verdict_icon} {result['verdict']}")
     else:
-        click.echo(f"   验证失败: {result.get('error', 'unknown')}")
+        click.echo(f"   验证失败: {result.get('error', 'unknown') if result else 'benchmark.out 未安装或输出格式不匹配'}")
 
 
 # ---------------------------------------------------------------------------
