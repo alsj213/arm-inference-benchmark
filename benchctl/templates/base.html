@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benchmark: {{ model }}</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 960px; margin: 2em auto; padding: 0 1em; color: #333; }
+        h1 { font-size: 1.6em; border-bottom: 2px solid #eee; padding-bottom: 0.3em; }
+        .header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
+        .header span { color: #666; font-size: 0.9em; }
+        table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+        th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: right; }
+        th { background: #f5f5f5; font-weight: 600; text-align: center; }
+        td:first-child { text-align: left; font-weight: 500; }
+        .best { background: #d4edda; font-weight: bold; }
+        .regression { background: #f8d7da; }
+        .footer { margin-top: 2em; color: #999; font-size: 0.85em; border-top: 1px solid #eee; padding-top: 1em; }
+        .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1em; margin: 1em 0; }
+        .summary-card { background: #f9f9f9; border-radius: 8px; padding: 1em; text-align: center; }
+        .summary-card .value { font-size: 1.8em; font-weight: bold; color: #2c3e50; }
+        .summary-card .label { font-size: 0.85em; color: #7f8c8d; }
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a2e; color: #e0e0e0; }
+            th { background: #16213e; color: #e0e0e0; }
+            td, th { border-color: #2a2a4a; }
+            .best { background: #1b4332; }
+            .regression { background: #4a1a1a; }
+            .summary-card { background: #16213e; }
+            .summary-card .value { color: #a0d2db; }
+            .footer { color: #666; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Benchmark: {{ model }}</h1>
+        <span>生成时间: {{ timestamp }}</span>
+    </div>
+
+    {% if summary_cards %}
+    <div class="summary">
+        {% for card in summary_cards %}
+        <div class="summary-card">
+            <div class="value">{{ card.value }}</div>
+            <div class="label">{{ card.label }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>框架</th>
+                <th>P50 (ms)</th>
+                <th>P99 (ms)</th>
+                <th>FPS</th>
+                <th>精度</th>
+                <th>线程</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr{% if row.best %} class="best"{% elif row.regression %} class="regression"{% endif %}>
+                <td>{{ row.framework }}</td>
+                <td>{{ "%.2f"|format(row.p50) }}</td>
+                <td>{{ "%.2f"|format(row.p99) }}</td>
+                <td>{{ "%.1f"|format(row.fps) }}</td>
+                <td>{{ row.precision }}</td>
+                <td>{{ row.threads }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>测试设备: {{ device }}</p>
+        <p>数据库: {{ db_path }}</p>
+    </div>
+</body>
+</html>

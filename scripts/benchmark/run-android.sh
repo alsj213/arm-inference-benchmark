@@ -1,4 +1,9 @@
 #!/bin/bash
+# ⚠️ 此脚本已弃用，请使用 benchctl:
+#   ./scripts/benchmark/benchctl.sh run cnn resnet50 -f mnn,ort
+# 或:
+#   python3 -m benchctl run cnn resnet50 -f mnn,ort
+
 # Push and run benchmark on connected Android device
 
 set -e
