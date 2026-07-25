@@ -3,6 +3,7 @@
 [![Platform](https://img.shields.io/badge/platform-Android-lightgrey)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/architecture-ARM64-brightgreen)](https://developer.arm.com/architectures)
 [![CI](https://img.shields.io/badge/CI-GitHub_Actions-blue)](https://github.com/alsj213/arm-inference-benchmark/actions)
+[![Pages](https://img.shields.io/badge/docs-GitHub_Pages-green)](https://alsj213.github.io/arm-inference-benchmark/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **Cross-framework ML inference benchmarking on ARM mobile devices.**
