@@ -270,5 +270,55 @@ def history(framework, model, last, json_output):
             click.echo(f"\n无回归 (最新 vs 前次: {(l_p50/p_p50 - 1)*100:.1f}%)")
 
 
+# ---------------------------------------------------------------------------
+# verify 命令 — 原生工具验证层
+# ---------------------------------------------------------------------------
+from .verify import NativeVerifier
+
+
+@cli.command()
+@click.argument("framework")
+@click.argument("model")
+@click.option("-t", "--threads", default=4, type=int)
+def verify(framework, model, threads):
+    """验证 Harness 结果的可信度 (调用框架原生工具).
+
+    \b
+    FRAMEWORK: mnn | ort
+    MODEL: resnet50 | mobilenetv2
+    """
+    db = Database()
+    latest = db.latest(framework, model)
+    db.close()
+
+    if not latest:
+        click.echo(f"没有 {framework}/{model} 的 Harness 数据, 请先执行 benchctl run")
+        return
+
+    harness_metrics = json.loads(latest["metrics_json"])
+    harness_ms = harness_metrics.get("p50_ms", 0)
+
+    click.echo(f"\n验证 {framework}/{model}:")
+    click.echo(f"   Harness p50: {harness_ms:.2f} ms")
+
+    verifier = NativeVerifier()
+    if framework == "mnn":
+        result = verifier.verify_mnn(model, threads, harness_ms)
+    elif framework == "ort":
+        result = verifier.verify_ort(model, threads, harness_ms)
+    else:
+        click.echo(f"   {framework} 暂不支持原生工具验证")
+        return
+
+    if result and "error" not in result:
+        verdict_icon = "pass" if result["verdict"] == "trusted" else "fail"
+        click.echo(f"   原生工具: {result['native_tool']}")
+        click.echo(f"   原生结果: {result['native_result_ms']:.2f} ms")
+        click.echo(f"   偏差:     {result['deviation_pct']:+.1f}%")
+        click.echo(f"   可信度:   {verdict_icon} {result['verdict']}")
+    else:
+        click.echo(f"   验证失败: {result.get('error', 'unknown')}")
+
+
 if __name__ == "__main__":
     cli()
