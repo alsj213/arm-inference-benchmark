@@ -9,7 +9,7 @@
 
 [submodule "third_party/tvm"]
     path = third_party/tvm
-    url = https://github.com/apache/tvm.git
+    url = https://github.com/alsj213/tvm.git
 
 [submodule "third_party/llama.cpp"]
 	path = third_party/llama.cpp
