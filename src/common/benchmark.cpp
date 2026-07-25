@@ -2,6 +2,10 @@
 #include "utils.h"
 
 #include "json.hpp"
+#include <chrono>
+#include <iomanip>
+#include <sstream>
+#include <random>
 using json = nlohmann::json;
 
 #include <algorithm>
@@ -282,14 +286,12 @@ std::string BenchmarkResult::to_json() const {
         {"std_dev", latency_stats.std_dev},
         {"throughput_fps", throughput_fps}
     };
-    if (accuracy.cosine_similarity > 0.0) {
-        j["accuracy"] = {
-            {"passed", accuracy.passed},
-            {"cosine_similarity", accuracy.cosine_similarity},
-            {"mean_absolute_error", accuracy.mean_absolute_error},
-            {"max_absolute_error", accuracy.max_absolute_error},
-            {"mean_relative_error", accuracy.mean_relative_error}
-        };
-    }
+    j["accuracy"] = {
+        {"passed", accuracy.passed},
+        {"cosine_similarity", accuracy.cosine_similarity},
+        {"mean_absolute_error", accuracy.mean_absolute_error},
+        {"max_absolute_error", accuracy.max_absolute_error},
+        {"mean_relative_error", accuracy.mean_relative_error}
+    };
     return j.dump();
 }

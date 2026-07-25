@@ -5,22 +5,6 @@ add_dependencies(benchmark_inference generate_models)
 target_include_directories(benchmark_inference PRIVATE ${CMAKE_BINARY_DIR}/src/generated)
 target_include_directories(benchmark_inference PRIVATE ${CMAKE_SOURCE_DIR}/third_party)
 
-# Inject git commit hash for --version
-execute_process(
-    COMMAND git rev-parse --short HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_COMMIT_HASH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_QUIET
-)
-if(NOT GIT_COMMIT_HASH)
-    set(GIT_COMMIT_HASH "unknown")
-endif()
-message(STATUS "Git commit: ${GIT_COMMIT_HASH}")
-target_compile_definitions(benchmark_inference PRIVATE
-    GIT_COMMIT_HASH="${GIT_COMMIT_HASH}"
-)
-
 target_compile_options(benchmark_inference PRIVATE -fexceptions)
 
 # Copy compile definitions from benchmark_common to benchmark_inference
