@@ -43,6 +43,27 @@
         .flow { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; align-items: center; margin: 20px 0; font-family: monospace; font-size: .9em; }
         .flow-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; }
         .flow-arrow { color: var(--muted); font-size: 1.2em; }
+
+        /* ── Tree diagrams ── */
+        .tree { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: .85em; line-height: 1.8; }
+        .tree ul { list-style: none; padding-left: 1.8em; position: relative; }
+        .tree ul li { position: relative; }
+        .tree ul li::before {
+            content: ''; position: absolute; left: -1.2em; top: .9em;
+            width: .8em; height: 1px; background: var(--border);
+        }
+        .tree ul li::after {
+            content: ''; position: absolute; left: -1.2em; top: -.3em; bottom: 50%;
+            width: 1px; background: var(--border);
+        }
+        .tree ul li:last-child::after { display: none; }
+        .tree-root { font-weight: 600; color: var(--blue); }
+        .tree-dir { color: #e36209; }
+        .tree-file { color: var(--text); }
+        .tree-label { color: var(--muted); font-size: .85em; margin-left: 8px; }
+        .tree-comment { color: #6a737d; font-style: italic; }
+        .two-col-tree { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 700px) { .two-col-tree { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -71,21 +92,63 @@
         <div class="kpi"><div class="kpi-val">29°C</div><div class="kpi-label">Device Temperature</div></div>
     </div>
 
-    <!-- Flow -->
-    <div class="card">
-        <h2>How It Works</h2>
-        <div class="flow">
-            <div class="flow-box">benchctl</div>
-            <span class="flow-arrow">→</span>
-            <div class="flow-box">ADB</div>
-            <span class="flow-arrow">→</span>
-            <div class="flow-box">C++ Binary</div>
-            <span class="flow-arrow">→</span>
-            <div class="flow-box">JSON Lines</div>
-            <span class="flow-arrow">→</span>
-            <div class="flow-box">SQLite</div>
-            <span class="flow-arrow">→</span>
-            <div class="flow-box">HTML Report</div>
+    <!-- Architecture Tree -->
+    <div class="two-col-tree">
+        <div class="card">
+            <h2>Architecture</h2>
+            <div class="tree">
+                <div class="tree-root">benchctl</div>
+                <span class="tree-label">Python CLI (host)</span>
+                <ul>
+                    <li><span style="color:#0d6efd">run</span> <span class="tree-comment">→ ADB → C++ Binary</span>
+                        <ul>
+                            <li><span style="color:#0d6efd">CNN</span> <span class="tree-comment">P50/P90/P99/FPS</span></li>
+                            <li><span style="color:#0d6efd">LLM</span> <span class="tree-comment">TTFT/TPS</span></li>
+                            <li><span style="color:#0d6efd">SingleOp</span> <span class="tree-comment">per-operator</span></li>
+                        </ul>
+                    </li>
+                    <li><span style="color:#0d6efd">history</span> <span class="tree-comment">→ SQLite</span></li>
+                    <li><span style="color:#0d6efd">verify</span> <span class="tree-comment">→ Native Tools</span></li>
+                    <li><span style="color:#0d6efd">export</span> <span class="tree-comment">→ HTML / JSON</span></li>
+                    <li><span style="color:#0d6efd">db</span> <span class="tree-comment">→ SQLite manage</span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="card">
+            <h2>Project Structure</h2>
+            <div class="tree">
+                <div class="tree-dir">benchmark/</div>
+                <ul>
+                    <li><span class="tree-dir">benchctl/</span> <span class="tree-comment">Python CLI</span>
+                        <ul>
+                            <li><span class="tree-file">cli.py</span> <span class="tree-comment">Click commands</span></li>
+                            <li><span class="tree-file">db.py</span> <span class="tree-comment">SQLite layer</span></li>
+                            <li><span class="tree-file">runner.py</span> <span class="tree-comment">ADB orchestrator</span></li>
+                            <li><span class="tree-file">verify.py</span> <span class="tree-comment">Native tool check</span></li>
+                            <li><span class="tree-file">report.py</span> <span class="tree-comment">HTML generator</span></li>
+                        </ul>
+                    </li>
+                    <li><span class="tree-dir">src/</span> <span class="tree-comment">C++ device code</span>
+                        <ul>
+                            <li><span class="tree-dir">cnn/</span> <span class="tree-comment">CNN binary</span></li>
+                            <li><span class="tree-dir">llm/</span> <span class="tree-comment">LLM binary</span></li>
+                            <li><span class="tree-dir">single_op/</span> <span class="tree-comment">SingleOp binary</span></li>
+                            <li><span class="tree-dir">backends/</span> <span class="tree-comment">MNN·ORT·TVM·llama</span></li>
+                            <li><span class="tree-dir">common/</span> <span class="tree-comment">Harness·Config·Utils</span></li>
+                        </ul>
+                    </li>
+                    <li><span class="tree-dir">third_party/</span>
+                        <ul>
+                            <li><span class="tree-dir">MNN/</span> <span class="tree-comment">3.6.1</span></li>
+                            <li><span class="tree-dir">onnxruntime/</span> <span class="tree-comment">1.28.0</span></li>
+                            <li><span class="tree-dir">tvm/</span> <span class="tree-comment">0.15.0</span></li>
+                            <li><span class="tree-dir">llama.cpp/</span> <span class="tree-comment">b10121</span></li>
+                        </ul>
+                    </li>
+                    <li><span class="tree-dir">docs/</span> <span class="tree-comment">Pages·Methodology</span></li>
+                    <li><span class="tree-file">.github/workflows/</span> <span class="tree-comment">CI (build+lint+regression)</span></li>
+                </ul>
+            </div>
         </div>
     </div>
 
