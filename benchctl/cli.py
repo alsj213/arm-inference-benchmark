@@ -320,5 +320,35 @@ def verify(framework, model, threads):
         click.echo(f"   验证失败: {result.get('error', 'unknown')}")
 
 
+# ---------------------------------------------------------------------------
+# export 命令 — JSON/HTML 报告导出
+# ---------------------------------------------------------------------------
+from .report import export_json, generate_html_compare
+
+
+@cli.command()
+@click.argument("model")
+@click.option("-f", "--frameworks", default="mnn,ort,tvm",
+              help="逗号分隔框架列表")
+@click.option("-o", "--output", type=click.Path(), default=None,
+              help="输出文件路径")
+@click.option("--format", "fmt", type=click.Choice(["json", "html"]), default="html",
+              help="输出格式")
+def export(model, frameworks, output, fmt):
+    """导出 benchmark 结果.
+
+    \b
+    MODEL: resnet50 | mobilenetv2 | ...
+    """
+    fw_list = [f.strip() for f in frameworks.split(",")]
+
+    if fmt == "json":
+        out = export_json(fw_list, model, Path(output) if output else None)
+        click.echo(f"JSON 导出: {out}")
+    elif fmt == "html":
+        out = generate_html_compare(fw_list, model, Path(output) if output else None)
+        click.echo(f"HTML 报告: {out}")
+
+
 if __name__ == "__main__":
     cli()
