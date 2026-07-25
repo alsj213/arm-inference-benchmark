@@ -10,7 +10,6 @@
 [submodule "third_party/tvm"]
     path = third_party/tvm
     url = https://github.com/apache/tvm.git
-    tag = v0.25.0
 
 [submodule "third_party/llama.cpp"]
 	path = third_party/llama.cpp

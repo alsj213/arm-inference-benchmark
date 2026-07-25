@@ -60,7 +60,6 @@ bool LlamaCppBackend::load_model(const std::string& model_path, int n_ctx, int n
   // Model params
   llama_model_params model_params = llama_model_default_params();
   model_params.n_gpu_layers = 0;  // No GPU on mobile
-  model_params.use_mmap = true;
 
   model_ = llama_model_load_from_file(model_path.c_str(), model_params);
   if (!model_) {
