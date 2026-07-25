@@ -1,0 +1,55 @@
+name: ARM64 Build Check
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'results/**'
+      - '*.md'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'results/**'
+      - '*.md'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        config:
+          - {name: "MNN+ORT",      cmake: "-DBENCHMARK_MNN=ON -DBENCHMARK_ORT=ON -DBENCHMARK_TVM=OFF -DBENCHMARK_LLAMACPP=OFF"}
+          - {name: "MNN+ORT+LLAMA", cmake: "-DBENCHMARK_MNN=ON -DBENCHMARK_ORT=ON -DBENCHMARK_TVM=OFF -DBENCHMARK_LLAMACPP=ON"}
+          - {name: "MNN-only",     cmake: "-DBENCHMARK_MNN=ON -DBENCHMARK_ORT=OFF -DBENCHMARK_TVM=OFF -DBENCHMARK_LLAMACPP=OFF"}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26d
+          add-to-path: false
+
+      - name: Configure CMake
+        run: |
+          cmake -B build_android \
+            -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \
+            -DANDROID_ABI=arm64-v8a \
+            -DANDROID_PLATFORM=android-29 \
+            -DCMAKE_BUILD_TYPE=Release \
+            ${{ matrix.config.cmake }}
+
+      - name: Build
+        run: cmake --build build_android --target benchmark_inference -j$(nproc)
+
+      - name: Verify binary
+        run: |
+          file build_android/src/cnn/benchmark_inference
+          echo "✅ ${{ matrix.config.name }} build passed"
