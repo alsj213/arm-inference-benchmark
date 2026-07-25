@@ -61,7 +61,7 @@ jobs:
             --android_ndk_path ${{ steps.ndk.outputs.ndk-path }} \
             --build_shared_lib --config Release \
             --skip_tests --parallel --skip_submodule_sync \
-            --cmake_extra_defines CMAKE_CXX_STANDARD=17
+            --cmake_extra_defines CMAKE_CXX_STANDARD=20
           echo "✅ ORT built"
 
       - name: Save ORT cache
