@@ -34,14 +34,20 @@ def generate_html_compare(frameworks: list[str], model: str,
         output = PROJECT_ROOT / "results" / f"report_{model}.html"
 
     # 简单内联 HTML (后续可用 Jinja2 模板)
+    best_p50 = min(
+        json.loads(r["metrics_json"]).get("p50_ms", float("inf"))
+        for r in results
+    ) if results else 0
+
     rows_html = ""
     for r in results:
         m = json.loads(r["metrics_json"])
         p50 = m.get("p50_ms", 0)
         p99 = m.get("p99_ms", 0)
         fps = m.get("throughput_fps", 0)
+        row_class = ' class="best"' if (best_p50 > 0 and abs(p50 - best_p50) < 0.01) else ''
         rows_html += f"""
-        <tr>
+        <tr{row_class}>
             <td>{r['framework']}</td>
             <td>{p50:.2f}</td>
             <td>{p99:.2f}</td>
@@ -49,11 +55,6 @@ def generate_html_compare(frameworks: list[str], model: str,
             <td>{r.get('precision', 'fp32')}</td>
             <td>{r.get('threads', 4)}</td>
         </tr>"""
-
-    best_p50 = min(
-        json.loads(r["metrics_json"]).get("p50_ms", float("inf"))
-        for r in results
-    ) if results else 0
 
     html = f"""<!DOCTYPE html>
 <html lang="zh">

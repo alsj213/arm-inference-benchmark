@@ -25,7 +25,7 @@ class NativeVerifier:
                 "shell",
                 f"cd {self.DEVICE_DIR} && "
                 f"LD_LIBRARY_PATH={self.DEVICE_DIR} "
-                f"./benchmark.out {self.DEVICE_DIR}/{model_path} 10 0"
+                f"./benchmark.out {self.DEVICE_DIR}/{model_path} 10 0 {threads}"
             )
             # 解析 "forward time: X.XXX ms"
             match = re.search(r"forward time:\s*([\d.]+)\s*ms", output)
