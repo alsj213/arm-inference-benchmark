@@ -1,6 +1,9 @@
 """benchctl CLI — ARM 端侧推理基准测试统一入口."""
 import click
 import json
+import datetime
+import subprocess as _sp
+import os
 
 from .db import Database, DB_PATH
 
@@ -151,7 +154,7 @@ def run(track, model, frameworks, precision, threads, warmup, runs, no_save):
     # Step 3: 获取设备温度
     temp = runner.get_device_temp()
     if temp:
-        click.echo(f"设备温度: {temp}C")
+        click.echo(f"设备温度: {temp}°C")
 
     # Step 4: 运行 benchmark
     args = track_obj.build_cli_args(config)
@@ -161,9 +164,6 @@ def run(track, model, frameworks, precision, threads, warmup, runs, no_save):
     # Step 5: 保存结果
     if not no_save and results:
         db = Database()
-        import datetime
-        import subprocess as _sp
-        import os
         run_id = (
             datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             + "-"

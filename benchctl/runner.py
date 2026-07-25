@@ -39,12 +39,12 @@ class AdbRunner:
         self.build_dir = PROJECT_ROOT / "build_android"
         self.device_dir = "/data/local/tmp/benchmark"
 
-    def _adb(self, *args) -> str:
+    def _adb(self, *args, timeout: int = 60) -> str:
         cmd = [self.adb]
         if self.device_id:
             cmd += ["-s", self.device_id]
         cmd += list(args)
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
         if result.returncode != 0:
             raise RuntimeError(
                 f"ADB failed: {' '.join(cmd)}\n{result.stderr}"
@@ -112,7 +112,7 @@ class AdbRunner:
             f" && LD_LIBRARY_PATH={self.device_dir}"
             f" ./{binary} " + " ".join(args)
         )
-        output = self._adb("shell", cmd)
+        output = self._adb("shell", cmd, timeout=600)
 
         results = []
         for line in output.split("\n"):
