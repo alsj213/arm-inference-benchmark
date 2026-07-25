@@ -165,8 +165,8 @@ BenchmarkResult run_benchmark(
     const std::vector<float>& reference_output
 ) {
     BenchmarkResult result;
-    result.run_id = generate_run_id();
-    result.timestamp = now_iso8601();
+    result.run_id = "";
+    result.timestamp = "";
     result.backend_name = backend->name();
     result.model_name = config.model_name;
     result.precision = config.precision;

@@ -18,5 +18,6 @@ class LLMTrack(BaseTrack):
             "--n-prompt", "128",
             "--n-repeat", str(config.runs),
             "--benchmark",
+            "--json",
         ]
         return args

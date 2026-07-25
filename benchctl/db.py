@@ -61,14 +61,22 @@ class Database:
         self.conn.commit()
         return cur.lastrowid
 
-    def history(self, framework: str, model: str, limit: int = 10) -> list[dict]:
-        """查询某个框架+模型的历史记录."""
-        rows = self.conn.execute(
-            """SELECT run_id, timestamp, git_commit, metrics_json
-               FROM runs WHERE framework=? AND model=? AND track='cnn'
-               ORDER BY timestamp DESC LIMIT ?""",
-            (framework, model, limit)
-        ).fetchall()
+    def history(self, framework: str, model: str, limit: int = 10, track: str = None) -> list[dict]:
+        """查询某个框架+模型的历史记录. track 为 None 时不过滤赛道."""
+        if track:
+            rows = self.conn.execute(
+                """SELECT run_id, timestamp, git_commit, metrics_json
+                   FROM runs WHERE framework=? AND model=? AND track=?
+                   ORDER BY timestamp DESC LIMIT ?""",
+                (framework, model, track, limit)
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                """SELECT run_id, timestamp, git_commit, metrics_json
+                   FROM runs WHERE framework=? AND model=?
+                   ORDER BY timestamp DESC LIMIT ?""",
+                (framework, model, limit)
+            ).fetchall()
         return [dict(r) for r in rows]
 
     def latest(self, framework: str, model: str) -> Optional[dict]:
