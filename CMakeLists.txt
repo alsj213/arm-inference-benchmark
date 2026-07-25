@@ -13,33 +13,13 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
 endif()
 
-# Options to enable/disable backends
-# =============================================================================
-# 当前活动后端：MNN (BENCHMARK_MNN)、ONNX Runtime (BENCHMARK_ORT)、NCNN (BENCHMARK_NCNN)、MindSpore Lite (BENCHMARK_MINDSPORE_LITE)
-#
-# 要重新启用已停用的后端，将下方对应选项设为 ON，然后重新编译即可。
-# 所有后端源代码完整保留在 src/backends/ 和 third_party/ 中。
-#
-# 可恢复的后端：
-#   BENCHMARK_NCNN    - ncnn（腾讯）
-#   BENCHMARK_TFLITE  - TensorFlow Lite
-#   BENCHMARK_TNN     - TNN（字节跳动）
-#   BENCHMARK_QNN     - Qualcomm QNN SDK
-#   BENCHMARK_TVM     - Apache TVM
-#   BENCHMARK_LLAMACPP - llama.cpp（LLM 推理）
-#   BENCHMARK_MINDSPORE_LITE - MindSpore Lite（华为，需手动下载 SDK）
-#
-# 完整的多后端配置见 backup/all-backends 分支
-# =============================================================================
-option(BENCHMARK_NCNN "Enable ncnn benchmark" ON)
+# ============================================================================
+# Backend options
+# ============================================================================
 option(BENCHMARK_MNN "Enable MNN benchmark" ON)
-option(BENCHMARK_TFLITE "Enable TensorFlow Lite benchmark" OFF)  # 已停用，可恢复
-option(BENCHMARK_TNN "Enable TNN benchmark" OFF)          # 已停用，可恢复
 option(BENCHMARK_ORT "Enable ONNX Runtime benchmark" ON)
-option(BENCHMARK_QNN "Enable QNN benchmark" OFF)          # 已停用，可恢复
 option(BENCHMARK_TVM "Enable Apache TVM benchmark" ON)
-option(BENCHMARK_LLAMACPP "Enable llama.cpp LLM benchmark" OFF)  # 已停用，可恢复
-option(BENCHMARK_MINDSPORE_LITE "Enable MindSpore Lite benchmark" ON)
+option(BENCHMARK_LLAMACPP "Enable llama.cpp LLM benchmark" OFF)
 
 # Enable position independent code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -50,8 +30,6 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
     message(STATUS "Building for ARM64 with FP16 support")
 endif()
 
-# Disable ncnn's exception disabling since ONNX Runtime needs exceptions
-set(NCNN_DISABLE_EXCEPTION OFF CACHE BOOL "" FORCE)
 
 # Add third_party directory
 add_subdirectory(third_party)

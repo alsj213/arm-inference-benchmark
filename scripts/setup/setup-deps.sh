@@ -24,9 +24,7 @@ usage() {
     echo "Options:"
     echo "  --all         Setup all frameworks (default)"
     echo "  --minimal     Setup only MNN + ONNX Runtime"
-    echo "  --ncnn        Setup ncnn only"
     echo "  --mnn         Setup MNN only"
-    echo "  --tflite      Setup TFLite only"
     echo "  --ort         Setup ONNX Runtime only"
     echo "  --tvm         Setup TVM only"
     echo "  --help        Show this help"
@@ -36,9 +34,7 @@ usage() {
 
 # Parse arguments
 SETUP_ALL=true
-SETUP_NCNN=false
 SETUP_MNN=false
-SETUP_TFLITE=false
 SETUP_ORT=false
 SETUP_TVM=false
 
@@ -46,9 +42,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --all) SETUP_ALL=true; shift ;;
         --minimal) SETUP_ALL=false; SETUP_MNN=true; SETUP_ORT=true; shift ;;
-        --ncnn) SETUP_ALL=false; SETUP_NCNN=true; shift ;;
         --mnn) SETUP_ALL=false; SETUP_MNN=true; shift ;;
-        --tflite) SETUP_ALL=false; SETUP_TFLITE=true; shift ;;
         --ort) SETUP_ALL=false; SETUP_ORT=true; shift ;;
         --tvm) SETUP_ALL=false; SETUP_TVM=true; shift ;;
         --help) usage ;;
@@ -131,67 +125,15 @@ download_onnxruntime() {
 }
 
 # Function to download TFLite
-download_tflite() {
-    info "Setting up TensorFlow Lite..."
-    local TFLITE_VERSION="2.15.0"
-    local TFLITE_DIR="$THIRD_PARTY/tflite_extracted"
-
-    mkdir -p "$TFLITE_DIR"
-    cd "$TFLITE_DIR"
-
-    if [ -f "jni/arm64-v8a/libtensorflowlite_jni.so" ]; then
-        info "  TFLite already exists"
-        return
-    fi
-
-    info "  Downloading TFLite $TFLITE_VERSION..."
-    local TFLITE_URL="https://dl.google.com/dl/android/maven2/org/tensorflow/tensorflow-lite/${TFLITE_VERSION}/tensorflow-lite-${TFLITE_VERSION}.aar"
-    curl -L -o tensorflow-lite.aar "$TFLITE_URL" 2>/dev/null || wget -q "$TFLITE_URL" -O tensorflow-lite.aar 2>/dev/null
-
-    if [ ! -f "tensorflow-lite.aar" ]; then
-        error "Failed to download TFLite. Please download manually from $TFLITE_URL"
-    fi
-
-    info "  Extracting..."
-    mkdir -p temp
-    cd temp
-    unzip -q ../tensorflow-lite.aar
-
-    # Extract headers
-    cd ..
-    mkdir -p headers
-    cp -r temp/headers/* headers/ 2>/dev/null || true
-
-    # Extract libraries
-    mkdir -p jni/arm64-v8a
-    cp temp/jni/arm64-v8a/libtensorflowlite_jni.so jni/arm64-v8a/
-
-    # Cleanup
-    rm -rf temp tensorflow-lite.aar
-
-    info "  ✓ TFLite setup complete"
-    cd "$PROJECT_ROOT"
-}
 
 echo ""
 info "Project root: $PROJECT_ROOT"
 info "Third party dir: $THIRD_PARTY"
 echo ""
 
-# Setup ncnn
-if [ "$SETUP_ALL" = true ] || [ "$SETUP_NCNN" = true ]; then
-    setup_submodule "ncnn" "https://github.com/Tencent/ncnn.git" "$THIRD_PARTY/ncnn"
 fi
 
 # Setup MNN
-if [ "$SETUP_ALL" = true ] || [ "$SETUP_MNN" = true ]; then
-    setup_submodule "MNN" "https://github.com/alibaba/MNN.git" "$THIRD_PARTY/MNN"
-fi
-
-# Setup TFLite
-if [ "$SETUP_ALL" = true ] || [ "$SETUP_TFLITE" = true ]; then
-    download_tflite
-fi
 
 # Setup ONNX Runtime
 if [ "$SETUP_ALL" = true ] || [ "$SETUP_ORT" = true ]; then

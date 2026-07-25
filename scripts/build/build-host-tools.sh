@@ -1,6 +1,6 @@
 #!/bin/bash
 # Build host tools for model conversion
-# This builds onnx2ncnn, onnx2mnn, onnx2tnn for x86_64 host
+# This builds onnx2mnn for x86_64 host
 
 set -e
 
@@ -16,19 +16,6 @@ echo ""
 mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 
-# 1. Build ncnn tools (onnx2ncnn) — 已停用，可恢复（见 backup/all-backends 分支）
-# echo "=== Building ncnn onnx2ncnn ==="
-# cd $BUILD_DIR
-# mkdir -p ncnn && cd ncnn
-# cmake $PROJECT_ROOT/third_party/ncnn \
-#     -DCMAKE_BUILD_TYPE=Release \
-#     -DNCNN_BUILD_TOOLS=ON \
-#     -DNCNN_BUILD_EXAMPLES=OFF \
-#     -DNCNN_BUILD_BENCHMARK=OFF \
-#     -DNCNN_OPENMP=ON \
-#     -DNCNN_SIMPLEOCV=OFF
-# make -j$(nproc)
-# echo "onnx2ncnn built: $BUILD_DIR/ncnn/tools/onnx/onnx2ncnn"
 # echo ""
 
 # 2. Build MNN tools (MNNConvert/onnx2mnn)
@@ -46,27 +33,13 @@ make -j$(nproc)
 echo "onnx2mnn built: $BUILD_DIR/MNN/onnx2mnn"
 echo ""
 
-# 3. Build TNN tools (onnx2tnn) — 已停用，可恢复（见 backup/all-backends 分支）
-# echo "=== Building TNN onnx2tnn ==="
-# cd $BUILD_DIR
-# mkdir -p TNN && cd TNN
-# cmake $PROJECT_ROOT/third_party/TNN \
-#     -DCMAKE_BUILD_TYPE=Release \
-#     -DTNN_BUILD_CONVERTER=ON \
-#     -DTNN_BUILD_SHARED=OFF \
-#     -DTNN_BUILD_BENCHMARK=OFF \
-#     -DTNN_BUILD_EXAMPLES=OFF
-# make -j$(nproc)
-# echo "onnx2tnn built: $BUILD_DIR/TNN/tools/onnx2tnn/onnx2tnn"
 # echo ""
 
 # 4. Create symlinks for easy access
 cd $PROJECT_ROOT
 mkdir -p tools/bin
 
-# ln -sf $BUILD_DIR/ncnn/tools/onnx/onnx2ncnn tools/bin/onnx2ncnn   # 已停用
 ln -sf $BUILD_DIR/MNN/MNNConvert tools/bin/MNNConvert
-# ln -sf $BUILD_DIR/TNN/tools/onnx2tnn/onnx2tnn tools/bin/onnx2tnn   # 已停用
 
 echo "=== Build Complete ==="
 echo ""
@@ -74,8 +47,7 @@ echo "Tools available in $PROJECT_ROOT/tools/bin:"
 ls -la $PROJECT_ROOT/tools/bin/
 echo ""
 echo "Available converters:"
-echo "  - MNNConvert: ONNX/TF/TFLite to MNN format"
+echo "  - MNNConvert: ONNX to MNN format"
 echo ""
-echo "For ncnn/TNN/TFLite conversion tools, see the backup/all-backends branch."
 echo ""
 echo "Then run: ./scripts/convert_models.sh"

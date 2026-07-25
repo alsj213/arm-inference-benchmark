@@ -30,9 +30,6 @@ adb shell "mkdir -p $DEVICE_DIR"
 
 for backend in $(echo $BACKENDS | tr ',' ' '); do
     case $backend in
-        ncnn)
-            adb push "$SINGLE_OPS_DIR/ncnn" "$DEVICE_DIR/" 2>/dev/null
-            ;;
         mnn)
             adb push "$SINGLE_OPS_DIR/mnn" "$DEVICE_DIR/" 2>/dev/null
             ;;
@@ -59,10 +56,7 @@ for op in $OPS; do
 
     for backend in $(echo $BACKENDS | tr ',' ' '); do
         case $backend in
-            ncnn)
-                MODEL_PATH="$DEVICE_DIR/ncnn/$op"
-                ;;
-            mnn)
+                mnn)
                 MODEL_PATH="$DEVICE_DIR/mnn/$op.mnn"
                 ;;
             onnxruntime)

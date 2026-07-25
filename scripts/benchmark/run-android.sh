@@ -128,8 +128,6 @@ fi
 
 # Push shared libraries (仅当前启用的后端)
 echo "Pushing shared libraries..."
-# TFLite — 已停用（已恢复时取消注释）
-# adb push "$PROJECT_ROOT/third_party/tflite_extracted/jni/arm64-v8a/libtensorflowlite_jni.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 if [ -f "$PROJECT_ROOT/third_party/onnxruntime/build/Android/$BUILD_TYPE/libonnxruntime.so" ]; then
     adb push "$PROJECT_ROOT/third_party/onnxruntime/build/Android/$BUILD_TYPE/libonnxruntime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
 fi
@@ -149,8 +147,6 @@ fi
 #     adb push "$TNN_SO" /data/local/tmp/benchmark/ 2>/dev/null || true
 # fi
 # adb push "$PROJECT_ROOT/third_party/tvm/build-android/libtvm_runtime.so" /data/local/tmp/benchmark/ 2>/dev/null || true
-# libmindspore-lite.so
-MS_LITE_SO="$PROJECT_ROOT/third_party/mindspore_lite/lib/libmindspore-lite.so"
 if [ -f "$MS_LITE_SO" ]; then
     adb push "$MS_LITE_SO" /data/local/tmp/benchmark/ 2>/dev/null || true
 fi

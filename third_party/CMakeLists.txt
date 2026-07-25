@@ -1,20 +1,8 @@
 # third_party CMake configuration
 
-# Find or build each backend
-
-# ncnn
-if(BENCHMARK_NCNN)
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ncnn)
-        add_subdirectory(ncnn)
-        set(ncnn_FOUND TRUE)
-        message(STATUS "Found ncnn")
-    else()
-        message(WARNING "ncnn not found, please add as git submodule")
-        set(BENCHMARK_NCNN OFF)
-    endif()
-endif()
-
-# MNN
+# ============================================================================
+# MNN — 核心推理框架 (CPU + GPU)
+# ============================================================================
 if(BENCHMARK_MNN)
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/MNN)
         set(MNN_BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
@@ -35,76 +23,9 @@ if(BENCHMARK_MNN)
     endif()
 endif()
 
-# TensorFlow Lite
-if(BENCHMARK_TFLITE)
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tflite_extracted)
-        set(CMAKE_CXX_STANDARD 17)
-        add_library(tensorflow-lite INTERFACE)
-        target_include_directories(tensorflow-lite INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/tflite_extracted/headers)
-        # Use library from extracted AAR
-        set(TFLITE_LIB ${CMAKE_CURRENT_SOURCE_DIR}/tflite_extracted/jni/arm64-v8a/libtensorflowlite_jni.so)
-        if(EXISTS ${TFLITE_LIB})
-            target_link_libraries(tensorflow-lite INTERFACE ${TFLITE_LIB})
-            set(TFLite_FOUND TRUE)
-            message(STATUS "Found TensorFlow Lite: ${TFLITE_LIB}")
-        else()
-            message(WARNING "TensorFlow Lite library not found at: ${TFLITE_LIB}")
-            set(BENCHMARK_TFLITE OFF)
-        endif()
-    else()
-        message(WARNING "TensorFlow Lite not found")
-        set(BENCHMARK_TFLITE OFF)
-    endif()
-endif()
-
-# TNN — 已停用
-if(BENCHMARK_TNN)
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/TNN)
-        set(TNN_ARM_ENABLE ON CACHE BOOL "" FORCE)
-        set(TNN_ARM82_ENABLE ON CACHE BOOL "" FORCE)
-        set(TNN_OPENCL_ENABLE OFF CACHE BOOL "" FORCE)
-        set(TNN_CPU_ENABLE ON CACHE BOOL "" FORCE)
-        set(TNN_TEST_ENABLE OFF CACHE BOOL "" FORCE)
-        set(TNN_BENCHMARK_MODE OFF CACHE BOOL "" FORCE)
-        set(TNN_BUILD_SHARED ON CACHE BOOL "" FORCE)
-        add_subdirectory(TNN)
-        set(TNN_FOUND TRUE)
-        message(STATUS "Found TNN")
-    else()
-        message(WARNING "TNN not found, please add as git submodule")
-        set(BENCHMARK_TNN OFF)
-    endif()
-endif()
-
-# QNN
-if(BENCHMARK_QNN)
-    # QNN needs to be downloaded from Qualcomm Developer Network
-    # Put extracted QNN SDK in third_party/QNN/
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/QNN/include/QNN)
-        add_library(qnn INTERFACE)
-        # Add both include paths: QNN headers reference subdirectories
-        target_include_directories(qnn INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/QNN/include)
-        target_include_directories(qnn INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/QNN/include/QNN)
-        if(ANDROID)
-            set(QNN_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/QNN/lib/arm64-v8a/libQnnSystem.so)
-        else()
-            set(QNN_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/QNN/lib/arm64-v8a/libQnnSystem.so)
-        endif()
-        if(EXISTS ${QNN_LIB_PATH})
-            target_link_libraries(qnn INTERFACE ${QNN_LIB_PATH})
-            set(QNN_FOUND TRUE)
-            message(STATUS "Found Qualcomm QNN SDK: ${QNN_LIB_PATH}")
-        else()
-            message(WARNING "QNN SDK found but library not found at: ${QNN_LIB_PATH}")
-            set(BENCHMARK_QNN OFF)
-        endif()
-    else()
-        message(WARNING "QNN SDK not found in third_party/QNN/, please download from https://qpm.qualcomm.com/")
-        set(BENCHMARK_QNN OFF)
-    endif()
-endif()
-
-# ONNX Runtime v1.21.0 - git submodule, source build
+# ============================================================================
+# ONNX Runtime v1.21.0 — 精度基准 + 跨框架验证
+# ============================================================================
 if(BENCHMARK_ORT)
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/onnxruntime/cmake/CMakeLists.txt)
         add_library(onnxruntime SHARED IMPORTED GLOBAL)
@@ -143,7 +64,9 @@ if(BENCHMARK_ORT)
     endif()
 endif()
 
-# Apache TVM v0.15.0 — Relay + GraphExecutor (无 tvm-ffi)
+# ============================================================================
+# Apache TVM v0.15.0 — Relay + GraphExecutor
+# ============================================================================
 if(BENCHMARK_TVM)
     set(TVM_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/tvm)
     if(ANDROID)
@@ -166,35 +89,11 @@ if(BENCHMARK_TVM)
     endif()
 endif()
 
-# MindSpore Lite — 需手动下载 SDK
-# 下载: https://www.mindspore.cn/lite → mindspore-lite-2.x.x-android-aarch64.tar.gz
-# 解压到 third_party/mindspore_lite/
-if(BENCHMARK_MINDSPORE_LITE)
-    set(MS_LITE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/mindspore_lite)
-    if(EXISTS ${MS_LITE_ROOT})
-        add_library(mindspore_lite SHARED IMPORTED GLOBAL)
-        target_include_directories(mindspore_lite INTERFACE ${MS_LITE_ROOT})
-        set(MS_LITE_LIB ${MS_LITE_ROOT}/lib/libmindspore-lite.so)
-        if(EXISTS ${MS_LITE_LIB})
-            set_target_properties(mindspore_lite PROPERTIES IMPORTED_LOCATION ${MS_LITE_LIB})
-            target_link_libraries(mindspore_lite INTERFACE ${MS_LITE_LIB})
-            set(MINDSPORE_LITE_FOUND TRUE)
-            message(STATUS "Found MindSpore Lite: ${MS_LITE_LIB}")
-        else()
-            message(WARNING "MindSpore Lite .so not found at: ${MS_LITE_LIB}")
-            set(BENCHMARK_MINDSPORE_LITE OFF)
-        endif()
-    else()
-        message(WARNING "MindSpore Lite SDK not found at ${MS_LITE_ROOT}")
-        message(WARNING "Download from: https://www.mindspore.cn/lite")
-        set(BENCHMARK_MINDSPORE_LITE OFF)
-    endif()
-endif()
-
-# llama.cpp for LLM inference
+# ============================================================================
+# llama.cpp — LLM 推理引擎
+# ============================================================================
 if(BENCHMARK_LLAMACPP)
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/llama.cpp)
-        # Configure llama.cpp build options
         set(LLAMA_STATIC ON CACHE BOOL "" FORCE)
         set(LLAMA_BUILD_TESTS OFF CACHE BOOL "" FORCE)
         set(LLAMA_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)

@@ -14,24 +14,12 @@ struct ModelInfo {
         if (backend == "mnn" || backend == "MNN" || backend == "mnn_gpu" || backend == "MNN_GPU") {
             return "models/exported/mnn/" + name + ".mnn";
         }
-        if (backend == "ncnn" || backend == "NCNN") {
-            return base_path + "/" + name + "_ncnn.param";
-        }
         if (backend == "onnxrt" || backend == "ort") {
             return base_path + "/" + name + ".onnx";
-        }
-        if (backend == "tnn" || backend == "TNN") {
-            return base_path + "/" + name + "_TNN.tnnproto";
         }
         if (backend == "tvm" || backend == "TVM") {
             // TVM 编译产物统一放在设备 tvm_models/ 目录
             return "tvm_models/" + name + "_tvm.so";
-        }
-        if (backend == "tflite" || backend == "TFLite") {
-            return base_path + "/" + name + ".tflite";
-        }
-        if (backend == "mindspore_lite" || backend == "mslite") {
-            return base_path + "/" + name + ".ms";
         }
         if (backend == "llamacpp" || backend == "llama") {
             return base_path + "/" + name + ".gguf";
@@ -42,12 +30,6 @@ struct ModelInfo {
     std::string get_weights_path(const std::string& backend) const {
         if (backend == "mnn" || backend == "MNN" || backend == "onnxrt" || backend == "ort") {
             return ""; // MNN and ONNX Runtime store everything in one file
-        }
-        if (backend == "ncnn" || backend == "NCNN") {
-            return base_path + "/" + name + "_ncnn.bin";
-        }
-        if (backend == "tnn" || backend == "TNN") {
-            return base_path + "/" + name + "_TNN.tnnmodel";
         }
         return base_path + "/" + name + "_" + backend + ".bin";
     }

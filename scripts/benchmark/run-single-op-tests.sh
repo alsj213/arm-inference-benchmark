@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # 单算子性能基准测试 - 完整版本
-# 支持 ncnn, MNN, ONNX Runtime
+# 支持 MNN, ONNX Runtime, TVM
 #
 
 set -e
@@ -70,14 +70,11 @@ echo "op,backend,mean_ms,min_ms,max_ms,std_ms" > "$RESULTS_FILE"
 # 推送文件到设备
 echo "Pushing binary and libraries..."
 $ADB push "$PROJECT_ROOT/build_android/src/single_op/single_op_benchmark" /data/local/tmp/
-$ADB push "$PROJECT_ROOT/build_android/third_party/ncnn/libncnn.so" /data/local/tmp/
 $ADB push "$PROJECT_ROOT/build_android/third_party/MNN/libMNN.so" /data/local/tmp/
 $ADB push "$PROJECT_ROOT/build_android/third_party/onnxruntime/libonnxruntime.so" /data/local/tmp/ 2>/dev/null || true
 
 $ADB shell "chmod +x /data/local/tmp/single_op_benchmark"
 
-echo "Pushing ncnn models..."
-$ADB push "$SINGLE_OPS_DIR/ncnn" "$DEVICE_DIR/" 2>/dev/null
 
 echo "Pushing MNN models..."
 $ADB push "$SINGLE_OPS_DIR/mnn" "$DEVICE_DIR/" 2>/dev/null
@@ -104,19 +101,6 @@ for op in $OPS; do
         SHAPE="1,3,224,224"
     fi
 
-    # Test ncnn
-    echo -n "  ncnn:    "
-    result=$($ADB shell "cd /data/local/tmp && export LD_LIBRARY_PATH=/data/local/tmp && ./single_op_benchmark --backend ncnn --model $DEVICE_DIR/ncnn/$op --input_shape $SHAPE --warmup $WARMUP --runs $RUNS --threads $THREADS 2>/dev/null" | grep "mean=")
-    if [[ "$result" == *"mean="* ]]; then
-        mean=$(echo "$result" | grep -oP 'mean=\K[0-9.]+')
-        min=$(echo "$result" | grep -oP 'min=\K[0-9.]+')
-        max=$(echo "$result" | grep -oP 'max=\K[0-9.]+')
-        std=$(echo "$result" | grep -oP 'std=\K[0-9.]+')
-        echo "mean=${mean}ms, min=${min}ms, max=${max}ms, std=${std}ms"
-        echo "$op,ncnn,$mean,$min,$max,$std" >> "$RESULTS_FILE"
-    else
-        echo "FAILED"
-        echo "$op,ncnn,0,0,0,0" >> "$RESULTS_FILE"
     fi
 
     # Test MNN

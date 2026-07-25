@@ -11,15 +11,9 @@ enum class Precision {
 };
 
 enum class BackendType {
-    // 以下枚举值完整保留，重新启用后端后无需修改此处
-    NCNN,       // 已停用，可恢复
     MNN,
-    TNN,        // 已停用，可恢复
-    TFLITE,     // 已停用，可恢复
-    QNN,        // 已停用，可恢复
     ONNXRT,
-    TVM,        // 已停用，可恢复
-    MINDSPORE_LITE,  // 待下载 SDK
+    TVM,
     MNN_GPU,        // MNN OpenCL GPU 后端
     LLAMACPP,       // llama.cpp LLM 推理引擎 (GGUF)
 };
@@ -45,8 +39,6 @@ struct BenchmarkConfig {
     // Framework-specific configuration
     bool enable_fp16;           // 是否启用 FP16 推理
     bool enable_int8;           // 是否启用 INT8 量化
-    bool enable_winograd;       // 是否启用 Winograd 算法（NCNN）
-    bool enable_x86_opt;        // 是否启用 x86 优化（TFLite）
     int intra_op_threads;       // ONNX Runtime 内部操作线程数
     int inter_op_threads;       // ONNX Runtime 间操作线程数
 
@@ -70,8 +62,6 @@ struct BenchmarkConfig {
         , test_runs(100)
         , enable_fp16(false)
         , enable_int8(false)
-        , enable_winograd(false)
-        , enable_x86_opt(false)
         , intra_op_threads(1)
         , inter_op_threads(1)
         , memory_limit_mb(0)

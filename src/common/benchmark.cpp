@@ -7,29 +7,14 @@
 #include <numeric>
 #include <sstream>
 
-#ifdef BENCHMARK_NCNN
-#include "backends/ncnn_backend.h"
-#endif
 #ifdef BENCHMARK_MNN
 #include "backends/mnn_backend.h"
-#endif
-#ifdef BENCHMARK_TNN
-#include "backends/tnn_backend.h"
-#endif
-#ifdef BENCHMARK_TFLITE
-#include "backends/tflite_backend.h"
-#endif
-#ifdef BENCHMARK_QNN
-#include "backends/qnn_backend.h"
 #endif
 #ifdef BENCHMARK_ORT
 #include "backends/ort_backend.h"
 #endif
 #ifdef BENCHMARK_TVM
 #include "backends/tvm_backend.h"
-#endif
-#ifdef BENCHMARK_MINDSPORE_LITE
-#include "backends/mindspore_lite_backend.h"
 #endif
 #ifdef BENCHMARK_LLAMACPP
 #include "backends/llamacpp_backend.h"
@@ -220,25 +205,10 @@ BenchmarkResult run_benchmark(
 
 std::unique_ptr<BenchmarkBackend> create_backend(BackendType type) {
     switch (type) {
-#ifdef BENCHMARK_NCNN
-        case BackendType::NCNN:
-            return std::make_unique<NCNNBackend>();
-#endif
 #ifdef BENCHMARK_MNN
         case BackendType::MNN:
+        case BackendType::MNN_GPU:
             return std::make_unique<MNNBackend>();
-#endif
-#ifdef BENCHMARK_TNN
-        case BackendType::TNN:
-            return std::make_unique<TNNBackend>();
-#endif
-#ifdef BENCHMARK_TFLITE
-        case BackendType::TFLITE:
-            return std::make_unique<TFLiteBackend>();
-#endif
-#ifdef BENCHMARK_QNN
-        case BackendType::QNN:
-            return std::make_unique<QNNBackend>();
 #endif
 #ifdef BENCHMARK_ORT
         case BackendType::ONNXRT:
@@ -247,10 +217,6 @@ std::unique_ptr<BenchmarkBackend> create_backend(BackendType type) {
 #ifdef BENCHMARK_TVM
         case BackendType::TVM:
             return std::make_unique<TVMBackend>();
-#endif
-#ifdef BENCHMARK_MINDSPORE_LITE
-        case BackendType::MINDSPORE_LITE:
-            return std::make_unique<MindSporeLiteBackend>();
 #endif
 #ifdef BENCHMARK_LLAMACPP
         case BackendType::LLAMACPP:

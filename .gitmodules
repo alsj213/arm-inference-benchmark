@@ -1,38 +1,21 @@
 # ==============================================
 # Git Submodules Configuration
 # ==============================================
-# Initialize all submodules:
-#   git submodule update --init --recursive
-#
-# Add a new submodule:
-#   git submodule add <repo-url> third_party/<name>
-#
-# Update all submodules:
-#   git submodule update --remote --merge
-# ==============================================
-
-[submodule "third_party/ncnn"]
-    path = third_party/ncnn
-    url = https://github.com/Tencent/ncnn.git
-    branch = master
 
 [submodule "third_party/MNN"]
     path = third_party/MNN
     url = https://github.com/alibaba/MNN.git
     branch = master
 
-[submodule "third_party/TNN"]
-    path = third_party/TNN
-    url = https://github.com/Tencent/TNN.git
-    branch = master
-
 [submodule "third_party/tvm"]
     path = third_party/tvm
     url = https://github.com/apache/tvm.git
     branch = main
+
 [submodule "third_party/llama.cpp"]
 	path = third_party/llama.cpp
 	url = https://github.com/ggerganov/llama.cpp.git
+
 [submodule "third_party/onnxruntime"]
 	path = third_party/onnxruntime
 	url = https://github.com/microsoft/onnxruntime.git

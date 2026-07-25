@@ -80,16 +80,10 @@ Precision parse_precision(const std::string& p) {
 }
 
 BackendType parse_backend(const std::string& b) {
-    // 已停用的后端映射保留在此，重新启用后取消注释即可
-    if (b == "ncnn" || b == "NCNN") return BackendType::NCNN;
     if (b == "mnn" || b == "MNN") return BackendType::MNN;
     if (b == "mnn_gpu" || b == "MNN_GPU") return BackendType::MNN_GPU;
-    // if (b == "tnn" || b == "TNN") return BackendType::TNN;       // TNN — 已停用
-    // if (b == "tflite" || b == "TFLite" || b == "TFLITE") return BackendType::TFLITE;  // TFLite — 已停用
-    // if (b == "qnn" || b == "QNN") return BackendType::QNN;
     if (b == "onnxrt" || b == "ort" || b == "ONNXRT" || b == "ORT") return BackendType::ONNXRT;
     if (b == "tvm" || b == "TVM") return BackendType::TVM;
-    if (b == "mindspore_lite" || b == "mslite") return BackendType::MINDSPORE_LITE;
     if (b == "llama" || b == "llamacpp") return BackendType::LLAMACPP;
     return (BackendType)-1;
 }
