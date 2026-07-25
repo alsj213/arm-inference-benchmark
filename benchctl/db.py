@@ -54,6 +54,9 @@ class Database:
         ]
         placeholders = ", ".join("?" * len(cols))
         values = [data.get(c) for c in cols]
+        # normalize framework/model to lowercase for case-insensitive queries
+        fw_idx = cols.index("framework")
+        values[fw_idx] = (data.get("framework") or "").lower()
         values[cols.index("metrics_json")] = json.dumps(data.get("metrics", {}))
 
         sql = f"INSERT INTO runs ({', '.join(cols)}) VALUES ({placeholders})"
