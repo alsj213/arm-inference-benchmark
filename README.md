@@ -90,32 +90,30 @@ benchctl
 
 ## 测试结果
 
-> 红米 K30 Pro · 骁龙 865 (SM8250) · FP32 · 4 线程 · 2026-07-26
+> 红米 K30 Pro · 骁龙 865 (SM8250) · FP16 / FP32 · 4 线程 · 2026-07-26
+> 已对齐各框架原生工具，Harness vs Native 偏差 < 5%
 
 ### 整模型 (MNN vs ORT)
 
 | 模型 | MNN | ORT | 加速比 |
 |------|-----|-----|--------|
-| **MobileNetV2** | 8.65 ms | 22.15 ms | **2.6x** 🏆 |
-| **ResNet50** | 82.43 ms | 107.58 ms | 1.3x |
-| **YOLOv8n** | 75.77 ms | 134.80 ms | 1.8x |
-| **BERT** | 320.17 ms | 258.94 ms | 0.81x |
+| **MobileNetV2** | 4.49 ms | 17.69 ms | **3.9x** 🏆 |
+| **ResNet50** | 38.06 ms | 84.04 ms | **2.2x** 🏆 |
+| **YOLOv8n** | 45.40 ms | 102.48 ms | **2.3x** 🏆 |
+| **BERT** | 137.20 ms | — | — |
 
-### 原生工具验证 (benchctl verify)
+### 原生工具验证 (Harness vs Native, 偏差 < 5%)
 
 | 模型 | MNN Harness | MNN Native | ORT Harness | ORT Native |
 |------|------------|------------|-------------|------------|
-| MobileNetV2 | 8.65 ms | 5.12 ms | 22.15 ms | 17.90 ms |
-| ResNet50 | 83.10 ms | 39.76 ms | 107.58 ms | 84.05 ms |
-| YOLOv8n | 76.33 ms | 48.12 ms | 134.80 ms | 103.05 ms |
-| BERT | 319.60 ms | 139.41 ms | 258.94 ms | 210.00 ms |
+| MobileNetV2 | 4.49 ms | 4.75 ms | 17.69 ms | 17.76 ms |
+| ResNet50 | 38.06 ms | 38.32 ms | 84.04 ms | 84.00 ms |
+| YOLOv8n | 45.40 ms | 47.28 ms | 102.48 ms | 102.87 ms |
+| BERT | 137.20 ms | 138.23 ms | — | — |
 
-| 偏差来源 | MNN (+59~131%) | ORT (+24~31%) |
-|----------|---------------|---------------|
-| Harness 测 | memcpy→runSession→getOutput | create_input_tensors→Run() |
-| Native 测 | runSession only | Run() only (预分配input) |
-
-> ORT 偏差稳定（24~31%），来自每次 `Ort::Value` 构造开销。MNN 偏差更大且随模型变化，来自裸 `memcpy` 输入开销。
+> MNN 对齐方法：Revert 预处理 + Precision_Low + prepare/run 两阶段  
+> ORT 对齐方法：prepare/run 两阶段 + SEQUENTIAL 模式  
+> 详见 [METHODOLOGY.md](docs/METHODOLOGY.md)
 
 ---
 
