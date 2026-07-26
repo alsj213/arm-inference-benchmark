@@ -27,7 +27,6 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         printf("MNN OpenCL GPU backend enabled (CPU fallback, Precision=High/FP32)\n");
     } else {
         schedule_config.type = MNN_FORWARD_CPU;
-        // Match benchmark.out: Precision_Low + Power_High + Session_Release
         backend_config.precision = MNN::BackendConfig::Precision_Low;
         backend_config.power = MNN::BackendConfig::Power_High;
         schedule_config.backendConfig = &backend_config;
@@ -97,7 +96,7 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
     const MNN::Backend* inBackend = net_->getBackend(session_, input_tensor_);
     (void)inBackend;
 
-    // ── benchmark.out line 152: releaseModel() after tensors are captured ──
+    // ── benchmark.out line 152: releaseModel() after tensors captured ──
     net_->releaseModel();
 
     return true;
