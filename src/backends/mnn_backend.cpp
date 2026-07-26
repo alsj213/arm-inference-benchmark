@@ -1,6 +1,7 @@
 #include "mnn_backend.h"
 
 #include <cstring>
+#include <fstream>
 #include <MNN/Interpreter.hpp>
 #include <MNN/Tensor.hpp>
 #include <MNN/MNNForwardType.h>
@@ -38,7 +39,22 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         printf("MNN: Profiling enabled, output: %s\n", config.profile_file.c_str());
     }
 
-    net_ = std::unique_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(config.model_path.c_str()));
+    // Match benchmark.out: createFromBuffer (avoids createFromFile path differences)
+    // benchmark.out uses Revert preprocessing, but for sparsity=0 it's mostly a pass-through.
+    // createFromBuffer ensures same loading path for BERT-sized models.
+    {
+        std::ifstream f(config.model_path, std::ios::binary | std::ios::ate);
+        if (!f) {
+            printf("Failed to open MNN model: %s\n", config.model_path.c_str());
+            return false;
+        }
+        auto sz = f.tellg();
+        f.seekg(0);
+        std::vector<char> buf(sz);
+        f.read(buf.data(), sz);
+        net_ = std::unique_ptr<MNN::Interpreter>(
+            MNN::Interpreter::createFromBuffer(buf.data(), buf.size()));
+    }
     if (!net_) {
         printf("Failed to load MNN model: %s\n", config.model_path.c_str());
         return false;
@@ -66,7 +82,6 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
     }
 
     // For GPU mode, create a host staging tensor for input data transfer
-    // Use CAFFE (NCHW) dimension type to match ONNX model format
     if (use_gpu_) {
         host_input_tensor_.reset(MNN::Tensor::create<float>(shapes, nullptr, MNN::Tensor::CAFFE));
         if (!host_input_tensor_) {
@@ -91,15 +106,11 @@ bool MNNBackend::prepare(const std::vector<float>& input) {
 
 bool MNNBackend::run() {
     // ── Timed: matches benchmark.out timing scope ──
+    //   benchmark.out: map→unmap→runSession→map→unmap  (map/unmap no-op on CPU)
+    //   Our run():     runSession only (no sync needed on CPU)
     net_->runSession(session_);
-    // map/unmap output to trigger sync (near-zero on CPU, needed for GPU)
     if (use_gpu_) {
         auto host_out = MNN::Tensor::createHostTensorFromDevice(output_tensor_, true);
-    } else {
-        void* out_host = output_tensor_->map(MNN::Tensor::MAP_TENSOR_READ,
-                                             output_tensor_->getDimensionType());
-        output_tensor_->unmap(MNN::Tensor::MAP_TENSOR_READ,
-                              output_tensor_->getDimensionType(), out_host);
     }
     return true;
 }
