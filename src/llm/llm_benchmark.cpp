@@ -26,7 +26,7 @@ struct Args {
     std::string backend = "llamacpp";
     std::string model;
     int max_tokens = 128;
-    int n_ctx = 1024;
+    int n_ctx = 256;  // llama-bench: n_prompt + n_gen
     int n_prompt = 128;
     int n_repeat = 5;
     bool benchmark_only = false;

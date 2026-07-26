@@ -70,13 +70,17 @@ bool LlamaCppBackend::load_model(const std::string& model_path, int n_ctx, int n
   // Get vocab from model (required for tokenization in new API)
   vocab_ = llama_model_get_vocab(model_);
 
-  // Context params (match llama-bench defaults)
+  // Context params — exact match llama-bench to_llama_cparams()
   llama_context_params ctx_params = llama_context_default_params();
-  ctx_params.n_ctx   = n_ctx;
-  ctx_params.n_batch = 2048;
-  ctx_params.n_ubatch = 512;
+  ctx_params.n_ctx   = n_ctx;  // llama-bench: n_prompt + n_gen = 256
+  ctx_params.n_batch = n_batch;
+  ctx_params.n_ubatch = std::min(n_batch, 512);
   ctx_params.n_threads = 4;
+  ctx_params.type_k = GGML_TYPE_F16;
+  ctx_params.type_v = GGML_TYPE_F16;
+  ctx_params.offload_kqv = true;
   ctx_params.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_AUTO;
+  ctx_params.op_offload = true;
 
   ctx_ = llama_init_from_model(model_, ctx_params);
   if (!ctx_) {
