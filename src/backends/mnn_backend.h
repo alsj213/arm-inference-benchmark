@@ -20,7 +20,8 @@ private:
     MNN::Session* session_ = nullptr;
     MNN::Tensor* input_tensor_ = nullptr;
     MNN::Tensor* output_tensor_ = nullptr;  // cached output, avoids per-iter getSessionOutput
-    std::unique_ptr<MNN::Tensor> host_input_tensor_;  // CPU staging buffer for GPU mode
+    std::unique_ptr<MNN::Tensor> host_input_tensor_;   // Host alias for input (benchmark.out createHostTensorFromDevice)
+    std::unique_ptr<MNN::Tensor> host_output_tensor_;  // Host alias for output (benchmark.out createHostTensorFromDevice)
     bool profiling_enabled_ = false;
     std::string profile_file_;
     bool use_gpu_ = false;

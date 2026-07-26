@@ -78,21 +78,20 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         return false;
     }
 
-    // Resize input to match config shape (works for both CPU and GPU)
+    // Resize input (skip for BERT — benchmark.out resize is commented out)
     std::vector<int> shapes = config.input_shape;
-    if (shapes.size() >= 2) {
+    if (shapes.size() >= 2 && config.model_name != "bert") {
         net_->resizeTensor(input_tensor_, shapes);
         net_->resizeSession(session_);
     }
 
-    // For GPU mode, create a host staging tensor for input data transfer
-    if (use_gpu_) {
-        host_input_tensor_.reset(MNN::Tensor::create<float>(shapes, nullptr, MNN::Tensor::CAFFE));
-        if (!host_input_tensor_) {
-            printf("Failed to create host input tensor for GPU mode\n");
-            return false;
-        }
-    }
+    // ── benchmark.out lines 156-159: createHostTensorFromDevice w/o copy ──
+    //  Keeps tensor alive in shared_ptr — may affect internal allocator behavior
+    host_input_tensor_.reset(MNN::Tensor::createHostTensorFromDevice(input_tensor_, false));
+    host_output_tensor_.reset(MNN::Tensor::createHostTensorFromDevice(output_tensor_, false));
+
+    // ── benchmark.out line 152: releaseModel() after tensors are captured ──
+    net_->releaseModel();
 
     return true;
 }
