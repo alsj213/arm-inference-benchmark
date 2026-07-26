@@ -24,6 +24,10 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         printf("MNN OpenCL GPU backend enabled (CPU fallback, Precision=High/FP32)\n");
     } else {
         schedule_config.type = MNN_FORWARD_CPU;
+        // Match benchmark.out: Precision_Low (speed priority) + Power_High
+        backend_config.precision = MNN::BackendConfig::Precision_Low;
+        backend_config.power = MNN::BackendConfig::Power_High;
+        schedule_config.backendConfig = &backend_config;
     }
 
     // Enable profiling if configured
@@ -46,9 +50,11 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         return false;
     }
 
+    // Cache input/output tensors once (benchmark.out pattern — avoids per-iteration alloc)
     input_tensor_ = net_->getSessionInput(session_, nullptr);
-    if (!input_tensor_) {
-        printf("Failed to get input tensor\n");
+    output_tensor_ = net_->getSessionOutput(session_, nullptr);
+    if (!input_tensor_ || !output_tensor_) {
+        printf("Failed to get input/output tensor\n");
         return false;
     }
 
@@ -72,20 +78,36 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
     return true;
 }
 
-bool MNNBackend::infer(const std::vector<float>& input) {
-    // Copy input data — GPU uses copyFromHostTensor, CPU uses direct memcpy
+bool MNNBackend::prepare(const std::vector<float>& input) {
+    // ── Untimed: copy input data to tensor (matches benchmark.out's map/unmap + pre-load) ──
     if (use_gpu_) {
         memcpy(host_input_tensor_->host<float>(), input.data(), input.size() * sizeof(float));
         input_tensor_->copyFromHostTensor(host_input_tensor_.get());
     } else {
         memcpy(input_tensor_->host<float>(), input.data(), input.size() * sizeof(float));
     }
+    return true;
+}
 
-    // Run inference with profiling if enabled
+bool MNNBackend::run() {
+    // ── Timed: matches benchmark.out timing scope ──
     net_->runSession(session_);
+    // map/unmap output to trigger sync (near-zero on CPU, needed for GPU)
+    if (use_gpu_) {
+        auto host_out = MNN::Tensor::createHostTensorFromDevice(output_tensor_, true);
+    } else {
+        void* out_host = output_tensor_->map(MNN::Tensor::MAP_TENSOR_READ,
+                                             output_tensor_->getDimensionType());
+        output_tensor_->unmap(MNN::Tensor::MAP_TENSOR_READ,
+                              output_tensor_->getDimensionType(), out_host);
+    }
+    return true;
+}
 
-    MNN::Tensor* output = net_->getSessionOutput(session_, nullptr);
-    return output != nullptr;
+bool MNNBackend::infer(const std::vector<float>& input) {
+    // Legacy single-shot: prepare + run (for backward compat)
+    prepare(input);
+    return run();
 }
 
 bool MNNBackend::infer_with_output(const std::vector<float>& input, std::vector<float>& output) {

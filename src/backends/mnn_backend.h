@@ -8,6 +8,8 @@
 class MNNBackend : public BenchmarkBackend {
 public:
     bool init(const BenchmarkConfig& config) override;
+    bool prepare(const std::vector<float>& input) override;
+    bool run() override;
     bool infer(const std::vector<float>& input) override;
     bool infer_with_output(const std::vector<float>& input, std::vector<float>& output) override;
     void deinit() override;
@@ -17,6 +19,7 @@ private:
     std::unique_ptr<MNN::Interpreter> net_;
     MNN::Session* session_ = nullptr;
     MNN::Tensor* input_tensor_ = nullptr;
+    MNN::Tensor* output_tensor_ = nullptr;  // cached output, avoids per-iter getSessionOutput
     std::unique_ptr<MNN::Tensor> host_input_tensor_;  // CPU staging buffer for GPU mode
     bool profiling_enabled_ = false;
     std::string profile_file_;

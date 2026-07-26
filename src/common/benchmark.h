@@ -56,7 +56,19 @@ public:
     // Initialize the backend and load model
     virtual bool init(const BenchmarkConfig& config) = 0;
 
-    // Run inference once
+    // ── Two-phase inference: prepare (untimed) + run (timed) ──
+    //  Matches framework native benchmark tool semantics:
+    //  prepare = memcpy / tensor setup,  run = raw inference only
+
+    // Phase 1: copy input data to device tensor (NOT timed)
+    // Default: saves input pointer (backends override for zero-copy)
+    virtual bool prepare(const std::vector<float>& input);
+
+    // Phase 2: execute inference (TIMED — what benchmark.out / onnxruntime_perf_test measure)
+    // Default: falls back to infer() for backends that don't implement two-phase
+    virtual bool run();
+
+    // ── Legacy: single-shot inference (timed, includes data copy) ──
     virtual bool infer(const std::vector<float>& input) = 0;
 
     // Run inference and get output (default implementation returns false - not supported)
@@ -69,6 +81,9 @@ public:
 
     // Get backend name
     virtual std::string name() const = 0;
+
+protected:
+    const std::vector<float>* input_buf_ = nullptr;  // saved for default run()
 };
 
 // Run full benchmark

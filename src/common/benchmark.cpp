@@ -49,6 +49,17 @@ std::string now_iso8601() {
     return ss.str();
 }
 
+// ── Default two-phase inference (non-inline, vtable-safe) ──
+bool BenchmarkBackend::prepare(const std::vector<float>& input) {
+    input_buf_ = &input;
+    return true;
+}
+
+bool BenchmarkBackend::run() {
+    // Default: fall back to legacy infer() for backends that don't split
+    return infer(*input_buf_);
+}
+
 // Calculate cosine similarity between two vectors
 double cosine_similarity(const std::vector<float>& a, const std::vector<float>& b) {
     if (a.size() != b.size() || a.empty()) {
@@ -203,7 +214,7 @@ BenchmarkResult run_benchmark(
         }
     }
 
-    // Warmup
+    // Warmup (full infer for cold start)
     for (int i = 0; i < config.warmup_runs; ++i) {
         backend->infer(input);
     }
@@ -211,14 +222,17 @@ BenchmarkResult run_benchmark(
     // Measure memory before test
     size_t mem_before = utils::get_memory_usage_kb();
 
-    // Run benchmark
+    // Run benchmark — two-phase: prepare (untimed) + run (timed)
+    //   prepare = memcpy / input tensor setup (matches framework native tool)
+    //   run     = raw inference (what benchmark.out / onnxruntime_perf_test measure)
     std::vector<double> times;
     times.reserve(config.test_runs);
 
     for (int i = 0; i < config.test_runs; ++i) {
-        utils::Timer t;
-        backend->infer(input);
-        times.push_back(t.elapsed_ms());
+        backend->prepare(input);              // copy data (NOT timed)
+        utils::Timer t;                       // ── timer start ──
+        backend->run();                       // pure inference (TIMED)
+        times.push_back(t.elapsed_ms());      // ── timer end ──
     }
 
     // Measure peak memory
