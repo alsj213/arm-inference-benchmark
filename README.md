@@ -99,7 +99,7 @@ benchctl
 | **MobileNetV2** | 8.65 ms | 22.15 ms | **2.6x** 🏆 |
 | **ResNet50** | 82.43 ms | 107.58 ms | 1.3x |
 | **YOLOv8n** | 75.77 ms | 134.80 ms | 1.8x |
-| **BERT** | 320.14 ms | — | — |
+| **BERT** | 320.17 ms | 258.94 ms | 0.81x |
 
 ### 原生工具验证 (MNN benchmark.out)
 
