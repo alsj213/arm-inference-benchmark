@@ -1,4 +1,4 @@
-# ARM Inference Benchmark
+# ARM 推理框架性能基准测试
 
 [![Platform](https://img.shields.io/badge/platform-Android-lightgrey)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/architecture-ARM64-brightgreen)](https://developer.arm.com/architectures)
@@ -6,76 +6,76 @@
 [![Pages](https://img.shields.io/badge/docs-GitHub_Pages-green)](https://alsj213.github.io/arm-inference-benchmark/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**Cross-framework ML inference benchmarking on ARM mobile devices.**
-端侧深度学习推理框架性能基准测试 — fair, reproducible, verifiable.
+在 ARM 手机芯片上公平、可复现、可验证地对比多个端侧推理框架的性能。
 
 ---
 
-## Why This Project
+## 为什么做这个项目
 
-Comparing ML inference frameworks is hard: each has its own benchmark tool, different warm‑up policies, incompatible metric definitions. Results rarely agree with each other.
+对比推理框架的性能很难：每个框架有自己的 benchmark 工具，预热策略不同，指标定义不统一，测出来的数据各说各话。
 
-**ARM Inference Benchmark** solves this by:
-- **One harness, many frameworks** — same input, same timer, same device, same protocol
-- **Verification built in** — every result is cross‑checked against the framework's own native tool; deviations >5% are flagged
-- **Full audit trail** — every run is stored in SQLite with git commit, timestamp, device temperature
+**本项目解决三个问题：**
+
+- **一套 Harness，多个框架** — 相同输入、相同计时器、相同设备、相同协议
+- **内置验证机制** — 每次测试结果都会用框架官方工具交叉验证，偏差 >5% 自动标记
+- **完整审计追踪** — 每次运行都存入 SQLite，记录 commit hash、时间戳、设备温度
 
 ```bash
-benchctl run cnn resnet50 -f mnn,ort         # run benchmark
-benchctl history mnn resnet50                 # vertical trend
-benchctl verify mnn resnet50                  # native tool cross‑check
-benchctl export mobilenetv2 -f mnn,ort --html # report
+benchctl run cnn resnet50 -f mnn,ort         # 横向对比
+benchctl history mnn resnet50                 # 纵向趋势
+benchctl verify mnn resnet50                  # 原生工具验证
+benchctl export mobilenetv2 -f mnn,ort --html # 生成报告
 ```
 
 ---
 
-## Benchmarks
+## 测试数据
 
-### Model Benchmarks (CNN / NLP)
+### 整模型性能 (CNN / NLP)
 
-> Device: Redmi K30 Pro · Snapdragon 865 (SM8250) · FP32 · 4 threads
+> 红米 K30 Pro · 骁龙 865 (SM8250) · FP32 · 4 线程
 
-| Model | MNN | ORT | TVM | MNN vs ORT |
+| 模型 | MNN | ORT | TVM | MNN vs ORT |
 |-------|-----|-----|-----|------------|
 | **MobileNetV2** | 8.55 ms | 21.68 ms | — | **2.5x** 🏆 |
 | **ResNet50** | 83.47 ms | 142.62 ms | 64.38 ms | 1.7x |
 | **YOLOv8n** | 76.28 ms | 134.38 ms | 126.63 ms | 1.8x |
 | **BERT** | 322.13 ms | 263.50 ms | — | 0.82x |
 
-### LLM Benchmarks
+### LLM 性能
 
-> Qwen2-0.5B · 4 threads
+> Qwen2-0.5B · 4 线程
 
-| Framework | Prefill (tok/s) | Decode (tok/s) |
+| 框架 | Prefill (tok/s) | Decode (tok/s) |
 |-----------|-----------------|-----------------|
 | **MNN LLM** | 267.09 | 60.84 |
 | **llama.cpp** | 70.07 | 42.54 |
 
-### Single‑Operator Benchmarks
+### 单算子测试
 
-80+ test cases across 7 categories: Conv1x1, DWConv, MatMul, LayerNorm, Softmax, GELU, Misaligned Conv.
+80+ 测试用例，覆盖 7 个类别：Conv1x1、DWConv、MatMul、LayerNorm、Softmax、GELU、非对齐 Conv。
 
-*Full data: [`results/single_op_benchmark_2026-06-09.md`](results/single_op_benchmark_2026-06-09.md)*
+*完整数据：[`results/single_op_benchmark_2026-06-09.md`](results/single_op_benchmark_2026-06-09.md)*
 
 ---
 
-## Quick Start
+## 快速开始
 
-### Prerequisites
+### 环境要求
 
 - **Android NDK** (r26+)
-- **ADB** + Android 10+ device (ARM64)
-- **Python 3.10+** (for benchctl)
-- **Click** (`pip install click pyyaml`)
+- **ADB** + Android 10+ 设备 (ARM64)
+- **Python 3.10+**
+- `pip install click pyyaml`
 
-### 1. Clone & Init
+### 1. 克隆仓库
 
 ```bash
 git clone --recurse-submodules https://github.com/alsj213/arm-inference-benchmark.git
 cd arm-inference-benchmark
 ```
 
-### 2. Build
+### 2. 编译
 
 ```bash
 export ANDROID_NDK=/path/to/android-ndk
@@ -87,43 +87,36 @@ cmake -B build_android \
 cmake --build build_android --target benchmark_inference -j$(nproc)
 ```
 
-### 3. Run
+### 3. 运行
 
 ```bash
-# One‑shot
-benchctl run cnn mobilenetv2 -f mnn
-
-# Compare frameworks
-benchctl run cnn mobilenetv2 -f mnn,ort
-
-# See history
-benchctl history mnn mobilenetv2
-
-# Export report
-benchctl export mobilenetv2 -f mnn,ort --format html
+benchctl run cnn mobilenetv2 -f mnn          # 单框架
+benchctl run cnn mobilenetv2 -f mnn,ort       # 横向对比
+benchctl history mnn mobilenetv2              # 查看趋势
+benchctl export mobilenetv2 -f mnn,ort --format html  # 导出报告
 ```
 
 ---
 
-## Architecture
+## 架构
 
 ```
 ┌─────────────────────────────────────────────┐
-│  benchctl (Python CLI, host‑side)            │
+│  benchctl (Python CLI, PC 端)                │
 │  run · history · verify · export · db        │
 └──────────────┬──────────────────────────────┘
                │ ADB
 ┌──────────────▼──────────────────────────────┐
-│  benchmark_inference (C++, device‑side)      │
+│  benchmark_inference (C++, 手机端)           │
 │  JSON Lines → stdout                         │
 │                                              │
 │  ┌─────────┐ ┌─────────┐ ┌─────────┐        │
-│  │ CNN     │ │ LLM     │ │ SingleOp│        │
-│  │ P50/P99 │ │ TTFT/TPS│ │ per‑op  │        │
+│  │ CNN     │ │ LLM     │ │ 单算子   │        │
+│  │ P50/P99 │ │ TTFT/TPS│ │ 逐算子   │        │
 │  └────┬────┘ └────┬────┘ └────┬────┘        │
 │       └───────────┼───────────┘              │
 │              ┌────▼────┐                     │
-│              │ Harness  │   unified timer     │
+│              │ Harness  │   统一计时          │
 │              └────┬────┘                     │
 │    ┌──────────────┼──────────────┐           │
 │    ▼              ▼              ▼           │
@@ -131,45 +124,45 @@ benchctl export mobilenetv2 -f mnn,ort --format html
 └──────────────────────────────────────────────┘
 ```
 
-**Key design decisions:**
+**核心设计：**
 
-- **LoadGen‑style separation** — the timer lives in the harness, not in framework code
-- **JSON Lines protocol** — C++ binaries output one JSON object per line; benchctl consumes them
-- **SQLite audit trail** — every run is recorded with commit hash, timestamp, device temp
-- **Native tool verification** — `benchctl verify` runs the framework's own benchmark tool and flags deviations >5%
-
----
-
-## Supported Frameworks
-
-| Framework | Status | Role |
-|-----------|--------|------|
-| **MNN** (3.6.1) | ✅ Active | 主力测试 — CPU + LLM |
-| **ONNX Runtime** (1.28.0) | ✅ Active | Accuracy baseline |
-| **TVM** (0.15.0) | ⏸ Disabled | Relay backend; v0.25 API migration needed |
-| **llama.cpp** (b10121) | ✅ Active | LLM benchmark baseline |
-| ~~NCNN~~ | Removed | — |
-| ~~TFLite~~ | Removed | — |
-| ~~TNN~~ | Removed | — |
-| ~~QNN~~ | Removed | — |
-| ~~MindSpore Lite~~ | Removed | — |
+- **计时器与框架代码分离** — 计时在 Harness 层，不在框架 wrapper 里
+- **JSON Lines 协议** — C++ 二进制每行输出一个 JSON 对象；benchctl 消费
+- **SQLite 审计追踪** — 每次运行记录 commit hash、时间戳、设备温度
+- **原生工具验证** — `benchctl verify` 调用框架自带工具交叉验证，标记偏差
 
 ---
 
-## Commands
+## 支持的框架
+
+| 框架 | 版本 | 状态 | 角色 |
+|-----------|------|------|------|
+| **MNN** | 3.6.1 | ✅ 活跃 | 主力测试 — CPU + LLM |
+| **ONNX Runtime** | 1.28.0 | ✅ 活跃 | 精度标杆 |
+| **TVM** | 0.15.0 | ⏸ 暂停 | Relay backend，需适配 v0.25 API |
+| **llama.cpp** | b10121 | ✅ 活跃 | LLM 基准 |
+| ~~NCNN~~ | — | 已移除 | — |
+| ~~TFLite~~ | — | 已移除 | — |
+| ~~TNN~~ | — | 已移除 | — |
+| ~~QNN~~ | — | 已移除 | — |
+| ~~MindSpore Lite~~ | — | 已移除 | — |
+
+---
+
+## 命令速查
 
 ```
 benchctl
-├── run      CNN/LLM/单算子 benchmark
+├── run      跑 benchmark (CNN/LLM/单算子)
 │   benchctl run cnn resnet50 -f mnn,ort -t 4 -r 50
 │
-├── history  纵向性能趋势 + 回归检测
+├── history  纵向趋势 + 回归检测
 │   benchctl history mnn resnet50 --last 10
 │
 ├── verify   原生工具交叉验证
 │   benchctl verify mnn resnet50
 │
-├── export   报告导出 (JSON / HTML)
+├── export   导出报告 (JSON / HTML)
 │   benchctl export resnet50 -f mnn,ort --format html
 │
 └── db       数据库管理
@@ -178,83 +171,80 @@ benchctl
 
 ---
 
-## Methodology
+## 测试方法
 
-### Measurement Protocol
+参考 [MLPerf Inference: Mobile](https://arxiv.org/abs/2012.02328)：
 
-Inspired by [MLPerf Inference: Mobile](https://arxiv.org/abs/2012.02328):
+1. **固定随机种子** (42) — 所有框架输入一致
+2. **预热** (10 轮) — 排除冷启动影响
+3. **正式测试** (50+ 轮) — 单流串行推理
+4. **指标** — P50 / P90 / P99 / FPS / 峰值内存
+5. **精度** — 以 ONNX Runtime FP32 为基准计算余弦相似度
 
-1. **Fixed random seed** (42) — all frameworks see identical input
-2. **Warmup** (10 iterations) — exclude cold‑start effects
-3. **Measurement** (50+ iterations) — single‑stream, synchronous inference
-4. **Metrics** — P50 / P90 / P99 latency, throughput (FPS), peak memory
-5. **Accuracy** — cosine similarity vs ONNX Runtime FP32 reference
+### 验证
 
-### Verification
-
-Every result is validated against the framework's own tool:
+每次测试结果都会用框架自己的 benchmark 工具交叉验证：
 
 ```
-Framework │ Harness P50 │ Native Tool    │ Deviation │ Verdict
-──────────┼─────────────┼────────────────┼───────────┼────────
-MNN       │ 8.58 ms     │ 5.39 ms (avg)  │ +59.0%    │ ⚠️ check
+框架  │ Harness P50 │ 原生工具       │ 偏差    │ 结论
+──────┼─────────────┼────────────────┼─────────┼────────
+MNN   │ 8.58 ms     │ 5.39 ms (avg)  │ +59.0%  │ ⚠️ 待查
 ```
 
-*Note: MNN's native `benchmark.out` measures raw forward time while the harness measures full inference cycle (memcpy → run → memcpy). The deviation is expected and documented.*
+> MNN 原生 `benchmark.out` 测的是纯净 forward 时间，Harness 测了完整推理周期（memcpy → run → memcpy），偏差在预期范围内。
 
-### Track Definitions
+### 赛道定义
 
-| Track | Metrics | Models |
+| 赛道 | 指标 | 模型 |
 |-------|---------|--------|
-| **CNN** | P50, P90, P99, FPS, Memory | MobileNetV2, ResNet50, YOLOv8n, BERT |
-| **LLM** | TTFT, TPS, Memory | Qwen2‑0.5B, Qwen3‑4B |
-| **SingleOp** | Per‑op latency (mean) | Conv1x1, MatMul, DWConv, LayerNorm, … |
+| **CNN** | P50、P90、P99、FPS、内存 | MobileNetV2、ResNet50、YOLOv8n、BERT |
+| **LLM** | TTFT、TPS、内存 | Qwen2-0.5B、Qwen3-4B |
+| **单算子** | 逐算子延迟 | Conv1x1、MatMul、DWConv、LayerNorm…… |
 
 ---
 
-## Project Structure
+## 项目结构
 
 ```
 benchmark/
-├── benchctl/          # Python CLI (host‑side orchestrator)
-│   ├── cli.py         # Click CLI commands
-│   ├── db.py          # SQLite database
-│   ├── runner.py      # ADB device orchestration
-│   ├── verify.py      # Native tool verification
-│   ├── report.py      # HTML/JSON report generation
-│   └── tracks/        # Track‑specific logic (cnn/llm/single_op)
-├── src/               # C++ device‑side code
-│   ├── cnn/           # CNN benchmark binary
-│   ├── llm/           # LLM benchmark binary
-│   ├── single_op/     # Single‑operator benchmark
-│   ├── common/        # Harness, config, utilities
-│   ├── backends/      # Framework wrappers (5 backends)
-│   └── models/        # Model info definitions
-├── third_party/       # Git submodules (MNN, ORT, TVM, llama.cpp)
-├── scripts/           # Shell scripts (build, convert, profile)
-├── models/            # Model files (symlink to external storage)
-├── docs/              # Documentation + analysis reports
-├── results/           # Benchmark output
-└── templates/         # HTML report templates
+├── benchctl/          # Python CLI (PC 端)
+│   ├── cli.py         # Click 命令
+│   ├── db.py          # SQLite 数据库
+│   ├── runner.py      # ADB 编排
+│   ├── verify.py      # 原生工具验证
+│   ├── report.py      # HTML/JSON 报告
+│   └── tracks/        # 赛道逻辑 (cnn/llm/single_op)
+├── src/               # C++ 代码 (手机端)
+│   ├── cnn/           # CNN benchmark
+│   ├── llm/           # LLM benchmark
+│   ├── single_op/     # 单算子 benchmark
+│   ├── common/        # Harness、配置、工具函数
+│   ├── backends/      # 框架 wrapper (4 个后端)
+│   └── models/        # 模型信息定义
+├── third_party/       # Git 子模块 (MNN、ORT、TVM、llama.cpp)
+├── scripts/           # Shell 脚本 (编译、转换、profiling)
+├── docs/              # 文档 + 分析报告
+├── results/           # 测试输出
+└── .github/workflows/ # CI (编译 + lint + 回归)
 ```
 
 ---
 
-## Development
+## 开发
 
 ### CI/CD
 
-GitHub Actions runs cross‑compilation on every push to verify the build stays green.
+每次 push 自动交叉编译 ARM64，验证 MNN / MNN+ORT / MNN+LLAMA 三路构建。
 
-### Branch Strategy
+### 分支策略
 
-- `main` — stable, all tests pass
-- `feat/*` — feature branches, merged via PR
-- `backup/*` — historical backups
+- `main` — 稳定分支，CI 全绿
+- `feat/*` — 功能分支，PR 合入
+- `backup/*` — 历史备份
 
-### Submodule Tags
+### 子模块版本
 
-| Submodule | Tag |
+| 子模块 | Tag |
 |-----------|-----|
 | MNN | `3.6.1` |
 | ONNX Runtime | `v1.28.0` |
@@ -263,19 +253,22 @@ GitHub Actions runs cross‑compilation on every push to verify the build stays 
 
 ---
 
-## FAQ
+## 常见问题
 
-**Q: Why not use each framework's own benchmark tool?**
-A: Framework‑native tools are great for *verification* (see `benchctl verify`), but they use different measurement protocols — you can't compare them directly. Our unified harness ensures apples‑to‑apples comparison.
+**Q: 为什么不用各框架自带的 benchmark 工具？**
 
-**Q: Is MNN's 2.5x speedup over ORT real?**
-A: Yes, for MobileNetV2 FP32 on Snapdragon 865. MNN's NCHW4c layout + hand‑written NEON assembly give it a significant edge on small CV models. However, ORT pulls ahead on MatMul‑heavy models like BERT.
+A: 框架自带工具适合做*验证*（`benchctl verify`），但它们测量方法各不相同，不能直接对比。统一 Harness 保证同等条件、同等计时。
 
-**Q: How do I add a new framework?**
-A: Implement the `BenchmarkBackend` interface in `src/backends/`, add the CMake option, and create a model converter script if needed. See `BACKEND_REENABLE_GUIDE.md`.
+**Q: MNN 比 ORT 快 2.5x 真实吗？**
+
+A: 在骁龙 865 + MobileNetV2 FP32 条件下确实如此。MNN 的 NCHW4c 内存布局 + NEON 手写汇编在小 CV 模型上有显著优势。但在 MatMul 为主的模型（如 BERT）上 ORT 反超。
+
+**Q: 如何添加新框架？**
+
+A: 在 `src/backends/` 实现 `BenchmarkBackend` 接口，添加 CMake option，写模型转换脚本。详见 `BACKEND_REENABLE_GUIDE.md`。
 
 ---
 
-## License
+## 许可证
 
-MIT License — see [LICENSE](LICENSE)
+MIT License — 详见 [LICENSE](LICENSE)
