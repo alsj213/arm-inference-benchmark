@@ -101,16 +101,21 @@ benchctl
 | **YOLOv8n** | 75.77 ms | 134.80 ms | 1.8x |
 | **BERT** | 320.17 ms | 258.94 ms | 0.81x |
 
-### 原生工具验证 (MNN benchmark.out)
+### 原生工具验证 (benchctl verify)
 
-| 模型 | Harness P50 | Native avg | 偏差 |
-|------|------------|------------|------|
-| MobileNetV2 | 8.65 ms | 4.68 ms | +84.8% |
-| ResNet50 | 82.43 ms | 38.53 ms | +113.9% |
-| YOLOv8n | 75.77 ms | 47.85 ms | +58.3% |
-| BERT | 320.14 ms | 138.56 ms | +131.0% |
+| 模型 | MNN Harness | MNN Native | ORT Harness | ORT Native |
+|------|------------|------------|-------------|------------|
+| MobileNetV2 | 8.65 ms | 5.12 ms | 22.15 ms | 17.90 ms |
+| ResNet50 | 83.10 ms | 39.76 ms | 107.58 ms | 84.05 ms |
+| YOLOv8n | 76.33 ms | 48.12 ms | 134.80 ms | 103.05 ms |
+| BERT | 319.60 ms | 139.41 ms | 258.94 ms | — |
 
-> Harness 测完整推理周期（memcpy → run → memcpy），Native 只测纯 forward。偏差为预期开销。
+| 偏差来源 | MNN (+59~131%) | ORT (+24~31%) |
+|----------|---------------|---------------|
+| Harness 测 | memcpy→runSession→getOutput | create_input_tensors→Run() |
+| Native 测 | runSession only | Run() only (预分配input) |
+
+> ORT 偏差稳定（24~31%），来自每次 `Ort::Value` 构造开销。MNN 偏差更大且随模型变化，来自裸 `memcpy` 输入开销。
 
 ---
 

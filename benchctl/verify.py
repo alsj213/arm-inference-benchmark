@@ -44,28 +44,37 @@ class NativeVerifier:
             return {"error": str(e)}
         return None
 
-    def verify_ort(self, model_name: str, harness_result_ms: float = 0) -> Optional[dict]:
+    def verify_ort(self, model_name: str, threads: int = 4,
+                   harness_result_ms: float = 0) -> Optional[dict]:
         """调用 ONNX Runtime 自带的 onnxruntime_perf_test.
 
         ORT 的 perf test 工具需要单独编译 (在 third_party/onnxruntime 中).
         """
-        model_path = f"models/source/classification/{model_name}/{model_name}.onnx"
+        # Model path mapping: classification/ for most, detection/ for yolov8n, nlp/ for bert
+        if model_name == "yolov8n":
+            model_path = f"{self.DEVICE_DIR}/models/source/detection/{model_name}/{model_name}.onnx"
+        elif model_name == "bert":
+            model_path = f"{self.DEVICE_DIR}/models/source/nlp/{model_name}/{model_name}.onnx"
+        else:
+            model_path = f"{self.DEVICE_DIR}/models/source/classification/{model_name}/{model_name}.onnx"
+
         try:
             runner = self._get_runner()
             output = runner._adb(
                 "shell",
                 f"cd {self.DEVICE_DIR} && "
                 f"LD_LIBRARY_PATH={self.DEVICE_DIR} "
-                f"./onnxruntime_perf_test {model_path} 10"
+                f"./onnxruntime_perf_test -I -r 50 -s -e cpu {model_path}",
+                timeout=300
             )
-            # 解析 ORT perf test 输出格式
-            match = re.search(r"avg:\s*([\d.]+)\s*ms", output)
+            # 解析 ORT perf test 输出: "P50 Latency: X.XXXXXXX s"
+            match = re.search(r"P50 Latency:\s*([\d.]+)\s*s", output)
             if match:
-                native_ms = float(match.group(1))
+                native_ms = float(match.group(1)) * 1000  # s → ms
                 deviation = (harness_result_ms - native_ms) / native_ms * 100
                 return {
                     "native_tool": "onnxruntime_perf_test",
-                    "native_result_ms": native_ms,
+                    "native_result_ms": round(native_ms, 2),
                     "harness_result_ms": harness_result_ms,
                     "deviation_pct": round(deviation, 2),
                     "verdict": "trusted" if abs(deviation) < 5 else "unreliable"
