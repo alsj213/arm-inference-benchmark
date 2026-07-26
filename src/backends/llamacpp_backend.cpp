@@ -70,13 +70,13 @@ bool LlamaCppBackend::load_model(const std::string& model_path, int n_ctx, int n
   // Get vocab from model (required for tokenization in new API)
   vocab_ = llama_model_get_vocab(model_);
 
-  // Context params
+  // Context params (match llama-bench defaults)
   llama_context_params ctx_params = llama_context_default_params();
-  ctx_params.n_ctx = n_ctx;
-  ctx_params.n_batch = n_batch;
+  ctx_params.n_ctx   = n_ctx;
+  ctx_params.n_batch = 2048;
+  ctx_params.n_ubatch = 512;
   ctx_params.n_threads = 4;
-  ctx_params.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_ENABLED;
-  ctx_params.offload_kqv = false;
+  ctx_params.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_AUTO;
 
   ctx_ = llama_init_from_model(model_, ctx_params);
   if (!ctx_) {
@@ -261,20 +261,17 @@ LlamaCppBackend::TokenBenchResult LlamaCppBackend::benchmark_decode(
 
         auto t1 = std::chrono::high_resolution_clock::now();
 
-        // --- Decode: generate n_gen tokens ---
-        llama_token new_token = llama_sampler_sample(smpl_, ctx_, -1);
-        auto t2 = std::chrono::high_resolution_clock::now();
+        // --- Decode (llama-bench: tg128) ---
+        // Exact match to llama-bench test_gen(): llama_batch_get_one + llama_synchronize
+        // Uses random tokens (std::rand), NO sampler (sampler overhead is excluded)
+        const int n_vocab = llama_vocab_n_tokens(vocab_);
+        int token = std::rand() % n_vocab;
 
-        for (int i = 0; i < n_gen - 1; i++) {
-            batch.n_tokens = 1;
-            batch.token[0] = new_token;
-            batch.pos[0] = n_past;
-            batch.n_seq_id[0] = 1;
-            batch.seq_id[0][0] = 0;
-            batch.logits[0] = 1;
-            llama_decode(ctx_, batch);
-            n_past++;
-            new_token = llama_sampler_sample(smpl_, ctx_, -1);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < n_gen; i++) {
+            llama_decode(ctx_, llama_batch_get_one(&token, 1));
+            llama_synchronize(ctx_);
+            token = std::rand() % n_vocab;
         }
         auto t3 = std::chrono::high_resolution_clock::now();
         llama_batch_free(batch);
