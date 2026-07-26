@@ -184,18 +184,18 @@
 
     <!-- Verification -->
     <div class="card">
-        <h2>Native Tool Verification (Harness vs Native)</h2>
-        <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">全模型偏差 < 5% — MNN(Revert+Precision_Low) / ORT(SEQUENTIAL+prepare/run)</p>
-        <table>
-            <thead><tr><th>Model</th><th>MNN</th><th>MNN Native</th><th>ORT</th><th>ORT Native</th></tr></thead>
-            <tbody>
-                <tr><td>MobileNetV2</td><td class="best">4.49 ms</td><td>4.75 ms</td><td class="best">17.69 ms</td><td>17.76 ms</td></tr>
-                <tr><td>ResNet50</td><td class="best">38.06 ms</td><td>38.32 ms</td><td class="best">84.04 ms</td><td>84.00 ms</td></tr>
-                <tr><td>YOLOv8n</td><td class="best">45.40 ms</td><td>47.28 ms</td><td class="best">102.48 ms</td><td>102.87 ms</td></tr>
-                <tr><td>BERT</td><td class="best">136.59 ms</td><td>137.10 ms</td><td class="best">210.87 ms</td><td>210.38 ms</td></tr>
-            </tbody>
-        </table>
-    </div>
+        <h2>Native Tool Verification (偏差 < 7%)</h2>
+	        <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">Harness vs 框架原生工具 — 全模型偏差 < 7%</p>
+	        <table>
+	            <thead><tr><th>Model</th><th>MNN FP16</th><th>Native</th><th>MNN FP32</th><th>ORT FP32</th><th>Native</th></tr></thead>
+	            <tbody>
+	                <tr><td>MobileNetV2</td><td class="best">4.49 ms</td><td>4.78 ms</td><td>8.54 ms</td><td>17.68 ms</td><td>17.76 ms</td></tr>
+	                <tr><td>ResNet50</td><td class="best">38.15 ms</td><td>38.43 ms</td><td>83.39 ms</td><td>84.18 ms</td><td>84.00 ms</td></tr>
+	                <tr><td>YOLOv8n</td><td class="best">45.68 ms</td><td>47.84 ms</td><td>76.13 ms</td><td>103.45 ms</td><td>102.87 ms</td></tr>
+	                <tr><td>BERT</td><td class="best">136.59 ms</td><td>137.10 ms</td><td>301.18 ms</td><td>210.87 ms</td><td>210.38 ms</td></tr>
+	            </tbody>
+	        </table>
+	    </div>
 
     <!-- LLM Benchmarks -->
     <div class="two-col">
