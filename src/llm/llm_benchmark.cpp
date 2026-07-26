@@ -31,6 +31,44 @@ static int read_temp() {
     return -1;
 }
 
+// Read max CPU current frequency across all cores (MHz)
+static int read_cpu_freq() {
+    int max_mhz = 0;
+    for (int cpu = 0; cpu < 8; cpu++) {
+        char path[64];
+        snprintf(path, sizeof(path),
+                 "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_cur_freq", cpu);
+        FILE* f = fopen(path, "r");
+        if (!f) continue;
+        int khz = 0;
+        fscanf(f, "%d", &khz);
+        fclose(f);
+        int mhz = khz / 1000;
+        if (mhz > max_mhz) max_mhz = mhz;
+    }
+    return max_mhz > 0 ? max_mhz : -1;
+}
+
+// Read CPU governor for big cluster (cpu4 on SD865)
+static std::string read_governor() {
+    const char* paths[] = {
+        "/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor",
+        "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor",
+        nullptr
+    };
+    for (int i = 0; paths[i]; i++) {
+        FILE* f = fopen(paths[i], "r");
+        if (!f) continue;
+        char buf[64] = {};
+        fgets(buf, sizeof(buf), f);
+        fclose(f);
+        std::string s(buf);
+        if (!s.empty() && s.back() == '\n') s.pop_back();
+        if (!s.empty()) return s;
+    }
+    return "unknown";
+}
+
 // Print benchmark statistics with mean±std, percentiles, TTFT, TPOT
 static void print_llm_stats(const std::string& label,
                             double mean_tok_s,
@@ -178,7 +216,8 @@ static bool run_llamacpp(const Args& args) {
         int temp_before = read_temp();
         printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
                args.n_prompt, args.max_tokens, args.n_repeat);
-        printf("    Device temp: %d°C\n", temp_before);
+        printf("    CPU: %d MHz (%s) | Temp: %d°C\n",
+               read_cpu_freq(), read_governor().c_str(), temp_before);
         auto r = backend.benchmark_decode(args.n_prompt, args.max_tokens, args.n_repeat);
         int temp_after = read_temp();
 
@@ -369,7 +408,8 @@ static bool run_mnn_llm(const Args& args) {
         int temp_before = read_temp();
         printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
                args.n_prompt, args.max_tokens, args.n_repeat);
-        printf("    Device temp: %d°C\n", temp_before);
+        printf("    CPU: %d MHz (%s) | Temp: %d°C\n",
+               read_cpu_freq(), read_governor().c_str(), temp_before);
         auto result = backend.benchmark(args.n_prompt, args.max_tokens, args.n_repeat);
         int temp_after = read_temp();
 
