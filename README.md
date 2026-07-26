@@ -90,32 +90,31 @@ benchctl
 
 ## 测试结果
 
-> 红米 K30 Pro · 骁龙 865 (SM8250) · FP16 / FP32 · 4 线程 · 2026-07-26
-> 已对齐各框架原生工具，Harness vs Native 偏差 < 5%
+> 红米 K30 Pro · 骁龙 865 (SM8250) · 4 线程 · 2026-07-26
+> Harness 与各框架原生工具偏差 < 7%，数据可信
 
 ### 整模型 (MNN vs ORT)
 
-| 模型 | MNN | ORT | 加速比 |
-|------|-----|-----|--------|
-| **MobileNetV2** | 4.49 ms | 17.68 ms | **3.9x** 🏆 |
-| **ResNet50** | 38.15 ms | 84.18 ms | **2.2x** 🏆 |
-| **YOLOv8n** | 45.68 ms | 103.45 ms | **2.3x** 🏆 |
-| **BERT** | 136.59 ms | 210.87 ms | 1.5x |
+| 模型 | MNN FP16 | MNN FP32 | ORT FP32 | FP16 vs ORT | FP32 vs ORT |
+|------|----------|----------|----------|------------|------------|
+| **MobileNetV2** | 4.49 ms | 8.54 ms | 17.68 ms | **3.9x** 🏆 | **2.1x** 🏆 |
+| **ResNet50** | 38.15 ms | 83.39 ms | 84.18 ms | **2.2x** 🏆 | 1.0x |
+| **YOLOv8n** | 45.68 ms | 76.13 ms | 103.45 ms | **2.3x** 🏆 | 1.4x |
+| **BERT** | 136.59 ms | 301.18 ms | 210.87 ms | 1.5x | 0.7x ⚠️ |
 
-### 原生工具验证 (Harness vs Native, 偏差 < 5%)
+> FP16: MNN ARM82 指令加速 · FP32: 同精度公平对比  
+> BERT FP32: ORT 快 1.4x (MatMul 密集场景 ORT 有优势)
 
-| 模型 | MNN Harness | MNN Native | ORT Harness | ORT Native |
-|------|------------|------------|-------------|------------|
-| MobileNetV2 | 4.49 ms | 4.78 ms | 17.68 ms | 17.76 ms |
-| ResNet50 | 38.15 ms | 38.43 ms | 84.18 ms | 84.00 ms |
-| YOLOv8n | 45.68 ms | 47.84 ms | 103.45 ms | 102.87 ms |
-| BERT | 136.59 ms | 137.10 ms | 210.87 ms | 210.38 ms |
+### 原生工具验证 (Harness vs Native, 偏差 < 7%)
 
-> 全模型 Harness vs Native 偏差 < 7%
+| 模型 | MNN FP16 | MNN原生 | MNN FP32 | ORT FP32 | ORT原生 |
+|------|----------|---------|----------|----------|---------|
+| MobileNetV2 | 4.49 ms | 4.78 ms | 8.54 ms | 17.68 ms | 17.76 ms |
+| ResNet50 | 38.15 ms | 38.43 ms | 83.39 ms | 84.18 ms | 84.00 ms |
+| YOLOv8n | 45.68 ms | 47.84 ms | 76.13 ms | 103.45 ms | 102.87 ms |
+| BERT | 136.59 ms | 137.10 ms | 301.18 ms | 210.87 ms | 210.38 ms |
 
-> MNN 对齐方法：Revert 预处理 + Precision_Low + prepare/run 两阶段  
-> ORT 对齐方法：prepare/run 两阶段 + SEQUENTIAL 模式  
-> 详见 [METHODOLOGY.md](docs/METHODOLOGY.md)
+> MNN: Revert + prepare/run · ORT: SEQUENTIAL + prepare/run · 详见 [METHODOLOGY.md](docs/METHODOLOGY.md)
 
 ---
 

@@ -86,9 +86,9 @@
 
     <!-- KPI -->
     <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-val">3.9x</div><div class="kpi-label">MNN vs ORT Speedup</div></div>
-        <div class="kpi"><div class="kpi-val">4.49ms</div><div class="kpi-label">Fastest P50 (MNN)</div></div>
-        <div class="kpi"><div class="kpi-val">0.4%</div><div class="kpi-label">Native Tool Deviation</div></div>
+        <div class="kpi"><div class="kpi-val">4.49ms</div><div class="kpi-label">MNN FP16 Fastest</div></div>
+        <div class="kpi"><div class="kpi-val">2.1x</div><div class="kpi-label">FP32 MNN vs ORT</div></div>
+        <div class="kpi"><div class="kpi-val">< 7%</div><div class="kpi-label">Native Verification</div></div>
         <div class="kpi"><div class="kpi-val">25°C</div><div class="kpi-label">Device Temperature</div></div>
     </div>
 
@@ -159,27 +159,24 @@
             Redmi K30 Pro · Snapdragon 865 (SM8250) · FP16/FP32 · 4 threads · 2026-07-26
         </p>
         <table>
-            <thead><tr><th>Model</th><th>MNN</th><th>ORT</th><th>MNN vs ORT</th></tr></thead>
+            <thead><tr><th>Model</th><th>MNN FP16</th><th>MNN FP32</th><th>ORT FP32</th><th>FP32 加速比</th></tr></thead>
             <tbody>
                 <tr>
                     <td><strong>MobileNetV2</strong></td>
-                    <td class="best">4.49 ms</td><td>17.69 ms</td>
-                    <td><span class="tag tag-green">3.9x</span></td>
+                    <td class="best">4.49 ms</td><td>8.54 ms</td><td>17.68 ms</td>
+                    <td><span class="tag tag-green">2.1x</span></td>
                 </tr>
                 <tr>
-                    <td><strong>ResNet50</strong></td>
-                    <td class="best">38.06 ms</td><td>84.04 ms</td>
-                    <td><span class="tag tag-green">2.2x</span></td>
+                    <td><strong>ResNet50</strong></td><td class="best">38.15 ms</td><td>83.39 ms</td><td>84.18 ms</td>
+                    <td><span class="tag tag-gray">1.0x</span></td>
                 </tr>
                 <tr>
-                    <td><strong>YOLOv8n</strong></td>
-                    <td class="best">45.40 ms</td><td>102.48 ms</td>
-                    <td><span class="tag tag-green">2.3x</span></td>
+                    <td><strong>YOLOv8n</strong></td><td class="best">45.68 ms</td><td>76.13 ms</td><td>103.45 ms</td>
+                    <td><span class="tag tag-green">1.4x</span></td>
                 </tr>
                 <tr>
-                    <td><strong>BERT</strong></td>
-                    <td class="best">136.59 ms</td><td>210.87 ms</td>
-                    <td><span class="tag tag-green">1.5x</span></td>
+                    <td><strong>BERT</strong></td><td>136.59 ms</td><td>301.18 ms</td><td class="best">210.87 ms</td>
+                    <td><span class="tag tag-gray">0.7x</span></td>
                 </tr>
             </tbody>
         </table>
