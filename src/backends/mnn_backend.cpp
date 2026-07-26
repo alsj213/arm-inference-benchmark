@@ -1,12 +1,10 @@
 #include "mnn_backend.h"
 
 #include <cstring>
-#include <fstream>
 #include <MNN/Interpreter.hpp>
 #include <MNN/Tensor.hpp>
 #include <MNN/MNNForwardType.h>
-#include <chrono>
-#include <sys/time.h>
+#include "revertMNNModel.hpp"
 
 bool MNNBackend::init(const BenchmarkConfig& config) {
     MNN::ScheduleConfig schedule_config;
@@ -40,21 +38,19 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         printf("MNN: Profiling enabled, output: %s\n", config.profile_file.c_str());
     }
 
-    // Match benchmark.out: createFromBuffer (avoids createFromFile path differences)
-    // benchmark.out uses Revert preprocessing, but for sparsity=0 it's mostly a pass-through.
-    // createFromBuffer ensures same loading path for BERT-sized models.
+    // ── benchmark.out Revert preprocessing ──
+    // Revert does FlatBuffers re-serialization (changes byte layout).
+    // For sparsity=0, Conv weights are zeroed but BERT has no Conv ops.
+    // The re-serialization itself is what matters — it changes MNN's
+    // internal memory allocator/cache behavior for Precision_Low/FP16 path.
     {
-        std::ifstream f(config.model_path, std::ios::binary | std::ios::ate);
-        if (!f) {
-            printf("Failed to open MNN model: %s\n", config.model_path.c_str());
-            return false;
-        }
-        auto sz = f.tellg();
-        f.seekg(0);
-        std::vector<char> buf(sz);
-        f.read(buf.data(), sz);
+        auto revertor = std::unique_ptr<Revert>(new Revert(config.model_path.c_str()));
+        revertor->initialize(0.0f, 1);  // sparsity=0, sparseBlockOC=1
+        auto modelBuffer = revertor->getBuffer();
+        auto bufferSize = revertor->getBufferSize();
         net_ = std::unique_ptr<MNN::Interpreter>(
-            MNN::Interpreter::createFromBuffer(buf.data(), buf.size()));
+            MNN::Interpreter::createFromBuffer(modelBuffer, bufferSize));
+        revertor.reset();
     }
     if (!net_) {
         printf("Failed to load MNN model: %s\n", config.model_path.c_str());
@@ -66,12 +62,6 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         net_->setSessionMode(MNN::Interpreter::Session_Release);
     }
     net_->setSessionHint(MNN::Interpreter::HintMode::CPU_ENABLE_KLEIDIAI, 0);
-
-    printf("[MNN init] before createSession: type=%d threads=%d precision=%d power=%d backendConfig=%p\n",
-           schedule_config.type, schedule_config.numThread,
-           schedule_config.backendConfig ? (int)schedule_config.backendConfig->precision : -1,
-           schedule_config.backendConfig ? (int)schedule_config.backendConfig->power : -1,
-           (void*)schedule_config.backendConfig);
 
     session_ = net_->createSession(schedule_config);
     if (!session_) {

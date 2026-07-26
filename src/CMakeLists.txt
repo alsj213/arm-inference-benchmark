@@ -68,11 +68,20 @@ set(BACKEND_SRCS)
 set(BACKEND_LIBS)
 
 if(BENCHMARK_MNN)
-    list(APPEND BACKEND_SRCS backends/mnn_backend.cpp backends/mnn_llm_backend.cpp)
+    list(APPEND BACKEND_SRCS backends/mnn_backend.cpp backends/mnn_llm_backend.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/MNN/tools/cpp/revertMNNModel.cpp)
     list(APPEND BACKEND_LIBS MNN)
     # MNN LLM engine header (for llm_benchmark / mnn_llm_backend)
     target_include_directories(benchmark_common PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/MNN/transformers/llm/engine/include)
+    # Revert internal headers + flatbuffers
+    target_include_directories(benchmark_common PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/MNN/tools/cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/MNN/schema/current
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/MNN/source
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/MNN/source/core
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/MNN/3rd_party/flatbuffers/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/MNN/3rd_party/half)
 endif()
 
 if(BENCHMARK_ORT)
