@@ -1,4 +1,5 @@
 #include "llamacpp_backend.h"
+#include "common/utils.h"
 
 #ifdef BENCHMARK_LLAMACPP
 #include "llama.h"
@@ -57,7 +58,11 @@ bool LlamaCppBackend::load_model(const std::string& model_path, int n_ctx, int n
   }
   printf("llama.cpp: Loading model: %s\n", model_path.c_str());
 
-  // Model params
+  n_ctx_ = n_ctx;
+  n_batch_ = n_batch;
+  n_threads_ = 4;
+
+  // Model params — match native llama-bench to_llama_mparams()
   llama_model_params model_params = llama_model_default_params();
   model_params.n_gpu_layers = 0;  // No GPU on mobile
 
@@ -67,20 +72,19 @@ bool LlamaCppBackend::load_model(const std::string& model_path, int n_ctx, int n
     return false;
   }
 
-  // Get vocab from model (required for tokenization in new API)
   vocab_ = llama_model_get_vocab(model_);
 
-  // Context params — exact match llama-bench to_llama_cparams()
+  // Context params — match native llama-bench to_llama_cparams()
   llama_context_params ctx_params = llama_context_default_params();
-  ctx_params.n_ctx   = n_ctx;  // llama-bench: n_prompt + n_gen = 256
-  ctx_params.n_batch = n_batch;
-  ctx_params.n_ubatch = std::min(n_batch, 512);
-  ctx_params.n_threads = 4;
-  ctx_params.type_k = GGML_TYPE_F16;
-  ctx_params.type_v = GGML_TYPE_F16;
+  ctx_params.n_ctx       = n_ctx_;                  // llama-bench: n_prompt + n_gen + n_depth
+  ctx_params.n_batch     = n_batch_;
+  ctx_params.n_ubatch    = std::min(n_batch_, 512);
+  ctx_params.type_k      = GGML_TYPE_F16;
+  ctx_params.type_v      = GGML_TYPE_F16;
   ctx_params.offload_kqv = true;
   ctx_params.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_AUTO;
-  ctx_params.op_offload = true;
+  ctx_params.op_offload  = true;
+  ctx_params.embeddings  = false;                   // match native default
 
   ctx_ = llama_init_from_model(model_, ctx_params);
   if (!ctx_) {
@@ -91,19 +95,38 @@ bool LlamaCppBackend::load_model(const std::string& model_path, int n_ctx, int n
     return false;
   }
 
-  // Create greedy sampler chain
+  // ── Threadpool: match native llama-bench (lines 2341-2360) ──
+  ggml_backend_load_all();
+  auto * cpu_dev = ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_CPU);
+  if (cpu_dev) {
+    auto * cpu_reg = ggml_backend_dev_backend_reg(cpu_dev);
+    auto * ggml_threadpool_new_fn = (decltype(ggml_threadpool_new) *)
+        ggml_backend_reg_get_proc_address(cpu_reg, "ggml_threadpool_new");
+    if (ggml_threadpool_new_fn) {
+      struct ggml_threadpool_params tpp =
+          ggml_threadpool_params_default(n_threads_);
+      tpp.poll = 50;  // native default poll value
+      threadpool_ = ggml_threadpool_new_fn(&tpp);
+      if (threadpool_) {
+        llama_attach_threadpool(ctx_, threadpool_, NULL);
+        printf("llama.cpp: Threadpool attached (%d threads)\n", n_threads_);
+      }
+    }
+  }
+  if (!threadpool_) {
+    printf("llama.cpp: Threadpool not available, using set_n_threads\n");
+  }
+
+  // Create greedy sampler chain (used only by generate(), not benchmark)
   auto sparams = llama_sampler_chain_default_params();
   smpl_ = llama_sampler_chain_init(sparams);
   llama_sampler_chain_add(smpl_, llama_sampler_init_greedy());
 
-  n_ctx_ = n_ctx;
-  n_batch_ = n_batch;
-  n_past_ = 0;
   model_loaded_ = true;
 
   printf("llama.cpp: Model loaded successfully!\n");
   printf("llama.cpp: Context size: %d\n", n_ctx_);
-  printf("llama.cpp: Batch size: %d\n", n_batch_);
+  printf("llama.cpp: Batch size: %d / ubatch: %d\n", n_batch_, ctx_params.n_ubatch);
 
   return true;
 #else
@@ -230,66 +253,110 @@ LlamaCppBackend::TokenBenchResult LlamaCppBackend::benchmark_decode(
         int n_prompt, int n_gen, int n_repeat) {
     TokenBenchResult r = {};
 #ifdef BENCHMARK_LLAMACPP
-    if (!model_loaded_) return r;
+    if (!model_loaded_ || !ctx_) return r;
 
-    // Random token IDs (bypass tokenizer, same as llama-bench)
-    std::vector<llama_token> tokens(n_prompt);
-    for (int i = 0; i < n_prompt; i++) {
-        tokens[i] = (rand() % 10000) + 100;
-    }
+    const int32_t n_vocab = llama_vocab_n_tokens(vocab_);
+    const bool add_bos = llama_vocab_get_add_bos(vocab_);
+    const int32_t bos_token = add_bos ? llama_vocab_bos(vocab_) : 0;
+    auto mem = llama_get_memory(ctx_);
 
-    int n_batch = std::min(n_batch_, n_prompt);
-    llama_memory_t mem = llama_get_memory(ctx_);
+    // Track peak RSS during benchmark
+    auto sample_mem = []() { return utils::get_memory_usage_kb() / 1024; };  // MiB
+    size_t mem_before = sample_mem();
+    r.peak_memory_mib = mem_before;
 
-    double prefill_sum = 0, decode_sum = 0;
-
-    for (int rep = 0; rep < n_repeat + 1; rep++) {  // +1 warmup (skip first)
-        // Clear KV cache
-        llama_memory_seq_rm(mem, 0, 0, -1);
-        int n_past = 0;
-
-        // --- Prefill: batch decode all prompt tokens ---
-        auto t0 = std::chrono::high_resolution_clock::now();
-
-        llama_batch batch = llama_batch_init(n_batch, 0, 1);
-        for (int i = 0; i < n_prompt; i++) {
-            batch.token[i] = tokens[i];
-            batch.pos[i] = n_past + i;
-            batch.n_seq_id[i] = 1;
-            batch.seq_id[i][0] = 0;
-            batch.logits[i] = (i == n_prompt - 1) ? 1 : 0;
+    // ── Prefill benchmark (match native test_prompt + timing loop) ──
+    if (n_prompt > 0) {
+        // Warmup (match native lines 2363-2375)
+        llama_memory_clear(mem, false);
+        llama_set_n_threads(ctx_, n_threads_, n_threads_);
+        std::vector<llama_token> w_tokens(n_batch_);
+        int n_processed = 0;
+        while (n_processed < n_prompt) {
+            int n_tokens = std::min(n_prompt - n_processed, n_batch_);
+            w_tokens[0] = (n_processed == 0 && add_bos)
+                ? bos_token : std::rand() % n_vocab;
+            for (int i = 1; i < n_tokens; i++)
+                w_tokens[i] = std::rand() % n_vocab;
+            llama_decode(ctx_, llama_batch_get_one(w_tokens.data(), n_tokens));
+            n_processed += n_tokens;
         }
-        batch.n_tokens = n_prompt;
-        llama_decode(ctx_, batch);
-        n_past += n_prompt;
+        llama_synchronize(ctx_);
 
-        auto t1 = std::chrono::high_resolution_clock::now();
+        double prefill_sum = 0;
+        for (int rep = 0; rep < n_repeat; rep++) {
+            llama_memory_clear(mem, false);
+            llama_set_n_threads(ctx_, n_threads_, n_threads_);
+            n_processed = 0;
 
-        // --- Decode (llama-bench: tg128) ---
-        // Exact match to llama-bench test_gen(): llama_batch_get_one + llama_synchronize
-        // Uses random tokens (std::rand), NO sampler (sampler overhead is excluded)
-        const int n_vocab = llama_vocab_n_tokens(vocab_);
-        int token = std::rand() % n_vocab;
+            auto t0 = std::chrono::high_resolution_clock::now();
 
-        auto t2 = std::chrono::high_resolution_clock::now();
-        for (int i = 0; i < n_gen; i++) {
-            llama_decode(ctx_, llama_batch_get_one(&token, 1));
+            while (n_processed < n_prompt) {
+                int n_tokens = std::min(n_prompt - n_processed, n_batch_);
+                w_tokens[0] = (n_processed == 0 && add_bos)
+                    ? bos_token : std::rand() % n_vocab;
+                for (int i = 1; i < n_tokens; i++)
+                    w_tokens[i] = std::rand() % n_vocab;
+                llama_decode(ctx_, llama_batch_get_one(w_tokens.data(), n_tokens));
+                n_processed += n_tokens;
+            }
             llama_synchronize(ctx_);
-            token = std::rand() % n_vocab;
+
+            auto t1 = std::chrono::high_resolution_clock::now();
+            double ms  = std::chrono::duration<double, std::milli>(t1 - t0).count();
+            double spd = (double)n_prompt / (ms / 1000.0);
+            r.prefill_ms.push_back(ms);
+            r.prefill_per_iter.push_back(spd);
+            prefill_sum += spd;
+
+            // Sample peak memory
+            size_t cur = sample_mem();
+            if (cur > r.peak_memory_mib) r.peak_memory_mib = cur;
         }
-        auto t3 = std::chrono::high_resolution_clock::now();
-        llama_batch_free(batch);
-
-        if (rep == 0) continue;  // skip warmup
-
-        double prefill_s = std::chrono::duration<double>(t1 - t0).count();
-        double decode_s  = std::chrono::duration<double>(t3 - t2).count();
-        prefill_sum += (double)n_prompt / prefill_s;
-        decode_sum  += (double)n_gen / decode_s;
+        r.prefill_tok_per_s = prefill_sum / n_repeat;
+        r.ttft_ms = r.prefill_ms.empty() ? 0 : r.prefill_ms[0];
     }
 
-    r.prefill_tok_per_s = prefill_sum / n_repeat;
-    r.decode_tok_per_s  = decode_sum  / n_repeat;
+    // ── Decode benchmark (match native test_gen + timing loop) ──
+    if (n_gen > 0) {
+        // Warmup (match native lines 2377-2388)
+        llama_memory_clear(mem, false);
+        llama_set_n_threads(ctx_, n_threads_, n_threads_);
+        llama_token w_token = add_bos ? bos_token : std::rand() % n_vocab;
+        for (int i = 0; i < 1; i++) {  // native: test_gen(ctx, 1)
+            llama_decode(ctx_, llama_batch_get_one(&w_token, 1));
+            llama_synchronize(ctx_);
+            w_token = std::rand() % n_vocab;
+        }
+
+        double decode_sum = 0, decode_ms_sum = 0;
+        for (int rep = 0; rep < n_repeat; rep++) {
+            llama_memory_clear(mem, false);
+            llama_set_n_threads(ctx_, n_threads_, n_threads_);
+            w_token = add_bos ? bos_token : std::rand() % n_vocab;
+
+            auto t0 = std::chrono::high_resolution_clock::now();
+
+            for (int i = 0; i < n_gen; i++) {
+                llama_decode(ctx_, llama_batch_get_one(&w_token, 1));
+                llama_synchronize(ctx_);
+                w_token = std::rand() % n_vocab;
+            }
+
+            auto t1 = std::chrono::high_resolution_clock::now();
+            double ms  = std::chrono::duration<double, std::milli>(t1 - t0).count();
+            double spd = (double)n_gen / (ms / 1000.0);
+            r.decode_ms.push_back(ms);
+            r.decode_per_iter.push_back(spd);
+            decode_sum += spd;
+            decode_ms_sum += ms;
+
+            size_t cur = sample_mem();
+            if (cur > r.peak_memory_mib) r.peak_memory_mib = cur;
+        }
+        r.decode_tok_per_s = decode_sum / n_repeat;
+        r.tpot_ms = (n_gen > 0) ? decode_ms_sum / (n_repeat * n_gen) : 0;
+    }
 #else
     (void)n_prompt; (void)n_gen; (void)n_repeat;
 #endif
@@ -399,6 +466,19 @@ LlamaCppBackend::VLBatchResult LlamaCppBackend::generate_vl(
 
 void LlamaCppBackend::deinit() {
 #ifdef BENCHMARK_LLAMACPP
+  if (threadpool_) {
+    // Match native: lookup free function dynamically
+    auto * cpu_dev = ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_CPU);
+    if (cpu_dev) {
+      auto * cpu_reg = ggml_backend_dev_backend_reg(cpu_dev);
+      auto * ggml_threadpool_free_fn = (decltype(ggml_threadpool_free) *)
+          ggml_backend_reg_get_proc_address(cpu_reg, "ggml_threadpool_free");
+      if (ggml_threadpool_free_fn) {
+        ggml_threadpool_free_fn(threadpool_);
+      }
+    }
+    threadpool_ = nullptr;
+  }
   if (smpl_) {
     llama_sampler_free(smpl_);
     smpl_ = nullptr;

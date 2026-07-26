@@ -14,6 +14,52 @@
 using json = nlohmann::json;
 
 #include "common/benchmark.h"
+#include "common/utils.h"
+
+// Read device temperature (first thermal zone > 0, in °C)
+static int read_temp() {
+    for (int i = 0; i < 20; i++) {
+        char path[64];
+        snprintf(path, sizeof(path), "/sys/class/thermal/thermal_zone%d/temp", i);
+        FILE* f = fopen(path, "r");
+        if (!f) continue;
+        int val = 0;
+        fscanf(f, "%d", &val);
+        fclose(f);
+        if (val > 0) return val / 1000;
+    }
+    return -1;
+}
+
+// Print benchmark statistics with mean±std, percentiles, TTFT, TPOT
+static void print_llm_stats(const std::string& label,
+                            double mean_tok_s,
+                            const std::vector<double>& per_iter,
+                            const std::vector<double>& per_ms,
+                            double ttft_or_tpot_ms) {
+    printf("  %s:\n", label.c_str());
+    printf("    Mean ± Std:  %.2f ± ", mean_tok_s);
+    if (per_iter.size() >= 2) {
+        double sum = 0;
+        for (auto v : per_iter) sum += v;
+        double mean = sum / per_iter.size();
+        double var = 0;
+        for (auto v : per_iter) var += (v - mean) * (v - mean);
+        var /= per_iter.size();
+        printf("%.2f tok/s\n", std::sqrt(var));
+    } else {
+        printf("N/A\n");
+    }
+    if (!per_ms.empty()) {
+        auto stats = utils::calculate_stats(per_ms);
+        printf("    P50/P90/P99: %.2f / %.2f / %.2f ms\n",
+               stats.p50_ms, stats.p90_ms, stats.p99_ms);
+        printf("    Min / Max:   %.2f / %.2f ms\n", stats.min_ms, stats.max_ms);
+    }
+    if (ttft_or_tpot_ms > 0) {
+        printf("    TTFT/TPOT:   %.2f ms\n", ttft_or_tpot_ms);
+    }
+}
 
 #ifdef BENCHMARK_LLAMACPP
 #include "backends/llamacpp_backend.h"
@@ -129,12 +175,19 @@ static bool run_llamacpp(const Args& args) {
     printf("Loaded in %.2f s\n\n", load_s);
 
     if (args.benchmark_only) {
-        // Benchmark mode: random tokens, token-level API (same as llama-bench)
+        int temp_before = read_temp();
         printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
                args.n_prompt, args.max_tokens, args.n_repeat);
+        printf("    Device temp: %d°C\n", temp_before);
         auto r = backend.benchmark_decode(args.n_prompt, args.max_tokens, args.n_repeat);
-        printf("prefill: %.2f tok/s  |  decode: %.2f tok/s\n",
-               r.prefill_tok_per_s, r.decode_tok_per_s);
+        int temp_after = read_temp();
+
+        print_llm_stats("Prefill", r.prefill_tok_per_s,
+                        r.prefill_per_iter, r.prefill_ms, r.ttft_ms);
+        print_llm_stats("Decode",  r.decode_tok_per_s,
+                        r.decode_per_iter,  r.decode_ms,  r.tpot_ms);
+        printf("  Peak Memory: %zu MiB\n", r.peak_memory_mib);
+        printf("  Device temp: %d → %d°C\n", temp_before, temp_after);
 
         if (args.json_output) {
             json j;
@@ -148,10 +201,18 @@ static bool run_llamacpp(const Args& args) {
             j["metrics"] = {
                 {"prefill_tok_per_s", r.prefill_tok_per_s},
                 {"decode_tok_per_s", r.decode_tok_per_s},
+                {"ttft_ms", r.ttft_ms},
+                {"tpot_ms", r.tpot_ms},
+                {"peak_memory_mib", r.peak_memory_mib},
+                {"temp_before", temp_before},
+                {"temp_after", temp_after},
                 {"n_prompt", args.n_prompt},
                 {"n_gen", args.max_tokens},
                 {"n_repeat", args.n_repeat}
             };
+            // Per-iteration data
+            j["metrics"]["prefill_per_iter"] = r.prefill_per_iter;
+            j["metrics"]["decode_per_iter"]  = r.decode_per_iter;
             printf("%s\n", j.dump().c_str());
         }
     } else {
@@ -305,12 +366,19 @@ static bool run_mnn_llm(const Args& args) {
     printf("Loaded in %.2f s\n\n", load_s);
 
     if (args.benchmark_only) {
-        // Benchmark mode: random token IDs, measure decode
+        int temp_before = read_temp();
         printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
                args.n_prompt, args.max_tokens, args.n_repeat);
+        printf("    Device temp: %d°C\n", temp_before);
         auto result = backend.benchmark(args.n_prompt, args.max_tokens, args.n_repeat);
-        printf("prefill: %.2f tok/s  |  decode: %.2f tok/s\n",
-               result.prefill_tok_per_s, result.decode_tok_per_s);
+        int temp_after = read_temp();
+
+        print_llm_stats("Prefill", result.prefill_tok_per_s,
+                        result.prefill_per_iter, result.prefill_ms, result.ttft_ms);
+        print_llm_stats("Decode",  result.decode_tok_per_s,
+                        result.decode_per_iter,  result.decode_ms,  result.tpot_ms);
+        printf("  Peak Memory: %zu MiB\n", result.peak_memory_mib);
+        printf("  Device temp: %d → %d°C\n", temp_before, temp_after);
 
         if (args.json_output) {
             json j;
@@ -324,10 +392,17 @@ static bool run_mnn_llm(const Args& args) {
             j["metrics"] = {
                 {"prefill_tok_per_s", result.prefill_tok_per_s},
                 {"decode_tok_per_s", result.decode_tok_per_s},
+                {"ttft_ms", result.ttft_ms},
+                {"tpot_ms", result.tpot_ms},
                 {"load_time_s", result.load_time_s},
+                {"peak_memory_mib", result.peak_memory_mib},
+                {"temp_before", temp_before},
+                {"temp_after", temp_after},
                 {"n_prompt", result.n_prompt},
                 {"n_generate", result.n_generate}
             };
+            j["metrics"]["prefill_per_iter"] = result.prefill_per_iter;
+            j["metrics"]["decode_per_iter"]  = result.decode_per_iter;
             printf("%s\n", j.dump().c_str());
         }
     } else {

@@ -1,4 +1,5 @@
 #include "mnn_llm_backend.h"
+#include "common/utils.h"
 
 #ifdef BENCHMARK_MNN
 #include "llm/llm.hpp"
@@ -25,14 +26,28 @@ bool MnnLlmBackend::load_model(const std::string& config_path) {
         return false;
     }
 
-    bool ok = llm_->load();
-    auto end = std::chrono::high_resolution_clock::now();
-    double t = std::chrono::duration<double>(end - start).count();
+    // ── Match native buildLLM() set_config calls (llm_bench.cpp:1087-1158) ──
+    // Config keys NOT already in config.json are set explicitly.
+    llm_->set_config(R"({"async":false})");                // ensure GPU/CPU sync
+    llm_->set_config(R"({"reuse_kv":false})");             // reset KV cache each run
+    llm_->set_config(R"({"power":"normal"})");             // power mode (default: normal)
+    llm_->set_config(R"({"dynamic_option":0})");           // scheduling (0 for n_prompt<=300)
+    llm_->set_config(R"({"attention_mode":8})");           // flash_attention=1, quant_kv=0
+    llm_->set_config(R"({"use_mmap":false})");             // no mmap (match native)
+    llm_->set_config(R"({"tmp_path":"tmp"})");             // intermediate buffer path
 
+    bool ok = llm_->load();
     if (!ok) {
         printf("MNN_LLM: load failed\n");
         return false;
     }
+
+    // ── Match native tuning_prepare() (llm_bench.cpp:1161-1162) ──
+    llm_->tuning(MNN::Transformer::OP_ENCODER_NUMBER,
+                 {1, 5, 10, 20, 30, 50, 100});
+
+    auto end = std::chrono::high_resolution_clock::now();
+    double t = std::chrono::duration<double>(end - start).count();
 
     printf("MNN_LLM: loaded in %.2f s\n", t);
     model_loaded_ = true;
@@ -54,7 +69,10 @@ void MnnLlmBackend::reset() {
 }
 
 // ── benchmark ──
-// Uses Llm::getContext()->prefill_us / decode_us — same hooks as official llm_bench
+// Exact match to native llm_bench kv_cache=false mode (llm_bench.cpp:1291-1317):
+//   - prefill: response(all_prompt_tokens, max=1)  → speed = n_prompt / prefill_us
+//   - decode:  response(single_token, max=n_gen)   → speed = n_gen / decode_us
+// Each response() call resets prefill_us/decode_us internally (reuse_kv=false).
 
 MnnLlmBackend::LlmBenchResult MnnLlmBackend::benchmark(
         int n_prompt, int n_generate, int n_repeat) {
@@ -65,45 +83,59 @@ MnnLlmBackend::LlmBenchResult MnnLlmBackend::benchmark(
     result.n_prompt = n_prompt;
     result.n_generate = n_generate;
 
-    std::vector<int> prompt_ids(n_prompt);
-    for (int i = 0; i < n_prompt; i++) {
-        prompt_ids[i] = (rand() % 10000) + 100;
+    // Track peak RSS
+    size_t mem_before = utils::get_memory_usage_kb() / 1024;  // MiB
+    result.peak_memory_mib = mem_before;
+
+    // Match native: fixed token value 16 (llm_bench.cpp:1293)
+    const int tok = 16;
+    std::vector<int> prompt_tokens(n_prompt, tok);
+    std::vector<int> single_token(1, tok);
+
+    auto* ctx = llm_->getContext();
+
+    double prefill_sum = 0, decode_sum = 0;
+
+    for (int r = 0; r < n_repeat + 1; r++) {  // +1 warmup
+        int64_t prefill_us = 0, decode_us = 0;
+
+        // ── Prefill phase ──
+        if (n_prompt > 0) {
+            llm_->response(prompt_tokens, nullptr, nullptr, 1);
+            prefill_us = ctx->prefill_us;
+        }
+
+        // ── Decode phase ──
+        if (n_generate > 0) {
+            llm_->response(single_token, nullptr, nullptr, n_generate);
+            decode_us = ctx->decode_us;
+        }
+
+        if (r == 0) continue;  // skip warmup
+
+        double prefill_ms = prefill_us / 1000.0;
+        double decode_ms  = decode_us / 1000.0;
+        double prefill_spd = (n_prompt > 0 && prefill_us > 0)
+            ? 1e6 * n_prompt / prefill_us : 0;
+        double decode_spd  = (n_generate > 0 && decode_us > 0)
+            ? 1e6 * n_generate / decode_us : 0;
+
+        result.prefill_ms.push_back(prefill_ms);
+        result.decode_ms.push_back(decode_ms);
+        result.prefill_per_iter.push_back(prefill_spd);
+        result.decode_per_iter.push_back(decode_spd);
+        prefill_sum += prefill_spd;
+        decode_sum  += decode_spd;
+
+        size_t cur = utils::get_memory_usage_kb() / 1024;
+        if (cur > result.peak_memory_mib) result.peak_memory_mib = cur;
     }
 
-    std::vector<double> prefill_speeds, decode_speeds;
-
-    for (int r = 0; r < n_repeat + 1; r++) {  // +1 warmup (skip first, like official llm_bench)
-        llm_->reset();
-
-        // Read baseline before generation
-        auto* ctx = llm_->getContext();
-        int64_t prefill_before = ctx->prefill_us;
-        int64_t decode_before  = ctx->decode_us;
-
-        // Full run: prefill + decode
-        auto output_ids = llm_->generate(prompt_ids, n_generate);
-
-        // Read after — take delta (context accumulates across calls)
-        int64_t prefill_delta = ctx->prefill_us - prefill_before;
-        int64_t decode_delta  = ctx->decode_us  - decode_before;
-
-        if (r == 0) continue;  // skip warmup (same as official llm_bench)
-
-        double prefill_s = prefill_delta / 1e6;
-        double decode_s  = decode_delta  / 1e6;
-
-        double prefill_tok_s = (prefill_s > 0) ? (double)n_prompt / prefill_s : 0;
-        double decode_tok_s  = (decode_s > 0)  ? (double)output_ids.size() / decode_s : 0;
-
-        prefill_speeds.push_back(prefill_tok_s);
-        decode_speeds.push_back(decode_tok_s);
-    }
-
-    double avg_prefill = 0, avg_decode = 0;
-    for (auto v : prefill_speeds) avg_prefill += v;
-    for (auto v : decode_speeds)  avg_decode += v;
-    result.prefill_tok_per_s = avg_prefill / prefill_speeds.size();
-    result.decode_tok_per_s  = avg_decode  / decode_speeds.size();
+    result.prefill_tok_per_s = prefill_sum / n_repeat;
+    result.decode_tok_per_s  = decode_sum  / n_repeat;
+    result.ttft_ms = result.prefill_ms.empty() ? 0 : result.prefill_ms[0];
+    result.tpot_ms = (n_generate > 0 && !result.decode_ms.empty())
+        ? result.decode_ms[0] / n_generate : 0;
 
     return result;
 }

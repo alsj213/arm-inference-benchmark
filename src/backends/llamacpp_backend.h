@@ -34,8 +34,15 @@ class LlamaCppBackend : public BenchmarkBackend {
   // Token-level benchmark (same methodology as llama-bench)
   // Uses random tokens directly, measures prefill and decode separately
   struct TokenBenchResult {
-    double prefill_tok_per_s;
-    double decode_tok_per_s;
+    double prefill_tok_per_s;       // mean prefill speed
+    double decode_tok_per_s;        // mean decode speed
+    double ttft_ms;                 // time to first token (prefill latency)
+    double tpot_ms;                 // time per output token (decode latency per token)
+    size_t peak_memory_mib;         // peak RSS during benchmark
+    std::vector<double> prefill_per_iter;  // tok/s per iteration
+    std::vector<double> decode_per_iter;   // tok/s per iteration
+    std::vector<double> prefill_ms;  // prefill latency per iteration (ms)
+    std::vector<double> decode_ms;   // decode latency per iteration (ms)
   };
   TokenBenchResult benchmark_decode(int n_prompt, int n_gen, int n_repeat);
 
@@ -62,10 +69,12 @@ class LlamaCppBackend : public BenchmarkBackend {
   const llama_vocab* vocab_ = nullptr;
   llama_sampler* smpl_ = nullptr;
   llama_batch batch_;
+  ggml_threadpool_t threadpool_ = nullptr;     // match native llama-bench
 #endif
   int n_ctx_ = 2048;
   int n_batch_ = 512;
   int n_past_ = 0;
+  int n_threads_ = 4;
   bool model_loaded_ = false;
   std::vector<int> tokens_;
 };

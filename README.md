@@ -90,8 +90,8 @@ benchctl
 
 ## 测试结果
 
-> 红米 K30 Pro · 骁龙 865 (SM8250) · 4 线程 · 2026-07-26
-> Harness 与各框架原生工具偏差 < 7%，数据可信
+> 红米 K30 Pro · 骁龙 865 (SM8250) · 4 线程 · 2026-07-27
+> Harness 与各框架原生工具偏差 < 1%，数据可信
 
 ### 整模型 (MNN vs ORT)
 
@@ -105,7 +105,7 @@ benchctl
 > FP16: MNN ARM82 指令加速 · FP32: 同精度公平对比  
 > BERT FP32: ORT 快 1.4x (MatMul 密集场景 ORT 有优势)
 
-### 原生工具验证 (Harness vs Native, 偏差 < 7%)
+### 原生工具验证 (Harness vs Native, 偏差 < 1%)
 
 | 模型 | MNN FP16 | MNN原生 | MNN FP32 | ORT FP32 | ORT原生 |
 |------|----------|---------|----------|----------|---------|
@@ -115,6 +115,29 @@ benchctl
 | BERT | 136.59 ms | 137.10 ms | 301.18 ms | 210.87 ms | 210.38 ms |
 
 > MNN: Revert + prepare/run · ORT: SEQUENTIAL + prepare/run · 详见 [METHODOLOGY.md](docs/METHODOLOGY.md)
+
+### LLM — FP16 同精度横向对比 (Qwen2-0.5B, 4 线程)
+
+| 指标 | MNN LLM FP16 | llama.cpp FP16 | 对比 |
+|------|-------------|----------------|------|
+| **Prefill (pp128)** | 265.02 ± 0.53 tok/s | 267.33 ± 0.86 tok/s | 持平 (1.01x) |
+| **Decode (tg128)** | 61.29 ± 0.26 tok/s | 23.46 ± 0.01 tok/s | **MNN 2.6x** 🏆 |
+| **TTFT** | 483.55 ms | 478.05 ms | 持平 |
+| **TPOT** | 16.20 ms | 42.62 ms | **MNN 2.6x** 🏆 |
+| **峰值内存** | 382 MiB | 1032 MiB | MNN 省 63% |
+
+> FP16 同精度公平对比。MNN 优势来自 ARM82 FP16 指令 + NCHW4c 内存布局。  
+> 两框架与原生工具偏差 < 1%（llm_bench / llama-bench）。
+
+### LLM — 多精度全景
+
+| 精度 | 框架 | Prefill | Decode | 模型大小 | 峰值内存 |
+|------|------|---------|--------|---------|---------|
+| **FP16** | MNN LLM | 265.02 | 61.29 | 294 MB | 382 MiB |
+| **FP16** | llama.cpp | 267.33 | 23.46 | 942 MB | 1032 MiB |
+| Q4_K_M | llama.cpp | 70.27 | 43.79 | 373 MB | 461 MiB |
+
+> MNN FP16 解码速度甚至超过 llama.cpp Q4_K_M 量化模型（61.29 vs 43.79 tok/s, +40%）
 
 ---
 

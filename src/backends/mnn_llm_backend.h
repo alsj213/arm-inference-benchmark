@@ -41,11 +41,18 @@ class MnnLlmBackend : public BenchmarkBackend {
 
   // Benchmark: prefill (prompt processing) + decode (token generation)
   struct LlmBenchResult {
-    double prefill_tok_per_s;   // prompt processing speed
-    double decode_tok_per_s;    // token generation speed
-    double load_time_s;         // model loading time
-    int n_prompt;               // prompt token count
-    int n_generate;             // generated token count
+    double prefill_tok_per_s;       // mean prefill speed
+    double decode_tok_per_s;        // mean decode speed
+    double ttft_ms;                 // time to first token
+    double tpot_ms;                 // time per output token
+    double load_time_s;             // model loading time
+    size_t peak_memory_mib;         // peak RSS during benchmark
+    int n_prompt;                   // prompt token count
+    int n_generate;                 // generated token count
+    std::vector<double> prefill_per_iter;  // tok/s per iteration
+    std::vector<double> decode_per_iter;   // tok/s per iteration
+    std::vector<double> prefill_ms;  // prefill latency per iteration (ms)
+    std::vector<double> decode_ms;   // decode latency per iteration (ms)
   };
   LlmBenchResult benchmark(int n_prompt, int n_generate, int n_repeat = 5);
 

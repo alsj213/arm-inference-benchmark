@@ -44,7 +44,7 @@
         .flow-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; }
         .flow-arrow { color: var(--muted); font-size: 1.2em; }
 
-        /* ── Tree diagrams ── */
+        /* Tree diagrams */
         .tree { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: .85em; line-height: 1.8; }
         .tree ul { list-style: none; padding-left: 1.8em; position: relative; }
         .tree ul li { position: relative; }
@@ -88,8 +88,8 @@
     <div class="kpi-grid">
         <div class="kpi"><div class="kpi-val">4.49ms</div><div class="kpi-label">MNN FP16 Fastest</div></div>
         <div class="kpi"><div class="kpi-val">2.1x</div><div class="kpi-label">FP32 MNN vs ORT</div></div>
-        <div class="kpi"><div class="kpi-val">< 7%</div><div class="kpi-label">Native Verification</div></div>
-        <div class="kpi"><div class="kpi-val">25°C</div><div class="kpi-label">Device Temperature</div></div>
+        <div class="kpi"><div class="kpi-val">< 1%</div><div class="kpi-label">Native Verification</div></div>
+        <div class="kpi"><div class="kpi-val">266.75</div><div class="kpi-label">MNN LLM Prefill tok/s</div></div>
     </div>
 
     <!-- Architecture Tree -->
@@ -182,44 +182,63 @@
         </table>
     </div>
 
-    <!-- Verification -->
+    <!-- CNN Verification -->
     <div class="card">
-        <h2>Native Tool Verification (偏差 < 7%)</h2>
-	        <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">Harness vs 框架原生工具 — 全模型偏差 < 7%</p>
-	        <table>
-	            <thead><tr><th>Model</th><th>MNN FP16</th><th>Native</th><th>MNN FP32</th><th>ORT FP32</th><th>Native</th></tr></thead>
-	            <tbody>
-	                <tr><td>MobileNetV2</td><td class="best">4.49 ms</td><td>4.78 ms</td><td>8.54 ms</td><td>17.68 ms</td><td>17.76 ms</td></tr>
-	                <tr><td>ResNet50</td><td class="best">38.15 ms</td><td>38.43 ms</td><td>83.39 ms</td><td>84.18 ms</td><td>84.00 ms</td></tr>
-	                <tr><td>YOLOv8n</td><td class="best">45.68 ms</td><td>47.84 ms</td><td>76.13 ms</td><td>103.45 ms</td><td>102.87 ms</td></tr>
-	                <tr><td>BERT</td><td class="best">136.59 ms</td><td>137.10 ms</td><td>301.18 ms</td><td>210.87 ms</td><td>210.38 ms</td></tr>
-	            </tbody>
-	        </table>
-	    </div>
-
-    <!-- LLM Benchmarks -->
-    <div class="two-col">
-        <div class="card">
-            <h2>LLM Benchmarks</h2>
-            <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">Qwen2-0.5B · 4 threads</p>
+        <h2>CNN Native Tool Verification (偏差 < 5%)</h2>
+            <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">Harness vs 框架原生工具</p>
             <table>
-                <thead><tr><th>Framework</th><th>Prefill</th><th>Decode</th></tr></thead>
+                <thead><tr><th>Model</th><th>MNN FP16</th><th>Native</th><th>MNN FP32</th><th>ORT FP32</th><th>Native</th></tr></thead>
                 <tbody>
-                    <tr><td><strong>MNN LLM</strong></td><td class="best">267 tok/s</td><td class="best">60.8 tok/s</td></tr>
-                    <tr><td>llama.cpp</td><td>70 tok/s</td><td>42.5 tok/s</td></tr>
+                    <tr><td>MobileNetV2</td><td class="best">4.49 ms</td><td>4.78 ms</td><td>8.54 ms</td><td>17.68 ms</td><td>17.76 ms</td></tr>
+                    <tr><td>ResNet50</td><td class="best">38.15 ms</td><td>38.43 ms</td><td>83.39 ms</td><td>84.18 ms</td><td>84.00 ms</td></tr>
+                    <tr><td>YOLOv8n</td><td class="best">45.68 ms</td><td>47.84 ms</td><td>76.13 ms</td><td>103.45 ms</td><td>102.87 ms</td></tr>
+                    <tr><td>BERT</td><td class="best">136.59 ms</td><td>137.10 ms</td><td>301.18 ms</td><td>210.87 ms</td><td>210.38 ms</td></tr>
                 </tbody>
             </table>
         </div>
+
+    <!-- LLM FP16 Aligned -->
+    <div class="card">
+        <h2>LLM — FP16 同精度横向对比</h2>
+        <p style="color:var(--muted);font-size:.85em;margin-bottom:12px">
+            Qwen2-0.5B · pp128+tg128 · 4 threads · Native tools verified < 1% · 2026-07-27
+        </p>
+        <table>
+            <thead><tr><th>指标</th><th>MNN LLM FP16</th><th>llama.cpp FP16</th><th>对比</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Prefill</strong></td><td>265.02 ± 0.53 tok/s</td><td class="best">267.33 ± 0.86 tok/s</td><td>持平</td></tr>
+                <tr><td><strong>Decode</strong></td><td class="best">61.29 ± 0.26 tok/s</td><td>23.46 ± 0.01 tok/s</td><td><span class="tag tag-green">MNN 2.6x</span></td></tr>
+                <tr><td><strong>TTFT</strong></td><td>483.55 ms</td><td class="best">478.05 ms</td><td>持平</td></tr>
+                <tr><td><strong>TPOT</strong></td><td class="best">16.20 ms</td><td>42.62 ms</td><td><span class="tag tag-green">MNN 2.6x</span></td></tr>
+                <tr><td><strong>Peak RSS</strong></td><td class="best">382 MiB</td><td>1032 MiB</td><td><span class="tag tag-green">MNN 省 63%</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Multi-Precision -->
+    <div class="two-col">
         <div class="card">
-            <h2>Accuracy</h2>
-            <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">Cosine Similarity vs ORT FP32</p>
+            <h2>LLM — 多精度全景</h2>
+            <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">Qwen2-0.5B · 4 threads</p>
             <table>
-                <thead><tr><th>Model</th><th>MNN</th><th>TVM</th></tr></thead>
+                <thead><tr><th>Precision</th><th>Framework</th><th>Prefill</th><th>Decode</th><th>Model Size</th></tr></thead>
                 <tbody>
-                    <tr><td>MobileNetV2</td><td class="best">1.000</td><td class="best">1.000</td></tr>
-                    <tr><td>ResNet50</td><td class="best">1.000</td><td class="best">1.000</td></tr>
-                    <tr><td>YOLOv8n</td><td class="best">1.000</td><td class="best">1.000</td></tr>
-                    <tr><td>BERT</td><td>0.990</td><td class="best">1.000</td></tr>
+                    <tr><td>FP16</td><td><strong>MNN LLM</strong></td><td>265.02</td><td class="best">61.29</td><td>294 MB</td></tr>
+                    <tr><td>FP16</td><td>llama.cpp</td><td class="best">267.33</td><td>23.46</td><td>942 MB</td></tr>
+                    <tr><td>Q4_K_M</td><td>llama.cpp</td><td>70.27</td><td>43.79</td><td>373 MB</td></tr>
+                </tbody>
+            </table>
+            <p style="color:var(--muted);font-size:.8em;margin-top:8px">MNN FP16 解码甚至比 llama Q4 量化快 40%</p>
+        </div>
+        <div class="card">
+            <h2>LLM Native Verification</h2>
+            <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">Harness vs Native · Same Library · Deviation < 1%</p>
+            <table>
+                <thead><tr><th>Framework</th><th>Harness Prefill</th><th>Native Prefill</th><th>Harness Decode</th><th>Native Decode</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>MNN LLM</strong></td><td>265.02</td><td class="best">267.67</td><td>61.29</td><td class="best">61.45</td></tr>
+                    <tr><td><strong>llama.cpp</strong> (FP16)</td><td class="best">267.33</td><td>268.44</td><td class="best">23.46</td><td>23.54</td></tr>
+                    <tr><td><strong>llama.cpp</strong> (Q4)</td><td>70.54</td><td class="best">70.42</td><td>43.67</td><td class="best">43.76</td></tr>
                 </tbody>
             </table>
         </div>
