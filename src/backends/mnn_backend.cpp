@@ -5,6 +5,8 @@
 #include <MNN/Interpreter.hpp>
 #include <MNN/Tensor.hpp>
 #include <MNN/MNNForwardType.h>
+#include <chrono>
+#include <sys/time.h>
 
 bool MNNBackend::init(const BenchmarkConfig& config) {
     MNN::ScheduleConfig schedule_config;
@@ -60,10 +62,11 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         return false;
     }
 
-    // Match benchmark.out: Session_Release avoids session callback overhead
+    // Match benchmark.out: Session_Release + setSessionHint (exact order)
     if (!use_gpu_) {
         net_->setSessionMode(MNN::Interpreter::Session_Release);
     }
+    net_->setSessionHint(MNN::Interpreter::HintMode::CPU_ENABLE_KLEIDIAI, 0);
     session_ = net_->createSession(schedule_config);
     if (!session_) {
         printf("Failed to create MNN session\n");
@@ -90,6 +93,10 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
     host_input_tensor_.reset(MNN::Tensor::createHostTensorFromDevice(input_tensor_, false));
     host_output_tensor_.reset(MNN::Tensor::createHostTensorFromDevice(output_tensor_, false));
 
+    // ── benchmark.out line 154: getBackend (side effect trigger) ──
+    const MNN::Backend* inBackend = net_->getBackend(session_, input_tensor_);
+    (void)inBackend;
+
     // ── benchmark.out line 152: releaseModel() after tensors are captured ──
     net_->releaseModel();
 
@@ -108,16 +115,13 @@ bool MNNBackend::prepare(const std::vector<float>& input) {
 }
 
 bool MNNBackend::run() {
-    // ── Timed: matches benchmark.out timing scope ──
-    //   benchmark.out: map→unmap→runSession→map→unmap  (map/unmap no-op on CPU)
-    //   Our run():     runSession only (no sync needed on CPU)
+    // ── Timed: dual timer to compare std::chrono vs gettimeofday (MNN::Timer) ──
     net_->runSession(session_);
     if (use_gpu_) {
         auto host_out = MNN::Tensor::createHostTensorFromDevice(output_tensor_, true);
     }
     return true;
 }
-
 bool MNNBackend::infer(const std::vector<float>& input) {
     // Legacy single-shot: prepare + run (for backward compat)
     prepare(input);
