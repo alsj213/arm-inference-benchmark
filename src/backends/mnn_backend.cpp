@@ -25,7 +25,7 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         printf("MNN OpenCL GPU backend enabled (CPU fallback, Precision=High/FP32)\n");
     } else {
         schedule_config.type = MNN_FORWARD_CPU;
-        // Match benchmark.out: Precision_Low (speed priority) + Power_High
+        // Match benchmark.out: Precision_Low + Power_High + Session_Release
         backend_config.precision = MNN::BackendConfig::Precision_Low;
         backend_config.power = MNN::BackendConfig::Power_High;
         schedule_config.backendConfig = &backend_config;
@@ -60,6 +60,10 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         return false;
     }
 
+    // Match benchmark.out: Session_Release avoids session callback overhead
+    if (!use_gpu_) {
+        net_->setSessionMode(MNN::Interpreter::Session_Release);
+    }
     session_ = net_->createSession(schedule_config);
     if (!session_) {
         printf("Failed to create MNN session\n");
