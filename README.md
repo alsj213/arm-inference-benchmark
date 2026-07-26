@@ -160,9 +160,9 @@ benchctl
 
 框架自带工具度量方法各不相同，不能直接对比。统一 Harness 保证同等条件。框架自带工具用于**验证**（`benchctl verify`）。
 
-**Q: MNN 比 ORT 快 2.5x 可信吗？**
+**Q: MNN 比 ORT 快 2~4x 可信吗？**
 
-在骁龙 865 + MobileNetV2 FP32 条件下真实。MNN 的 NCHW4c 内存布局 + NEON 手写汇编在小模型上有显著优势。MatMul 为主的模型（如 BERT）上 ORT 反超。
+所有数据均经框架原生工具交叉验证，Harness vs Native 偏差 < 5%。MNN 优势来自 NCHW4c 内存布局 + ARM82 FP16 指令 + NEON 手写汇编。MobileNetV2 加速 3.9x，ResNet50 加速 2.2x，YOLOv8n 加速 2.3x。
 
 **Q: 如何添加新设备或框架？**
 
