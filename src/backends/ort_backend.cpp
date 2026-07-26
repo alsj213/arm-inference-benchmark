@@ -8,10 +8,9 @@
 bool ONNXRTBackend::init(const BenchmarkConfig& config) {
     session_options_ = std::make_unique<Ort::SessionOptions>();
     session_options_->SetIntraOpNumThreads(config.num_threads);
-    session_options_->SetInterOpNumThreads(2);  // 允许算子间并行
+    // Match onnxruntime_perf_test defaults: sequential execution, single inter-op
     session_options_->SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
-    session_options_->EnableCpuMemArena();       // Arena 内存池, 减少分配 + 提高 cache 命中
-    session_options_->SetExecutionMode(ExecutionMode::ORT_PARALLEL);  // 算子间并行执行
+    session_options_->SetExecutionMode(ExecutionMode::ORT_SEQUENTIAL);
 
     // Enable profiling if configured
     if (config.enable_profiling && !config.profile_file.empty()) {
@@ -91,6 +90,28 @@ void ONNXRTBackend::create_input_tensors(const std::vector<float>& input,
                 input_shape_.data(), input_shape_.size()));
         }
     }
+}
+
+bool ONNXRTBackend::prepare(const std::vector<float>& input) {
+    // ── Untimed: create input tensors ──
+    // onnxruntime_perf_test pre-allocates inputs outside timing
+    // We mirror this: tensor construction in prepare, Run() in run
+    cached_input_tensors_.clear();
+    cached_scratch_.clear();
+    create_input_tensors(input, cached_input_tensors_, cached_scratch_);
+    return true;
+}
+
+bool ONNXRTBackend::run() {
+    // ── Timed: pure inference (matches onnxruntime_perf_test timing scope) ──
+    std::vector<Ort::Value> output_tensors = session_.Run(
+        Ort::RunOptions{nullptr},
+        input_names_.data(),
+        cached_input_tensors_.data(),
+        cached_input_tensors_.size(),
+        output_names_.data(),
+        output_names_.size());
+    return output_tensors.size() > 0;
 }
 
 bool ONNXRTBackend::infer(const std::vector<float>& input) {

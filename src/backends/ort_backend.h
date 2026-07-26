@@ -8,6 +8,8 @@
 class ONNXRTBackend : public BenchmarkBackend {
 public:
     bool init(const BenchmarkConfig& config) override;
+    bool prepare(const std::vector<float>& input) override;
+    bool run() override;
     bool infer(const std::vector<float>& input) override;
     bool infer_with_output(const std::vector<float>& input, std::vector<float>& output) override;
     void deinit() override;
@@ -29,6 +31,11 @@ private:
     std::vector<const char*> output_names_;
     std::vector<ONNXTensorElementDataType> input_types_;
     bool profiling_enabled_ = false;
+
+    // Cached for prepare/run two-phase (avoids per-call allocation)
+    std::vector<Ort::Value> cached_input_tensors_;
+    std::vector<std::vector<int64_t>> cached_scratch_;
+    bool input_cached_ = false;
 };
 
 #endif // BENCHMARK_BACKENDS_ORT_BACKEND_H_
