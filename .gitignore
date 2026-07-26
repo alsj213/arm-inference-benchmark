@@ -177,3 +177,4 @@ models/llm/*
 # LLM 缓存
 models/llm/.cache/
 models/llm/.cache_ms/
+bert_test_data/
