@@ -97,19 +97,21 @@ benchctl
 
 | 模型 | MNN | ORT | 加速比 |
 |------|-----|-----|--------|
-| **MobileNetV2** | 4.49 ms | 17.69 ms | **3.9x** 🏆 |
-| **ResNet50** | 38.06 ms | 84.04 ms | **2.2x** 🏆 |
-| **YOLOv8n** | 45.40 ms | 102.48 ms | **2.3x** 🏆 |
-| **BERT** | 137.20 ms | — | — |
+| **MobileNetV2** | 4.49 ms | 17.68 ms | **3.9x** 🏆 |
+| **ResNet50** | 38.15 ms | 84.18 ms | **2.2x** 🏆 |
+| **YOLOv8n** | 45.68 ms | 103.45 ms | **2.3x** 🏆 |
+| **BERT** | 136.59 ms | 210.87 ms | 1.5x |
 
 ### 原生工具验证 (Harness vs Native, 偏差 < 5%)
 
 | 模型 | MNN Harness | MNN Native | ORT Harness | ORT Native |
 |------|------------|------------|-------------|------------|
-| MobileNetV2 | 4.49 ms | 4.75 ms | 17.69 ms | 17.76 ms |
-| ResNet50 | 38.06 ms | 38.32 ms | 84.04 ms | 84.00 ms |
-| YOLOv8n | 45.40 ms | 47.28 ms | 102.48 ms | 102.87 ms |
-| BERT | 137.20 ms | 138.23 ms | — | — |
+| MobileNetV2 | 4.49 ms | 4.78 ms | 17.68 ms | 17.76 ms |
+| ResNet50 | 38.15 ms | 38.43 ms | 84.18 ms | 84.00 ms |
+| YOLOv8n | 45.68 ms | 47.84 ms | 103.45 ms | 102.87 ms |
+| BERT | 136.59 ms | 137.10 ms | 210.87 ms | 210.38 ms |
+
+> 全模型 Harness vs Native 偏差 < 7%
 
 > MNN 对齐方法：Revert 预处理 + Precision_Low + prepare/run 两阶段  
 > ORT 对齐方法：prepare/run 两阶段 + SEQUENTIAL 模式  
