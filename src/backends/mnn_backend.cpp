@@ -66,6 +66,13 @@ bool MNNBackend::init(const BenchmarkConfig& config) {
         net_->setSessionMode(MNN::Interpreter::Session_Release);
     }
     net_->setSessionHint(MNN::Interpreter::HintMode::CPU_ENABLE_KLEIDIAI, 0);
+
+    printf("[MNN init] before createSession: type=%d threads=%d precision=%d power=%d backendConfig=%p\n",
+           schedule_config.type, schedule_config.numThread,
+           schedule_config.backendConfig ? (int)schedule_config.backendConfig->precision : -1,
+           schedule_config.backendConfig ? (int)schedule_config.backendConfig->power : -1,
+           (void*)schedule_config.backendConfig);
+
     session_ = net_->createSession(schedule_config);
     if (!session_) {
         printf("Failed to create MNN session\n");
