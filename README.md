@@ -144,7 +144,7 @@ benchctl export mobilenetv2 -f mnn,ort --format html
 
 | Framework | Status | Role |
 |-----------|--------|------|
-| **MNN** (3.6.1) | ✅ Active | Primary target — CPU + GPU + LLM |
+| **MNN** (3.6.1) | ✅ Active | 主力测试 — CPU + LLM |
 | **ONNX Runtime** (1.28.0) | ✅ Active | Accuracy baseline |
 | **TVM** (0.15.0) | ⏸ Disabled | Relay backend; v0.25 API migration needed |
 | **llama.cpp** (b10121) | ✅ Active | LLM benchmark baseline |
