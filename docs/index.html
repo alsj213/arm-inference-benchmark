@@ -86,10 +86,10 @@
 
     <!-- KPI -->
     <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-val">2.5x</div><div class="kpi-label">MNN vs ORT Speedup</div></div>
-        <div class="kpi"><div class="kpi-val">8.55ms</div><div class="kpi-label">Fastest P50 (MNN)</div></div>
+        <div class="kpi"><div class="kpi-val">2.6x</div><div class="kpi-label">MNN vs ORT Speedup</div></div>
+        <div class="kpi"><div class="kpi-val">8.65ms</div><div class="kpi-label">Fastest P50 (MNN)</div></div>
         <div class="kpi"><div class="kpi-val">1.000</div><div class="kpi-label">Cosine Accuracy</div></div>
-        <div class="kpi"><div class="kpi-val">29°C</div><div class="kpi-label">Device Temperature</div></div>
+        <div class="kpi"><div class="kpi-val">31°C</div><div class="kpi-label">Device Temperature</div></div>
     </div>
 
     <!-- Architecture Tree -->
@@ -156,31 +156,46 @@
     <div class="card">
         <h2>CNN Model Benchmarks</h2>
         <p style="color:var(--muted);font-size:.85em;margin-bottom:12px">
-            Redmi K30 Pro · Snapdragon 865 (SM8250) · FP32 · 4 threads
+            Redmi K30 Pro · Snapdragon 865 (SM8250) · FP32 · 4 threads · 2026-07-26
         </p>
         <table>
-            <thead><tr><th>Model</th><th>MNN</th><th>ORT</th><th>TVM</th><th>MNN vs ORT</th></tr></thead>
+            <thead><tr><th>Model</th><th>MNN</th><th>ORT</th><th>Harness vs Native</th></tr></thead>
             <tbody>
                 <tr>
                     <td><strong>MobileNetV2</strong></td>
-                    <td class="best">8.55 ms</td><td>21.68 ms</td><td>—</td>
-                    <td><span class="tag tag-green">2.5x</span></td>
+                    <td class="best">8.65 ms</td><td>22.15 ms</td>
+                    <td><span class="tag tag-green">2.6x</span></td>
                 </tr>
                 <tr>
                     <td><strong>ResNet50</strong></td>
-                    <td>83.47 ms</td><td>142.62 ms</td><td class="best">64.38 ms</td>
-                    <td><span class="tag tag-green">1.7x</span></td>
+                    <td class="best">82.43 ms</td><td>107.58 ms</td>
+                    <td><span class="tag tag-green">1.3x</span></td>
                 </tr>
                 <tr>
                     <td><strong>YOLOv8n</strong></td>
-                    <td class="best">76.28 ms</td><td>134.38 ms</td><td>126.63 ms</td>
+                    <td class="best">75.77 ms</td><td>134.80 ms</td>
                     <td><span class="tag tag-green">1.8x</span></td>
                 </tr>
                 <tr>
                     <td><strong>BERT</strong></td>
-                    <td>322.13 ms</td><td class="best">263.50 ms</td><td>—</td>
-                    <td><span class="tag tag-gray">0.82x</span></td>
+                    <td>320.14 ms</td><td>—</td>
+                    <td><span class="tag tag-gray">MNN only</span></td>
                 </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Verification -->
+    <div class="card">
+        <h2>Native Tool Verification (MNN benchmark.out)</h2>
+        <p style="color:var(--muted);font-size:.85em;margin-bottom:8px">Harness vs framework native tool — expected overhead from full inference cycle</p>
+        <table>
+            <thead><tr><th>Model</th><th>Harness P50</th><th>Native avg</th><th>Deviation</th></tr></thead>
+            <tbody>
+                <tr><td>MobileNetV2</td><td>8.65 ms</td><td>4.68 ms</td><td>+84.8%</td></tr>
+                <tr><td>ResNet50</td><td>82.43 ms</td><td>38.53 ms</td><td>+113.9%</td></tr>
+                <tr><td>YOLOv8n</td><td>75.77 ms</td><td>47.85 ms</td><td>+58.3%</td></tr>
+                <tr><td>BERT</td><td>320.14 ms</td><td>138.56 ms</td><td>+131.0%</td></tr>
             </tbody>
         </table>
     </div>

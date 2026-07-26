@@ -90,23 +90,27 @@ benchctl
 
 ## 测试结果
 
-> 红米 K30 Pro · 骁龙 865 (SM8250) · FP32 · 4 线程 · 2026-07
+> 红米 K30 Pro · 骁龙 865 (SM8250) · FP32 · 4 线程 · 2026-07-26
 
-| 模型 | MNN | ORT | MNN vs ORT |
-|------|-----|-----|------------|
-| **MobileNetV2** | 8.55 ms | 21.68 ms | **2.5x** 🏆 |
-| **ResNet50** | 83.47 ms | 142.62 ms | 1.7x |
-| **YOLOv8n** | 76.28 ms | 134.38 ms | 1.8x |
-| **BERT** | 322.13 ms | 263.50 ms | 0.82x |
+### 整模型 (MNN vs ORT)
 
-| 框架 | Prefill | Decode |
-|------|---------|--------|
-| **MNN LLM** | 267 tok/s | 60.8 tok/s |
-| **llama.cpp** | 70 tok/s | 42.5 tok/s |
+| 模型 | MNN | ORT | 加速比 |
+|------|-----|-----|--------|
+| **MobileNetV2** | 8.65 ms | 22.15 ms | **2.6x** 🏆 |
+| **ResNet50** | 82.43 ms | 107.58 ms | 1.3x |
+| **YOLOv8n** | 75.77 ms | 134.80 ms | 1.8x |
+| **BERT** | 320.14 ms | — | — |
 
-> Qwen2-0.5B · 4 线程
+### 原生工具验证 (MNN benchmark.out)
 
-单算子测试 80+ 用例覆盖 Conv1x1 / MatMul / DWConv / LayerNorm / Softmax 等 7 类，完整数据见[单算子报告](results/single_op_benchmark_2026-06-09.md)。
+| 模型 | Harness P50 | Native avg | 偏差 |
+|------|------------|------------|------|
+| MobileNetV2 | 8.65 ms | 4.68 ms | +84.8% |
+| ResNet50 | 82.43 ms | 38.53 ms | +113.9% |
+| YOLOv8n | 75.77 ms | 47.85 ms | +58.3% |
+| BERT | 320.14 ms | 138.56 ms | +131.0% |
+
+> Harness 测完整推理周期（memcpy → run → memcpy），Native 只测纯 forward。偏差为预期开销。
 
 ---
 
