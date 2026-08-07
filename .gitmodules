@@ -21,3 +21,7 @@
 	path = third_party/onnxruntime
 	url = https://github.com/microsoft/onnxruntime.git
 	tag = v1.28.0
+
+[submodule "third_party/MobileLLM"]
+	path = third_party/MobileLLM
+	url = https://github.com/alsj213/MobileLLM.git

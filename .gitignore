@@ -58,6 +58,7 @@ third_party/*
 !third_party/onnxruntime/
 !third_party/tflite_extracted/
 !third_party/QNN/
+!third_party/MobileLLM
 
 # But ignore build artifacts inside submodules
 third_party/*/build/
