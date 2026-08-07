@@ -105,6 +105,9 @@ static void print_llm_stats(const std::string& label,
 #ifdef BENCHMARK_MNN
 #include "backends/mnn_llm_backend.h"
 #endif
+#ifdef BENCHMARK_MOBILELLM
+#include "backends/mobilellm_backend.h"
+#endif
 
 struct Args {
     std::string backend = "llamacpp";
@@ -127,7 +130,7 @@ struct Args {
 void print_usage(const char* prog) {
     printf("Usage: %s [options]\n", prog);
     printf("Options:\n");
-    printf("  --backend <llamacpp|mnn_llm>   LLM backend (default: llamacpp)\n");
+    printf("  --backend <llamacpp|mnn_llm|mobilellm>   LLM backend (default: llamacpp)\n");
     printf("  --model <path>                  Model file/config path\n");
     printf("  --max-tokens <n>                Max tokens to generate (default: 128)\n");
     printf("  --n-prompt <n>                  Prompt length for benchmark (default: 128)\n");
@@ -578,6 +581,105 @@ static bool run_mnn_llm_vl(const Args&) {
 }
 #endif
 
+// ── MobileLLM path ──
+#ifdef BENCHMARK_MOBILELLM
+static bool run_mobilellm(const Args& args) {
+    printf("========================================\n");
+    printf("   LLM Benchmark (MobileLLM)\n");
+    printf("========================================\n\n");
+
+    std::string model_path = args.model.empty()
+        ? "models/llm/qwen2_0.5b/qwen2-0_5b-instruct-q4_k_m.gguf"
+        : args.model;
+
+    printf("Model: %s\n", model_path.c_str());
+    printf("Max tokens: %d\n\n", args.max_tokens);
+
+    MobileLlmBackend backend;
+    BenchmarkConfig config;
+    config.model_path = model_path;
+
+    printf("Loading MobileLLM model...\n");
+    auto t0 = std::chrono::high_resolution_clock::now();
+    if (!backend.load_model(model_path, args.n_prompt + args.max_tokens + 64, 512)) {
+        printf("ERROR: load failed\n");
+        return false;
+    }
+    auto t1 = std::chrono::high_resolution_clock::now();
+    double load_s = std::chrono::duration<double>(t1 - t0).count();
+    printf("Loaded in %.2f s\n\n", load_s);
+
+    if (args.benchmark_only) {
+        int temp_before = read_temp();
+        printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
+               args.n_prompt, args.max_tokens, args.n_repeat);
+        printf("    CPU: %d MHz (%s) | Temp: %d°C\n",
+               read_cpu_freq(), read_governor().c_str(), temp_before);
+        auto result = backend.benchmark(args.n_prompt, args.max_tokens, args.n_repeat);
+        int temp_after = read_temp();
+
+        print_llm_stats("Prefill", result.prefill_tok_per_s,
+                        result.prefill_per_iter, result.prefill_ms, result.ttft_ms);
+        print_llm_stats("Decode",  result.decode_tok_per_s,
+                        result.decode_per_iter,  result.decode_ms,  result.tpot_ms);
+        printf("  Peak Memory: %zu MiB\n", result.peak_memory_mib);
+        printf("  Device temp: %d → %d°C\n", temp_before, temp_after);
+
+        if (args.json_output) {
+            json j;
+            j["run_id"] = generate_run_id();
+            j["timestamp"] = now_iso8601();
+            j["git_commit"] = GIT_COMMIT_HASH;
+            j["track"] = "llm";
+            j["framework"] = "MobileLLM";
+            j["model"] = model_path;
+            j["mode"] = "benchmark";
+            j["metrics"] = {
+                {"prefill_tok_per_s", result.prefill_tok_per_s},
+                {"decode_tok_per_s", result.decode_tok_per_s},
+                {"ttft_ms", result.ttft_ms},
+                {"tpot_ms", result.tpot_ms},
+                {"load_time_s", result.load_time_s},
+                {"peak_memory_mib", result.peak_memory_mib},
+                {"temp_before", temp_before},
+                {"temp_after", temp_after},
+                {"n_prompt", result.n_prompt},
+                {"n_generate", result.n_generate}
+            };
+            j["metrics"]["prefill_per_iter"] = result.prefill_per_iter;
+            j["metrics"]["decode_per_iter"]  = result.decode_per_iter;
+            printf("%s\n", j.dump().c_str());
+        }
+    } else {
+        // Interactive mode
+        std::string prompt = "Hello, explain what machine learning is in one sentence.";
+
+        printf("--- Warm-up ---\n");
+        std::string warmup = backend.generate("Hello", 16);
+        printf("Warm-up: %s\n\n", warmup.c_str());
+
+        printf("--- Generate ---\n");
+        auto st = std::chrono::high_resolution_clock::now();
+        std::string output = backend.generate(prompt, args.max_tokens);
+        auto et = std::chrono::high_resolution_clock::now();
+        double gen_s = std::chrono::duration<double>(et - st).count();
+
+        printf("\n%s\n\n", output.c_str());
+        printf("--- Results ---\n");
+        printf("Generation time: %.2f s\n", gen_s);
+        printf("Throughput: ~%.2f tok/s\n", args.max_tokens / gen_s);
+    }
+
+    backend.deinit();
+    return true;
+}
+#else
+static bool run_mobilellm(const Args&) {
+    printf("MobileLLM backend not compiled (BENCHMARK_MOBILELLM=OFF)\n");
+    return false;
+}
+#endif
+
 // ── main ──
 int main(int argc, char* argv[]) {
     Args args = parse_args(argc, argv);
@@ -602,6 +704,8 @@ int main(int argc, char* argv[]) {
     // Original text-only path
     if (args.backend == "mnn_llm" || args.backend == "mnn") {
         return run_mnn_llm(args) ? 0 : 1;
+    } else if (args.backend == "mobilellm") {
+        return run_mobilellm(args) ? 0 : 1;
     } else {
         return run_llamacpp(args) ? 0 : 1;
     }

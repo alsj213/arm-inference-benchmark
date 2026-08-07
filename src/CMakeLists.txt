@@ -48,6 +48,10 @@ if(BENCHMARK_LLAMACPP)
 target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/llama.cpp/include)
 target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/llama.cpp/src)
 endif()
+if(BENCHMARK_MOBILELLM)
+# mobilellm 目标自带 PUBLIC include 传播，此处仅显式补充
+target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/MobileLLM/include)
+endif()
 
 # Add compile definitions for enabled backends
 if(BENCHMARK_MNN)
@@ -61,6 +65,9 @@ if(BENCHMARK_TVM)
 endif()
 if(BENCHMARK_LLAMACPP)
     target_compile_definitions(benchmark_common PUBLIC BENCHMARK_LLAMACPP)
+endif()
+if(BENCHMARK_MOBILELLM)
+    target_compile_definitions(benchmark_common PUBLIC BENCHMARK_MOBILELLM)
 endif()
 
 # Backend sources - add to benchmark_common STATIC library so vtable symbols are resolved
@@ -96,6 +103,11 @@ endif()
 if(BENCHMARK_LLAMACPP)
     list(APPEND BACKEND_SRCS backends/llamacpp_backend.cpp)
     list(APPEND BACKEND_LIBS llama)
+endif()
+
+if(BENCHMARK_MOBILELLM)
+    list(APPEND BACKEND_SRCS backends/mobilellm_backend.cpp)
+    list(APPEND BACKEND_LIBS mobilellm m)
 endif()
 
 # Add backend sources to benchmark_common so create_backend() can resolve symbols

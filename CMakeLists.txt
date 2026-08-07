@@ -20,6 +20,7 @@ option(BENCHMARK_MNN "Enable MNN benchmark" ON)
 option(BENCHMARK_ORT "Enable ONNX Runtime benchmark" ON)
 option(BENCHMARK_TVM "Enable Apache TVM benchmark" OFF)
 option(BENCHMARK_LLAMACPP "Enable llama.cpp LLM benchmark" OFF)
+option(BENCHMARK_MOBILELLM "Enable MobileLLM LLM benchmark" OFF)
 
 # Enable position independent code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

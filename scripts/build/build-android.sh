@@ -74,6 +74,7 @@ cmake .. \
     -DBENCHMARK_ORT=ON \
     -DBENCHMARK_TVM=ON \
     -DBENCHMARK_LLAMACPP=ON \
+    -DBENCHMARK_MOBILELLM=ON \
 
 # Build
 make -j$(nproc)
