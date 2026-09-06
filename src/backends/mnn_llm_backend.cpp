@@ -53,16 +53,18 @@ static int detect_mnn_linear_bits(const std::string& config_path) {
 
     flatbuffers::Verifier verifier(buf.data(), buf.size());
     if (!MNN::VerifyNetBuffer(verifier)) return 0;
-    // UnPack() 返回裸 NetT*(含各 OpT 权重深拷贝);用 unique_ptr 接管,否则每次 load 泄漏整棵解包图
-    std::unique_ptr<MNN::NetT> netT(MNN::GetNet(buf.data())->UnPack());
+    // M4 修复:不 UnPack(避免整棵解包图+权重深拷贝的瞬时双倍内存),直接用 GetNet
+    // 返回的 flatbuffer 只读结构 zero-copy 遍历(Verify 已通过,无需深拷贝)。
+    auto* net = MNN::GetNet(buf.data());
+    if (!net || !net->oplists()) return 0;
 
     std::map<int, int> counts;
-    for (auto& op : netT->oplists) {
-        if (op->type != MNN::OpType_Convolution) continue;
-        if (op->main.type != MNN::OpParameter_Convolution2D) continue;
-        auto conv = op->main.AsConvolution2D();
-        if (!conv || !conv->quanParameter) continue;
-        counts[conv->quanParameter->aMaxOrBits]++;
+    for (auto op : *net->oplists()) {
+        if (op->type() != MNN::OpType_Convolution) continue;
+        if (op->main_type() != MNN::OpParameter_Convolution2D) continue;
+        auto conv = op->main_as_Convolution2D();
+        if (!conv || !conv->quanParameter()) continue;
+        counts[conv->quanParameter()->aMaxOrBits()]++;
     }
     int best_bit = 0, best_cnt = 0;
     for (auto& [b, c] : counts) {

@@ -91,15 +91,16 @@ def parse_text(content):
             'threads': int(threads_match.group(1)) if threads_match else None,
             'latency': {
                 'p50': float(p50_match.group(1)),
-                'p90': float(p90_match.group(1)) if p90_match else 0.0,
-                'p99': float(p99_match.group(1)) if p99_match else 0.0,
-                'mean': float(mean_match.group(1)) if mean_match else 0.0,
+                # M2 修复:缺省 None(未测量),不再填 0.0 伪装成真实样本
+                'p90': float(p90_match.group(1)) if p90_match else None,
+                'p99': float(p99_match.group(1)) if p99_match else None,
+                'mean': float(mean_match.group(1)) if mean_match else None,
             },
-            'throughput_fps': float(fps_match.group(1)) if fps_match else 0.0,
-            'init_time_ms': float(init_match.group(1)) if init_match else 0.0,
-            'memory_kb': int(memory_match.group(1)) if memory_match else 0,
+            'throughput_fps': float(fps_match.group(1)) if fps_match else None,
+            'init_time_ms': float(init_match.group(1)) if init_match else None,
+            'memory_kb': int(memory_match.group(1)) if memory_match else None,
             'accuracy_passed': accuracy_passed,
-            'cosine_similarity': float(cosine_match.group(1)) if cosine_match else 0.0,
+            'cosine_similarity': float(cosine_match.group(1)) if cosine_match else None,
         })
     return results
 
