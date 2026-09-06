@@ -92,11 +92,12 @@ ls -lh build_android/src/llm/llm_benchmark
 ```bash
 # 模型物理根从 .benchmarkrc.yml project.models_root 读取(仓库 models/ 是其 symlink,不硬编码路径)
 MODEL_ROOT=$(python3 -c "import yaml; print(yaml.safe_load(open('.benchmarkrc.yml'))['project'].get('models_root','models'))")
-# CNN 源模型在 $MODEL_ROOT/source/…：当前 E 盘无已转换 classification 模型，测 CNN 前
-# 必须先经 mobile-bench-model-prep 下载/转换（source/classification → 各框架产物）再推送设备。
+# CNN 源模型(onnx/tvm.so)在 $MODEL_ROOT/source/classification/<model>/(如 mobilenetv2.onnx 存在)。
+# 可测还需:①框架转换产物(MNN 需 .mnn→exported/mnn;ORT 可直接用 onnx)②推送设备 /data/local/tmp/benchmark/models/。
+# 缺转换/推送时经 mobile-bench-model-prep 完成(其同样读 $MODEL_ROOT)。
 # LLM 模型在 $MODEL_ROOT/llm/…（GGUF/MNN），设备侧 /data/local/tmp/benchmark/qwen3_models/。
-ls "$MODEL_ROOT/source/classification/" 2>/dev/null || echo "无 CNN 源模型——先走 mobile-bench-model-prep"
-# 缺失则执行模型准备 flow，详见 mobile-bench-model-prep skill
+ls "$MODEL_ROOT/source/classification/mobilenetv2/mobilenetv2.onnx"
+# 检查目标模型可测性;缺失/未转换则执行模型准备 flow，详见 mobile-bench-model-prep skill
 ```
 
 ### Step 5: 环境控制
