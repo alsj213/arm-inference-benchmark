@@ -28,8 +28,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      # 公共子模块(仅 build 所需;私有 MobileLLM 不参与 CI build、无凭据无法 clone,
+      # 显式排除避免 checkout 失败。MobileLLM 需验证时改 public 或配 PAT)
+      - name: Init public submodules
+        run: |
+          git submodule update --init third_party/MNN third_party/llama.cpp third_party/onnxruntime third_party/tvm
 
       - name: Setup Android NDK
         id: ndk
