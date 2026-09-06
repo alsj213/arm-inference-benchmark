@@ -688,7 +688,7 @@ static bool run_mobilellm(const Args& args) {
                 {"decode_tok_per_s", result.decode_tok_per_s},
                 {"ttft_ms", result.ttft_ms},
                 {"tpot_ms", result.tpot_ms},
-                {"load_time_s", result.load_time_s},
+                {"load_time_s", load_s},
                 {"peak_memory_mib", result.peak_memory_mib},
                 {"temp_before", temp_before},
                 {"temp_after", temp_after},
