@@ -105,14 +105,18 @@ benchmark/
 ## 环境
 
 - WSL2 + ADB 连接红米 K30 Pro（骁龙 865 / SM8250）
-- ADB 路径: `/mnt/e/andorid/adb/adb.exe`
-- 设备 ID: `b08dee23`
+- **所有设备/路径配置统一从 `.benchmarkrc.yml` 读取**（`device.adb` / `device.id` / `ndk.path` /
+  `project.models_root`），本机取值即：ADB=`/mnt/e/andorid/adb/adb.exe`、device=`b08dee23`、
+  models 物理根=`/mnt/e/wsl/home_liu/models`（仓库 `models/` 为其 symlink）
 - Android NDK 交叉编译（arm64-v8a, android-29）
 
 ## Benchmark 工作流（项目级 skill）
 
 benchmark 工作流以**项目级 skill** 形式内置（`.claude/skills/mobile-bench-*`），不再依赖外部插件。
 配置统一从 `.benchmarkrc.yml` 读取（设备 ID、ADB 路径、NDK 路径已内置真实值）。
+
+**配置约定（单点）**：各 skill 中的 `$ADB`/`$DEV` 统一从 `.benchmarkrc.yml` 读取；唯一完整样板见
+`mobile-bench-run` skill「读取配置」一节，其他 skill 不再各自重复整段样板（只引用约定）。
 
 所有测试流程必须遵守 mobile-bench 的 7 步协议（见下方"Benchmark 执行协议"），
 数据真实性规则见 `.claude/rules/mobile-bench-integrity.md`。
@@ -132,9 +136,13 @@ benchmark 工作流以**项目级 skill** 形式内置（`.claude/skills/mobile-
 
 辅助脚本（解析/报告/功耗/回归等）在 `scripts/analyze/mobilebench/`，schema 在 `.benchmarkrc.schema.json`。
 
-> **来源与同步**：本套 skill 源自 [claude-code-mobile-bench](https://github.com/alsj213/claude-code-mobile-bench)
-> 仓库（`/home/liu/project/mobile-bench`），已 vendor 进本项目。上游有更新时按需手动同步
-> （复制 skills/agents/rules/scripts 并重新改写脚本引用）。
+> **域划分**：`.claude/skills/` 仅两类——`mobile-bench-*`（端侧推理**测试体系**，入库）与
+> `openspec-*` + `.claude/commands/opsx`（ECC/OpenSpec **开发流程**，本地工作区私有，不入库，见 .gitignore）。
+
+> **来源（已与上游切割）**：`mobile-bench-*` 源自 [claude-code-mobile-bench](https://github.com/alsj213/claude-code-mobile-bench)
+> 仓，曾 vendor 进本项目。**现已与本仓切割定制**：本仓版本为权威（命令改指本仓真实脚本、结构按本仓重组，
+> 不再随上游 1:1 同步）；上游独立整改为通用零依赖插件（决策见
+> docs/04-designs/2026-09-06-mobile-bench-vendor-convergence.md）。
 
 ## 核心命令
 

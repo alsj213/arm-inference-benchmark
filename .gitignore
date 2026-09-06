@@ -181,3 +181,10 @@ models/llm/*
 models/llm/.cache/
 models/llm/.cache_ms/
 bert_test_data/
+
+# ==============================================
+# ECC/OpenSpec 开发工作区(本地私有,不入库)
+# ==============================================
+openspec/
+.claude/commands/opsx/
+.claude/skills/openspec-*/
