@@ -34,6 +34,10 @@
         "models_dir": {
           "type": "string",
           "description": "Models directory (e.g., models)"
+        },
+        "models_root": {
+          "type": "string",
+          "description": "Physical models root (absolute; repo `models` symlink target, e.g. /mnt/e/wsl/home_liu/models)"
         }
       }
     },

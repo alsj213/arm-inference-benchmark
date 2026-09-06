@@ -105,8 +105,9 @@ benchmark/
 ## 环境
 
 - WSL2 + ADB 连接红米 K30 Pro（骁龙 865 / SM8250）
-- ADB 路径: `/mnt/e/andorid/adb/adb.exe`
-- 设备 ID: `b08dee23`
+- **所有设备/路径配置统一从 `.benchmarkrc.yml` 读取**（`device.adb` / `device.id` / `ndk.path` /
+  `project.models_root`），本机取值即：ADB=`/mnt/e/andorid/adb/adb.exe`、device=`b08dee23`、
+  models 物理根=`/mnt/e/wsl/home_liu/models`（仓库 `models/` 为其 symlink）
 - Android NDK 交叉编译（arm64-v8a, android-29）
 
 ## Benchmark 工作流（项目级 skill）

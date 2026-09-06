@@ -90,11 +90,12 @@ ls -lh build_android/src/llm/llm_benchmark
 ### Step 4: 检查模型文件
 
 ```bash
-# CNN 模型源在 models/source/…（本机经 models symlink → /mnt/e/wsl/home_liu/models/source）。
-# 当前仓 E 盘无已转换 classification 模型：测 CNN 前必须先经 mobile-bench-model-prep
-# 下载/转换（源 models/source/classification → 各框架产物）再推送设备。
-# LLM 模型在 models/llm/…（GGUF/MNN），设备侧 /data/local/tmp/benchmark/qwen3_models/。
-ls models/source/classification/ 2>/dev/null || echo "无 CNN 源模型——先走 mobile-bench-model-prep"
+# 模型物理根从 .benchmarkrc.yml project.models_root 读取(仓库 models/ 是其 symlink,不硬编码路径)
+MODEL_ROOT=$(python3 -c "import yaml; print(yaml.safe_load(open('.benchmarkrc.yml'))['project'].get('models_root','models'))")
+# CNN 源模型在 $MODEL_ROOT/source/…：当前 E 盘无已转换 classification 模型，测 CNN 前
+# 必须先经 mobile-bench-model-prep 下载/转换（source/classification → 各框架产物）再推送设备。
+# LLM 模型在 $MODEL_ROOT/llm/…（GGUF/MNN），设备侧 /data/local/tmp/benchmark/qwen3_models/。
+ls "$MODEL_ROOT/source/classification/" 2>/dev/null || echo "无 CNN 源模型——先走 mobile-bench-model-prep"
 # 缺失则执行模型准备 flow，详见 mobile-bench-model-prep skill
 ```
 
