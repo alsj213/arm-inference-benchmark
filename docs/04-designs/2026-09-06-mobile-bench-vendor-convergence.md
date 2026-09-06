@@ -72,3 +72,15 @@
 - 会话决策过程：CLAUDE.md「Benchmark 执行协议」/「项目级 Skill」章节来源说明
 - `2026-05-25-mobile-bench-plugin-design.md`（原始插件设计）
 - 上游 README / package.json（`claude.type=plugin` 声明）
+
+## 8. 2026-09-06 追加：与本仓切割定制（不再 1:1 同步）
+
+用户在整合实测后决定：**本仓与 mobile-bench 上游做切割**——本仓 `.claude/skills/mobile-bench-*`
+为权威定制版，命令改指本仓真实脚本、结构按本仓需要重组（如 `mobile-bench-run` 462→231 行：
+删除与 `generate_report.py` 重复的内嵌旧报告模板），**不再随上游目录 1:1 同步**。
+上游独立仓保留并整改为通用零依赖插件（供多项目 / 发布用）。
+
+- 域划分固化：`.gitignore` 忽略 `openspec/`、`.claude/commands/opsx/`、`.claude/skills/openspec-*/`
+  （ECC/OpenSpec 开发工作区，本地私有不入库），与 `mobile-bench-*` 测试体系分开。
+- 配置单点：各 skill 的 `$ADB`/`$DEV` 读取样板唯一见 `mobile-bench-run`「读取配置」，不再各 skill 重复。
+- 本节取代第 5 节"同步策略"中"与上游保持可 diff/回灌"部分——本仓不再以保持上游一致为约束。
