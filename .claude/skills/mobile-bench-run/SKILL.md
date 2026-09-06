@@ -118,8 +118,8 @@ ls models/source/classification/ 2>/dev/null || echo "无 CNN 源模型——先
 ```bash
 ADB=$(python3 -c "import yaml; print(yaml.safe_load(open('.benchmarkrc.yml'))['device']['adb'])")
 
-# 推送二进制、动态库、模型
-$ADB push build_android/src/benchmark_inference /data/local/tmp/benchmark/
+# 推送二进制(CNN: src/cnn/benchmark_inference;LLM: src/llm/llm_benchmark)、动态库、模型
+$ADB push build_android/src/cnn/benchmark_inference /data/local/tmp/benchmark/
 $ADB push build_android/third_party/*.so /data/local/tmp/benchmark/
 $ADB push models/ /data/local/tmp/benchmark/
 
