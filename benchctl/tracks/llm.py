@@ -20,4 +20,9 @@ class LLMTrack(BaseTrack):
             "--benchmark",
             "--json",
         ]
+        # 精度对齐：显式指定 LLM 量化级别时透传 --require-precision（fp32 是 CNN 默认，
+        # 对 LLM 无意义，不转发以避免误拒绝已量化的模型）
+        LLM_LEVELS = {"f32", "f16", "q2", "q3", "q4", "q5", "q6", "q8", "iq"}
+        if config.precision in LLM_LEVELS:
+            args += ["--require-precision", config.precision]
         return args

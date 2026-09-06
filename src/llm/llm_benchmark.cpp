@@ -99,11 +99,27 @@ static void print_llm_stats(const std::string& label,
     }
 }
 
+// 精度对齐校验：--require-precision 指定规范级别，检测到的不匹配则拒绝运行
+// （跨框架对比必须同一量化级别，防止 int8 vs Q4 这类不公平对比）
+static bool check_precision(const precision::Info& info, const std::string& required) {
+    if (!required.empty() && info.level != required) {
+        printf("ERROR: precision mismatch — detected %s (level=%s), required %s\n",
+               info.label.c_str(), info.level.c_str(), required.c_str());
+        printf("       Refusing to run: cross-framework comparison must use the same quant level.\n");
+        printf("       Please use a model converted with matching quantization (e.g. both q4 or both q8).\n");
+        return false;
+    }
+    return true;
+}
+
 #ifdef BENCHMARK_LLAMACPP
 #include "backends/llamacpp_backend.h"
 #endif
 #ifdef BENCHMARK_MNN
 #include "backends/mnn_llm_backend.h"
+#endif
+#ifdef BENCHMARK_MOBILELLM
+#include "backends/mobilellm_backend.h"
 #endif
 
 struct Args {
@@ -119,6 +135,7 @@ struct Args {
     int image_width = 0;          // --image-size <w> <h>
     int image_height = 0;
     std::string accuracy_ref;     // --accuracy <mnn|llamacpp>
+    std::string require_precision;  // --require-precision <f32|f16|q8|q4|...>
     int seed = 42;                // --seed <n>
     std::string prompt_text;      // --prompt <text>
     bool json_output = false;     // --json
@@ -127,7 +144,7 @@ struct Args {
 void print_usage(const char* prog) {
     printf("Usage: %s [options]\n", prog);
     printf("Options:\n");
-    printf("  --backend <llamacpp|mnn_llm>   LLM backend (default: llamacpp)\n");
+    printf("  --backend <llamacpp|mnn_llm|mobilellm>   LLM backend (default: llamacpp)\n");
     printf("  --model <path>                  Model file/config path\n");
     printf("  --max-tokens <n>                Max tokens to generate (default: 128)\n");
     printf("  --n-prompt <n>                  Prompt length for benchmark (default: 128)\n");
@@ -136,6 +153,8 @@ void print_usage(const char* prog) {
     printf("  --image <path>                  Image file for VL inference\n");
     printf("  --image-size <w> <h>           RAW image dimensions\n");
     printf("  --accuracy <mnn|llamacpp>       Accuracy verification mode\n");
+    printf("  --require-precision <level>     Require model quant level (f32|f16|q8|q4|q3|q2)\n");
+    printf("                                   Refuse to run if mismatch (precision alignment)\n");
     printf("  --seed <n>                      Random seed (default: 42)\n");
     printf("  --prompt <text>                 Custom prompt text\n");
     printf("  --json                          Output results as JSON lines\n");
@@ -164,6 +183,8 @@ Args parse_args(int argc, char* argv[]) {
             args.image_height = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--accuracy") == 0 && i + 1 < argc) {
             args.accuracy_ref = argv[++i];
+        } else if (strcmp(argv[i], "--require-precision") == 0 && i + 1 < argc) {
+            args.require_precision = argv[++i];
         } else if (strcmp(argv[i], "--seed") == 0 && i + 1 < argc) {
             args.seed = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--prompt") == 0 && i + 1 < argc) {
@@ -212,6 +233,15 @@ static bool run_llamacpp(const Args& args) {
     double load_s = std::chrono::duration<double>(t1 - t0).count();
     printf("Loaded in %.2f s\n\n", load_s);
 
+    // 精度检测 + 对齐校验（跨框架对比须同量化级别）
+    auto pinfo = backend.get_precision();
+    printf("Precision: %s (level=%s)\n", pinfo.label.c_str(), pinfo.level.c_str());
+    if (!check_precision(pinfo, args.require_precision)) {
+        backend.deinit();
+        return false;
+    }
+    printf("\n");
+
     if (args.benchmark_only) {
         int temp_before = read_temp();
         printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
@@ -247,7 +277,9 @@ static bool run_llamacpp(const Args& args) {
                 {"temp_after", temp_after},
                 {"n_prompt", args.n_prompt},
                 {"n_gen", args.max_tokens},
-                {"n_repeat", args.n_repeat}
+                {"n_repeat", args.n_repeat},
+                {"precision", pinfo.level},
+                {"quant_label", pinfo.label}
             };
             // Per-iteration data
             j["metrics"]["prefill_per_iter"] = r.prefill_per_iter;
@@ -404,6 +436,15 @@ static bool run_mnn_llm(const Args& args) {
     double load_s = std::chrono::duration<double>(t1 - t0).count();
     printf("Loaded in %.2f s\n\n", load_s);
 
+    // 精度检测 + 对齐校验（跨框架对比须同量化级别）
+    auto pinfo = backend.get_precision();
+    printf("Precision: %s (level=%s)\n", pinfo.label.c_str(), pinfo.level.c_str());
+    if (!check_precision(pinfo, args.require_precision)) {
+        backend.deinit();
+        return false;
+    }
+    printf("\n");
+
     if (args.benchmark_only) {
         int temp_before = read_temp();
         printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
@@ -439,7 +480,9 @@ static bool run_mnn_llm(const Args& args) {
                 {"temp_before", temp_before},
                 {"temp_after", temp_after},
                 {"n_prompt", result.n_prompt},
-                {"n_generate", result.n_generate}
+                {"n_generate", result.n_generate},
+                {"precision", pinfo.level},
+                {"quant_label", pinfo.label}
             };
             j["metrics"]["prefill_per_iter"] = result.prefill_per_iter;
             j["metrics"]["decode_per_iter"]  = result.decode_per_iter;
@@ -578,6 +621,116 @@ static bool run_mnn_llm_vl(const Args&) {
 }
 #endif
 
+// ── MobileLLM path ──
+#ifdef BENCHMARK_MOBILELLM
+static bool run_mobilellm(const Args& args) {
+    printf("========================================\n");
+    printf("   LLM Benchmark (MobileLLM)\n");
+    printf("========================================\n\n");
+
+    std::string model_path = args.model.empty()
+        ? "models/llm/qwen2_0.5b/qwen2-0_5b-instruct-q4_k_m.gguf"
+        : args.model;
+
+    printf("Model: %s\n", model_path.c_str());
+    printf("Max tokens: %d\n\n", args.max_tokens);
+
+    MobileLlmBackend backend;
+    BenchmarkConfig config;
+    config.model_path = model_path;
+
+    printf("Loading MobileLLM model...\n");
+    auto t0 = std::chrono::high_resolution_clock::now();
+    if (!backend.load_model(model_path, args.n_prompt + args.max_tokens + 64, 512)) {
+        printf("ERROR: load failed\n");
+        return false;
+    }
+    auto t1 = std::chrono::high_resolution_clock::now();
+    double load_s = std::chrono::duration<double>(t1 - t0).count();
+    printf("Loaded in %.2f s\n\n", load_s);
+
+    // 精度检测 + 对齐校验（跨框架对比须同量化级别）
+    auto pinfo = backend.get_precision();
+    printf("Precision: %s (level=%s)\n", pinfo.label.c_str(), pinfo.level.c_str());
+    if (!check_precision(pinfo, args.require_precision)) {
+        backend.deinit();
+        return false;
+    }
+    printf("\n");
+
+    if (args.benchmark_only) {
+        int temp_before = read_temp();
+        printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
+               args.n_prompt, args.max_tokens, args.n_repeat);
+        printf("    CPU: %d MHz (%s) | Temp: %d°C\n",
+               read_cpu_freq(), read_governor().c_str(), temp_before);
+        auto result = backend.benchmark(args.n_prompt, args.max_tokens, args.n_repeat);
+        int temp_after = read_temp();
+
+        print_llm_stats("Prefill", result.prefill_tok_per_s,
+                        result.prefill_per_iter, result.prefill_ms, result.ttft_ms);
+        print_llm_stats("Decode",  result.decode_tok_per_s,
+                        result.decode_per_iter,  result.decode_ms,  result.tpot_ms);
+        printf("  Peak Memory: %zu MiB\n", result.peak_memory_mib);
+        printf("  Device temp: %d → %d°C\n", temp_before, temp_after);
+
+        if (args.json_output) {
+            json j;
+            j["run_id"] = generate_run_id();
+            j["timestamp"] = now_iso8601();
+            j["git_commit"] = GIT_COMMIT_HASH;
+            j["track"] = "llm";
+            j["framework"] = "MobileLLM";
+            j["model"] = model_path;
+            j["mode"] = "benchmark";
+            j["metrics"] = {
+                {"prefill_tok_per_s", result.prefill_tok_per_s},
+                {"decode_tok_per_s", result.decode_tok_per_s},
+                {"ttft_ms", result.ttft_ms},
+                {"tpot_ms", result.tpot_ms},
+                {"load_time_s", result.load_time_s},
+                {"peak_memory_mib", result.peak_memory_mib},
+                {"temp_before", temp_before},
+                {"temp_after", temp_after},
+                {"n_prompt", result.n_prompt},
+                {"n_generate", result.n_generate},
+                {"precision", pinfo.level},
+                {"quant_label", pinfo.label}
+            };
+            j["metrics"]["prefill_per_iter"] = result.prefill_per_iter;
+            j["metrics"]["decode_per_iter"]  = result.decode_per_iter;
+            printf("%s\n", j.dump().c_str());
+        }
+    } else {
+        // Interactive mode
+        std::string prompt = "Hello, explain what machine learning is in one sentence.";
+
+        printf("--- Warm-up ---\n");
+        std::string warmup = backend.generate("Hello", 16);
+        printf("Warm-up: %s\n\n", warmup.c_str());
+
+        printf("--- Generate ---\n");
+        auto st = std::chrono::high_resolution_clock::now();
+        std::string output = backend.generate(prompt, args.max_tokens);
+        auto et = std::chrono::high_resolution_clock::now();
+        double gen_s = std::chrono::duration<double>(et - st).count();
+
+        printf("\n%s\n\n", output.c_str());
+        printf("--- Results ---\n");
+        printf("Generation time: %.2f s\n", gen_s);
+        printf("Throughput: ~%.2f tok/s\n", args.max_tokens / gen_s);
+    }
+
+    backend.deinit();
+    return true;
+}
+#else
+static bool run_mobilellm(const Args&) {
+    printf("MobileLLM backend not compiled (BENCHMARK_MOBILELLM=OFF)\n");
+    return false;
+}
+#endif
+
 // ── main ──
 int main(int argc, char* argv[]) {
     Args args = parse_args(argc, argv);
@@ -602,6 +755,8 @@ int main(int argc, char* argv[]) {
     // Original text-only path
     if (args.backend == "mnn_llm" || args.backend == "mnn") {
         return run_mnn_llm(args) ? 0 : 1;
+    } else if (args.backend == "mobilellm") {
+        return run_mobilellm(args) ? 0 : 1;
     } else {
         return run_llamacpp(args) ? 0 : 1;
     }

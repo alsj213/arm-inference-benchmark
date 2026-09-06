@@ -4,7 +4,8 @@
 set -e
 
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
-PROJECT_ROOT=$(dirname $SCRIPT_DIR)
+# scripts/build/build-android.sh → PROJECT_ROOT = repo root (两层 dirname)
+PROJECT_ROOT=$(dirname $(dirname $SCRIPT_DIR))
 
 # Parse arguments
 BUILD_TYPE="Release"
@@ -74,6 +75,7 @@ cmake .. \
     -DBENCHMARK_ORT=ON \
     -DBENCHMARK_TVM=ON \
     -DBENCHMARK_LLAMACPP=ON \
+    -DBENCHMARK_MOBILELLM=ON \
 
 # Build
 make -j$(nproc)

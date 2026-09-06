@@ -109,32 +109,32 @@ benchmark/
 - 设备 ID: `b08dee23`
 - Android NDK 交叉编译（arm64-v8a, android-29）
 
-## 使用 mobile-bench
+## Benchmark 工作流（项目级 skill）
 
-本项目默认使用 [mobile-bench](https://github.com/alsj213/claude-code-mobile-bench) 插件（本地路径 `/home/liu/project/mobile-bench`）来执行 benchmark 测试和性能分析。
+benchmark 工作流以**项目级 skill** 形式内置（`.claude/skills/mobile-bench-*`），不再依赖外部插件。
+配置统一从 `.benchmarkrc.yml` 读取（设备 ID、ADB 路径、NDK 路径已内置真实值）。
 
-所有测试流程必须遵守 mobile-bench 的 7 步协议（见下方"核心命令"部分），数据真实性规则见 `mobile-bench-integrity` 规则。
+所有测试流程必须遵守 mobile-bench 的 7 步协议（见下方"Benchmark 执行协议"），
+数据真实性规则见 `.claude/rules/mobile-bench-integrity.md`。
 
-### 插件管理
-
-```bash
-# 本地安装
-claude plugins install /home/liu/project/mobile-bench
-
-# 更新插件（同步 benchmark 仓库变更后）
-cd /home/liu/project/mobile-bench && git pull
-
-# 配置（已存在 .benchmarkrc.yml）
-```
-
-### 支持的 Skill
+### 项目级 Skill
 
 | Skill | 用途 | 调用方式 |
 |-------|------|---------|
 | `mobile-bench-run` | 完整 benchmark 流程（7 步协议） | 说"跑 benchmark mnn mobilenetv2" |
+| `mobile-bench-llm` | LLM 推理基准（TTFT/TPS/长上下文/参数矩阵/精度对齐） | 说"跑 llm benchmark" |
 | `mobile-bench-model-prep` | 模型下载/转换/编译 | 说"准备模型" |
 | `mobile-bench-profiling` | 火焰图/逐算子 profiling | 说"抓火焰图" |
+| `mobile-bench-methodology` | 多轮统计/环境控制/公平对比 | 说"正式测量" |
 | `mobile-bench-integrate` | 集成新推理框架 | 说"集成 xx 后端" |
+| `mobile-bench-power` / `mobile-bench-memory` / `mobile-bench-thermal` | 功耗/内存/热稳定性专项 | 按需 |
+| `mobile-bench-regression` | 回归检测 | 按需 |
+
+辅助脚本（解析/报告/功耗/回归等）在 `scripts/analyze/mobilebench/`，schema 在 `.benchmarkrc.schema.json`。
+
+> **来源与同步**：本套 skill 源自 [claude-code-mobile-bench](https://github.com/alsj213/claude-code-mobile-bench)
+> 仓库（`/home/liu/project/mobile-bench`），已 vendor 进本项目。上游有更新时按需手动同步
+> （复制 skills/agents/rules/scripts 并重新改写脚本引用）。
 
 ## 核心命令
 
@@ -205,7 +205,7 @@ export ANDROID_NDK=/home/liu/android-ndk
 
 **Step 6: 输出结果摘要** — 直接从日志中提取真实数据，不得凭空填写
 
-**Step 7: 生成 HTML 报告** — 按插件的 `mobile-bench-run` skill 中的 HTML 生成流程
+**Step 7: 生成 HTML 报告** — 按 `mobile-bench-run` skill 中的 HTML 生成流程
 
 ### 协议红线
 - ❌ **不得伪造 adb 输出、模型数据、性能数字**
@@ -220,8 +220,10 @@ export ANDROID_NDK=/home/liu/android-ndk
 
 ## 项目 Agent
 
-Benchmark agent 由 `claude-code-mobile-bench` 插件提供（`mobile-bench-agent`），非本项目维护。安装插件后即可使用。
+Benchmark agent 为项目级 agent（`.claude/agents/mobile-bench-agent.md`），执行 7 步强制协议，
+每步产生证物，交付可追溯的真实性能数据。
 
 ## 项目技能
 
-Benchmark 工作流技能由 `claude-code-mobile-bench` 插件提供（`mobile-bench-run` / `mobile-bench-model-prep` / `mobile-bench-profiling` / `mobile-bench-integrate`）。安装插件后即可使用，所有配置从 `.benchmarkrc.yml` 读取。
+Benchmark 工作流技能为项目级 skill（`.claude/skills/mobile-bench-*`），所有配置从 `.benchmarkrc.yml` 读取。
+LLM 精度对齐规则见 `mobile-bench-llm` skill 的"精度对齐"章节。
