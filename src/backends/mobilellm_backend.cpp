@@ -156,11 +156,13 @@ MobileLlmBackend::LlmBenchResult MobileLlmBackend::benchmark(
           decode_s > 0 ? (double)n_generate / decode_s : 0.0);
       result.decode_ms.push_back(decode_s * 1000.0);
     }
+    // 峰值 RSS:必须在 decode ctx 释放前采样——ctx arena 按 n_ctx 一次性 mmap,
+    // free 后 RSS 回落,若采样在 free 之后会系统性低估真实峰值。
+    {
+      size_t cur = utils::get_memory_usage_kb() / 1024;
+      if (cur > result.peak_memory_mib) result.peak_memory_mib = cur;
+    }
     mblm_context_free(ctx);
-
-    // 采样峰值 RSS
-    size_t cur = utils::get_memory_usage_kb() / 1024;
-    if (cur > result.peak_memory_mib) result.peak_memory_mib = cur;
   };
 
   // warmup run（对齐 mblm_benchmark: 正式测量前跑一次预热频率/缓存，结果丢弃。

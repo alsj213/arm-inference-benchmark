@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <map>
+#include <memory>
 
 // ── 精度检测 ──
 // MNN 模型的量化位权威记录在 llm.mnn 图文件的 Convolution.op.main.quanParameter.aMaxOrBits
@@ -52,7 +53,8 @@ static int detect_mnn_linear_bits(const std::string& config_path) {
 
     flatbuffers::Verifier verifier(buf.data(), buf.size());
     if (!MNN::VerifyNetBuffer(verifier)) return 0;
-    auto netT = MNN::GetNet(buf.data())->UnPack();
+    // UnPack() 返回裸 NetT*(含各 OpT 权重深拷贝);用 unique_ptr 接管,否则每次 load 泄漏整棵解包图
+    std::unique_ptr<MNN::NetT> netT(MNN::GetNet(buf.data())->UnPack());
 
     std::map<int, int> counts;
     for (auto& op : netT->oplists) {

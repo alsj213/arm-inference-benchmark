@@ -42,17 +42,24 @@ def parse_log_file(log_path):
     """Parse a benchmark log file for structured results.
 
     Delegates to parse_log.py so both bare-JSON (real device --json output)
-    and text logs are handled by a single parser. Returns the legacy flat
-    shape consumed by the report generators.
+    and text logs are handled by a single parser. Returns a LIST of legacy flat
+    records — one per result found in the file (a single log may hold many
+    JSON_RESULT lines, e.g. multi-backend 3way runs), each tagged with its
+    source file for traceability. Empty/invalid files yield [].
     """
     try:
         parsed_list = parse_log(log_path)
     except Exception as e:
         print(f"Warning: cannot parse file {log_path}: {e}", file=sys.stderr)
-        return _to_flat({})
-    if parsed_list:
-        return _to_flat(parsed_list[0])
-    return _to_flat({})
+        return []
+    records = []
+    for parsed in parsed_list or []:
+        flat = _to_flat(parsed)
+        if flat.get('backend') is None:
+            continue  # 跳过无有效 backend 的占位记录
+        flat['source'] = os.path.basename(log_path)
+        records.append(flat)
+    return records
 
 
 def generate_markdown_report(all_results, results_dir):
@@ -275,8 +282,9 @@ def generate_report(results_dir):
         print("Error: no log files found in", results_dir, file=sys.stderr)
         return
 
-    all_results = [parse_log_file(f) for f in log_files]
-    all_results = [r for r in all_results if r['backend'] is not None]
+    all_results = []
+    for f in log_files:
+        all_results.extend(parse_log_file(f))
 
     if not all_results:
         print("Error: no valid benchmark results found in logs.", file=sys.stderr)

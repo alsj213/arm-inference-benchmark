@@ -34,8 +34,10 @@ static bool skip_value(FILE* f, uint32_t type) {
     switch (type) {
         case 0:  // uint8
         case 1:  // int8
+            return skip_bytes(f, 1);
         case 2:  // uint16
         case 3:  // int16
+            return skip_bytes(f, 2);
         case 4:  // uint32
         case 5:  // int32
         case 6:  // float32

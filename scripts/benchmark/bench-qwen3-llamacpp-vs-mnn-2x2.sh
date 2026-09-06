@@ -2,7 +2,7 @@
 # Qwen3 llama.cpp vs MNN LLM 性能对比 × 两个基准模型 (0.6B / 4B)
 # 精度对齐:两框架均强制 Q4 (llama.cpp Q4_K_M ↔ MNN int4), --require-precision q4
 # 统一参数: n_prompt=128 / max-tokens=128 / n_repeat=5 (与既有 0.6B 三方对比可比)
-set -e
+set -eo pipefail
 
 ADB="/mnt/e/andorid/adb/adb.exe"
 DEV="/data/local/tmp/benchmark"
@@ -34,7 +34,13 @@ run_bench() {
     local backend=$1 label=$2 model=$3
     echo "" | tee -a "$LOG"
     echo "########## $label ##########" | tee -a "$LOG"
-    "$ADB" shell "cd $DEV && LD_LIBRARY_PATH=. ./llm_benchmark --backend $backend --model $model --benchmark --n-prompt 128 --max-tokens 128 --n-repeat 5 --require-precision q4 --json" 2>&1 | tee -a "$LOG"
+    # pipefail + 显式 rc:设备端非零退出不再被 tee 吞掉(数据真实性红线:不得静默忽略失败)
+    local rc=0
+    "$ADB" shell "cd $DEV && LD_LIBRARY_PATH=. ./llm_benchmark --backend $backend --model $model --benchmark --n-prompt 128 --max-tokens 128 --n-repeat 5 --require-precision q4 --json" 2>&1 | tee -a "$LOG" || rc=$?
+    if [ "$rc" -ne 0 ]; then
+        echo "[ERROR] $label 运行失败 (exit=$rc)" | tee -a "$LOG"
+        exit 1
+    fi
     check_temp
 }
 

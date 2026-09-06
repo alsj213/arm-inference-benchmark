@@ -9,6 +9,7 @@ import os
 import sys
 import json
 import glob
+import subprocess
 from datetime import datetime
 
 
@@ -226,15 +227,44 @@ def main():
         print('Error: no valid benchmark blocks in log', file=sys.stderr)
         sys.exit(1)
 
+    def _shell_first(cmd):
+        """执行命令取首行;失败/无输出返回占位,避免把环境缺失当真实值。"""
+        try:
+            out = subprocess.check_output(cmd, shell=True, text=True,
+                                          stderr=subprocess.DEVNULL).strip()
+            return out.splitlines()[0] if out else 'N/A'
+        except Exception:
+            return 'N/A'
+
+    # 现场重算会随运行变化的字段,杜绝硬编码快照在重跑时失真(H3)
+    git_commit  = _shell_first('git log --oneline -1')
+    mllm_commit = _shell_first('git -C third_party/MobileLLM log --oneline -1')
+    bin_path = 'build_android/src/llm/llm_benchmark'
+    if os.path.exists(bin_path):
+        md5_line = _shell_first(f'md5sum {bin_path}')
+        bin_md5 = md5_line.split()[0] if md5_line and not md5_line.startswith('N/A') else 'N/A'
+    else:
+        bin_md5 = 'N/A(未找到二进制)'
+    t_before = [int(r['temp_before']) for r in results.values() if str(r['temp_before']).isdigit()]
+    t_after  = [int(r['temp_after'])  for r in results.values() if str(r['temp_after']).isdigit()]
+    governor = next((r['governor'] for r in results.values() if r['governor'] != 'N/A'), 'N/A')
+    if t_before and t_after:
+        t_lo, t_hi = min(t_before), max(t_after)
+        temp_range = f'{t_lo}→{t_hi}°C' + (' (峰值超 45°C,存在降频风险)' if t_hi > 45 else '')
+    else:
+        temp_range = 'N/A(日志无 Device temp)'
+
     meta = {
+        # 设备/模型/平台为测试时记录(物理标识;换设备/换模型时需人工更新)
         'device': 'M2007J3SC (红米 K30 Pro)',
         'platform': 'kona (Snapdragon 865 / SM8250)',
-        'commit': 'd86263e (feat: 集成 MobileLLM 后端适配器)',
-        'mobilellm_commit': '4020962 (线程池/NEON kernel 优化)',
-        'binary_md5': '2ae1ea4bf62c4d153162fd5004a7bf34',
         'model': 'Qwen3-0.6B-Q4_K_M.gguf (379 MB) + MNN Q4 (430 MB)',
-        'governor': 'performance',
-        'temp_range': '37-53°C (峰值超 45°C 触发降频风险)',
+        # 以下随运行变化,由本脚本每次现场读取:
+        'commit': git_commit,
+        'mobilellm_commit': mllm_commit,
+        'binary_md5': bin_md5,
+        'governor': governor,
+        'temp_range': temp_range,
         'log_lines': str(sum(1 for _ in open(log_path))),
         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
     }
