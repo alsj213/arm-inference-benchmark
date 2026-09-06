@@ -143,7 +143,8 @@ def collect_binary(cfg):
     candidates = glob.glob(os.path.join(build_dir, "**", binary), recursive=True)
     if not candidates:
         return {"error": f"binary not found under {build_dir}/"}
-    path = candidates[0]
+    # M7 修复:多候选(不同 ABI/构建类型并存)按最新修改时间取,避免字典序误选
+    path = max(candidates, key=os.path.getmtime)
     size = os.path.getsize(path)
     digest = md5_of(path)
     return {

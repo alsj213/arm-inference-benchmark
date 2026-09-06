@@ -90,7 +90,7 @@ bool read_gguf_file_type(const std::string& path, int* ftype) {
         uint32_t vtype = 0;
         if (!read_u32(f, &vtype)) break;
 
-        if (key == "general.file_type" && vtype == 4) {  // uint32
+        if (key == "general.file_type" && (vtype == 4 || vtype == 5)) {  // uint32/int32 均 4 字节
             uint32_t ft = 0;
             if (read_u32(f, &ft)) {
                 *ftype = static_cast<int>(ft);

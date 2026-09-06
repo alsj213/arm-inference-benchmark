@@ -1,4 +1,5 @@
 """Unit tests for scripts/power_analysis.py."""
+import os
 from pathlib import Path
 
 import pytest
@@ -106,11 +107,13 @@ def test_cli_perfetto_smoke(tmp_path, capsys):
     import sys
     p = tmp_path / "e.json"
     p.write_text('{"energy_uws": 120000000}', encoding="utf-8")
+    # M3 修复:被测脚本基于 __file__ 定位本仓,不依赖上游仓库绝对路径
+    script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "power_analysis.py")
     r = subprocess.run(
-        [sys.executable, "scripts/power_analysis.py", "--source", "perfetto",
+        [sys.executable, script, "--source", "perfetto",
          "--input", str(p), "--inference-count", "100",
          "--duration-s", "60", "--throughput-fps", "120"],
-        capture_output=True, text=True, cwd="/home/liu/project/mobile-bench")
+        capture_output=True, text=True, cwd=os.path.dirname(script))
     assert r.returncode == 0
     assert "每推理能耗" in r.stdout
 
@@ -124,9 +127,10 @@ def test_cli_batterystats_capacity_unavailable(tmp_path):
         "Estimated power use (mAh):\n"
         "  Capacity: 5000, Computed drain: 0, actual drain: 0\n",
         encoding="utf-8")
+    script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "power_analysis.py")
     r = subprocess.run(
-        [sys.executable, "scripts/power_analysis.py", "--source", "batterystats",
+        [sys.executable, script, "--source", "batterystats",
          "--input", str(p), "--inference-count", "100"],
-        capture_output=True, text=True, cwd="/home/liu/project/mobile-bench")
+        capture_output=True, text=True, cwd=os.path.dirname(script))
     assert r.returncode != 0
     assert "Power data unavailable" in r.stdout or "Power data unavailable" in r.stderr
