@@ -9,6 +9,7 @@ add_library(benchmark_common STATIC
     common/utils.cpp
     common/benchmark.cpp
     common/config.cpp
+    common/precision.cpp
 )
 target_include_directories(benchmark_common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

@@ -99,6 +99,19 @@ static void print_llm_stats(const std::string& label,
     }
 }
 
+// 精度对齐校验：--require-precision 指定规范级别，检测到的不匹配则拒绝运行
+// （跨框架对比必须同一量化级别，防止 int8 vs Q4 这类不公平对比）
+static bool check_precision(const precision::Info& info, const std::string& required) {
+    if (!required.empty() && info.level != required) {
+        printf("ERROR: precision mismatch — detected %s (level=%s), required %s\n",
+               info.label.c_str(), info.level.c_str(), required.c_str());
+        printf("       Refusing to run: cross-framework comparison must use the same quant level.\n");
+        printf("       Please use a model converted with matching quantization (e.g. both q4 or both q8).\n");
+        return false;
+    }
+    return true;
+}
+
 #ifdef BENCHMARK_LLAMACPP
 #include "backends/llamacpp_backend.h"
 #endif
@@ -122,6 +135,7 @@ struct Args {
     int image_width = 0;          // --image-size <w> <h>
     int image_height = 0;
     std::string accuracy_ref;     // --accuracy <mnn|llamacpp>
+    std::string require_precision;  // --require-precision <f32|f16|q8|q4|...>
     int seed = 42;                // --seed <n>
     std::string prompt_text;      // --prompt <text>
     bool json_output = false;     // --json
@@ -139,6 +153,8 @@ void print_usage(const char* prog) {
     printf("  --image <path>                  Image file for VL inference\n");
     printf("  --image-size <w> <h>           RAW image dimensions\n");
     printf("  --accuracy <mnn|llamacpp>       Accuracy verification mode\n");
+    printf("  --require-precision <level>     Require model quant level (f32|f16|q8|q4|q3|q2)\n");
+    printf("                                   Refuse to run if mismatch (precision alignment)\n");
     printf("  --seed <n>                      Random seed (default: 42)\n");
     printf("  --prompt <text>                 Custom prompt text\n");
     printf("  --json                          Output results as JSON lines\n");
@@ -167,6 +183,8 @@ Args parse_args(int argc, char* argv[]) {
             args.image_height = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--accuracy") == 0 && i + 1 < argc) {
             args.accuracy_ref = argv[++i];
+        } else if (strcmp(argv[i], "--require-precision") == 0 && i + 1 < argc) {
+            args.require_precision = argv[++i];
         } else if (strcmp(argv[i], "--seed") == 0 && i + 1 < argc) {
             args.seed = atoi(argv[++i]);
         } else if (strcmp(argv[i], "--prompt") == 0 && i + 1 < argc) {
@@ -215,6 +233,15 @@ static bool run_llamacpp(const Args& args) {
     double load_s = std::chrono::duration<double>(t1 - t0).count();
     printf("Loaded in %.2f s\n\n", load_s);
 
+    // 精度检测 + 对齐校验（跨框架对比须同量化级别）
+    auto pinfo = backend.get_precision();
+    printf("Precision: %s (level=%s)\n", pinfo.label.c_str(), pinfo.level.c_str());
+    if (!check_precision(pinfo, args.require_precision)) {
+        backend.deinit();
+        return false;
+    }
+    printf("\n");
+
     if (args.benchmark_only) {
         int temp_before = read_temp();
         printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
@@ -250,7 +277,9 @@ static bool run_llamacpp(const Args& args) {
                 {"temp_after", temp_after},
                 {"n_prompt", args.n_prompt},
                 {"n_gen", args.max_tokens},
-                {"n_repeat", args.n_repeat}
+                {"n_repeat", args.n_repeat},
+                {"precision", pinfo.level},
+                {"quant_label", pinfo.label}
             };
             // Per-iteration data
             j["metrics"]["prefill_per_iter"] = r.prefill_per_iter;
@@ -407,6 +436,15 @@ static bool run_mnn_llm(const Args& args) {
     double load_s = std::chrono::duration<double>(t1 - t0).count();
     printf("Loaded in %.2f s\n\n", load_s);
 
+    // 精度检测 + 对齐校验（跨框架对比须同量化级别）
+    auto pinfo = backend.get_precision();
+    printf("Precision: %s (level=%s)\n", pinfo.label.c_str(), pinfo.level.c_str());
+    if (!check_precision(pinfo, args.require_precision)) {
+        backend.deinit();
+        return false;
+    }
+    printf("\n");
+
     if (args.benchmark_only) {
         int temp_before = read_temp();
         printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
@@ -442,7 +480,9 @@ static bool run_mnn_llm(const Args& args) {
                 {"temp_before", temp_before},
                 {"temp_after", temp_after},
                 {"n_prompt", result.n_prompt},
-                {"n_generate", result.n_generate}
+                {"n_generate", result.n_generate},
+                {"precision", pinfo.level},
+                {"quant_label", pinfo.label}
             };
             j["metrics"]["prefill_per_iter"] = result.prefill_per_iter;
             j["metrics"]["decode_per_iter"]  = result.decode_per_iter;
@@ -609,6 +649,15 @@ static bool run_mobilellm(const Args& args) {
     double load_s = std::chrono::duration<double>(t1 - t0).count();
     printf("Loaded in %.2f s\n\n", load_s);
 
+    // 精度检测 + 对齐校验（跨框架对比须同量化级别）
+    auto pinfo = backend.get_precision();
+    printf("Precision: %s (level=%s)\n", pinfo.label.c_str(), pinfo.level.c_str());
+    if (!check_precision(pinfo, args.require_precision)) {
+        backend.deinit();
+        return false;
+    }
+    printf("\n");
+
     if (args.benchmark_only) {
         int temp_before = read_temp();
         printf("--- Benchmark (n_prompt=%d, n_gen=%d, repeat=%d) ---\n",
@@ -644,7 +693,9 @@ static bool run_mobilellm(const Args& args) {
                 {"temp_before", temp_before},
                 {"temp_after", temp_after},
                 {"n_prompt", result.n_prompt},
-                {"n_generate", result.n_generate}
+                {"n_generate", result.n_generate},
+                {"precision", pinfo.level},
+                {"quant_label", pinfo.label}
             };
             j["metrics"]["prefill_per_iter"] = result.prefill_per_iter;
             j["metrics"]["decode_per_iter"]  = result.decode_per_iter;

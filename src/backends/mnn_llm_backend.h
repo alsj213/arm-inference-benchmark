@@ -39,6 +39,11 @@ class MnnLlmBackend : public BenchmarkBackend {
   std::string generate(const std::string& prompt, int max_tokens = 128);
   void reset();
 
+  // 模型量化精度（export_args.json quant_bit / tie_embeddings[3] / config.json）
+  precision::Info get_precision() const override {
+      return {precision_level_, precision_label_};
+  }
+
   // Benchmark: prefill (prompt processing) + decode (token generation)
   struct LlmBenchResult {
     double prefill_tok_per_s;       // mean prefill speed
@@ -68,6 +73,8 @@ class MnnLlmBackend : public BenchmarkBackend {
   MNN::Transformer::Llm* llm_ = nullptr;
   bool model_loaded_ = false;
   std::vector<float> last_logits_;
+  std::string precision_level_;   // 规范级别 (f32/f16/q8/q4/...)
+  std::string precision_label_;   // 人类可读 ("int4" | "int8" | "fp16" | ...)
 };
 
 #endif  // BENCHMARK_BACKENDS_MNN_LLM_BACKEND_H_

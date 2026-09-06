@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "utils.h"
+#include "precision.h"
 
 #include <vector>
 #include <string>
@@ -81,6 +82,11 @@ public:
 
     // Get backend name
     virtual std::string name() const = 0;
+
+    // Model quantization precision (for cross-framework precision alignment).
+    // level: f32 | f16 | q8 | q4 | q3 | ...   label: "Q4_K_M" | "int4" | ...
+    // Default: not implemented → empty level (unknown).
+    virtual precision::Info get_precision() const { return {"", "unknown"}; }
 
 protected:
     const std::vector<float>* input_buf_ = nullptr;  // saved for default run()

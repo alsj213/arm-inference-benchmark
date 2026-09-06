@@ -5,6 +5,7 @@
 #include <cstdlib>
 
 #include "../common/utils.h"
+#include "../common/precision.h"
 
 // MobileLLM 纯 C ABI（头文件自带 extern "C" 保护）
 #include "mblm/mblm.h"
@@ -56,6 +57,22 @@ bool MobileLlmBackend::load_model(const std::string& model_path,
   model_ = m;
   model_loaded_ = true;
 
+  // 精度检测：GGUF general.file_type → 规范级别
+  {
+    int ftype = -1;
+    if (precision::read_gguf_file_type(model_path, &ftype)) {
+      auto info = precision::from_gguf_ftype(ftype);
+      precision_level_ = info.level;
+      precision_label_ = info.label;
+      printf("MobileLLM: Precision: %s (level=%s)\n",
+             precision_label_.c_str(), precision_level_.c_str());
+    } else {
+      precision_level_ = "";
+      precision_label_ = "unknown";
+      printf("MobileLLM: Precision: unknown (GGUF header unreadable)\n");
+    }
+  }
+
   // 预建一个 context（后续 benchmark 每次重复重建，避免 KV cache 累积）
   mblm_context_params_t cp = mblm_context_params_default();
   cp.n_ctx     = n_ctx;
@@ -99,50 +116,61 @@ MobileLlmBackend::LlmBenchResult MobileLlmBackend::benchmark(
 
   const mblm_token_t kTok = 1;  // 固定 token，仅测吞吐（同 mblm_benchmark）
 
-  for (int r = 0; r < n_repeat; r++) {
-    // 每次重复新建 context：与 mblm_benchmark 一致（KV cache 不跨重复累积）
+  // 单次测量：prefill/decode 各用独立 ctx（从空 KV），对齐 mblm_benchmark 1656a0a
+  // / llama-bench pp/tg 协议。record=false 用于 warmup（结果丢弃）。
+  auto run_once = [&](bool record) {
     mblm_context_params_t cp = mblm_context_params_default();
     cp.n_ctx     = n_prompt + n_generate + 64;
     cp.n_batch   = 512;
     cp.n_threads = n_threads_;
+
+    // ── Prefill: 独立 ctx, 从空 KV（对齐 llama-bench pp）──
     mblm_context_t* ctx = mblm_context_create((mblm_model_t*)model_, cp);
-    if (!ctx) continue;
-
+    if (!ctx) return;
     std::vector<mblm_token_t> prompt_tokens(n_prompt, kTok);
-
-    // ── Prefill ──
     auto t0c = std::chrono::high_resolution_clock::now();
     int rc = mblm_decode(ctx, prompt_tokens.data(), n_prompt, 0);
     auto t1c = std::chrono::high_resolution_clock::now();
-    if (rc != MBLM_OK) {
-      mblm_context_free(ctx);
-      continue;
+    double prefill_s = std::chrono::duration<double>(t1c - t0c).count();
+    if (rc == MBLM_OK && record) {
+      result.prefill_per_iter.push_back(
+          prefill_s > 0 ? (double)n_prompt / prefill_s : 0.0);
+      result.prefill_ms.push_back(prefill_s * 1000.0);
     }
-    double prefill_s =
-        std::chrono::duration<double>(t1c - t0c).count();
-    result.prefill_per_iter.push_back(
-        prefill_s > 0 ? (double)n_prompt / prefill_s : 0.0);
-    result.prefill_ms.push_back(prefill_s * 1000.0);
+    mblm_context_free(ctx);
 
-    // ── Decode ──
+    // ── Decode: 独立 ctx, 从空 KV 增长（对齐 llama-bench tg）──
+    // 首 token start_pos=0 走 prefill 分支（1 token prefill），后续纯 decode。
+    ctx = mblm_context_create((mblm_model_t*)model_, cp);
+    if (!ctx) return;
     mblm_token_t tok = kTok;
     auto t2c = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < n_generate; i++) {
-      mblm_decode(ctx, &tok, 1, n_prompt + i);
+      mblm_decode(ctx, &tok, 1, i);
       tok = kTok;
     }
     auto t3c = std::chrono::high_resolution_clock::now();
-    double decode_s =
-        std::chrono::duration<double>(t3c - t2c).count();
-    result.decode_per_iter.push_back(
-        decode_s > 0 ? (double)n_generate / decode_s : 0.0);
-    result.decode_ms.push_back(decode_s * 1000.0);
-
+    double decode_s = std::chrono::duration<double>(t3c - t2c).count();
+    if (record) {
+      result.decode_per_iter.push_back(
+          decode_s > 0 ? (double)n_generate / decode_s : 0.0);
+      result.decode_ms.push_back(decode_s * 1000.0);
+    }
     mblm_context_free(ctx);
 
     // 采样峰值 RSS
     size_t cur = utils::get_memory_usage_kb() / 1024;
     if (cur > result.peak_memory_mib) result.peak_memory_mib = cur;
+  };
+
+  // warmup run（对齐 mblm_benchmark: 正式测量前跑一次预热频率/缓存，结果丢弃。
+  // MBLM_NO_WARMUP=1 可关闭，与 mblm_benchmark 行为一致）
+  if (!getenv("MBLM_NO_WARMUP")) {
+    run_once(false);
+  }
+
+  for (int r = 0; r < n_repeat; r++) {
+    run_once(true);
   }
 
   if (!result.prefill_per_iter.empty()) {

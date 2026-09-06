@@ -1,5 +1,6 @@
 #include "llamacpp_backend.h"
 #include "common/utils.h"
+#include "common/precision.h"
 
 #ifdef BENCHMARK_LLAMACPP
 #include "llama.h"
@@ -70,6 +71,16 @@ bool LlamaCppBackend::load_model(const std::string& model_path, int n_ctx, int n
   if (!model_) {
     printf("llama.cpp: Failed to load model\n");
     return false;
+  }
+
+  // 精度检测：GGUF file_type → 规范级别 + 权威 label
+  {
+    auto ftype = llama_model_ftype(model_);
+    auto info = precision::from_gguf_ftype(static_cast<int>(ftype));
+    precision_level_ = info.level;
+    precision_label_ = llama_ftype_name(ftype);
+    printf("llama.cpp: Precision: %s (level=%s)\n",
+           precision_label_.c_str(), precision_level_.c_str());
   }
 
   vocab_ = llama_model_get_vocab(model_);

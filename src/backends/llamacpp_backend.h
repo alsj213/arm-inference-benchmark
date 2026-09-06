@@ -31,6 +31,11 @@ class LlamaCppBackend : public BenchmarkBackend {
   int get_context_length() const { return n_ctx_; }
   int get_batch_size() const { return n_batch_; }
 
+  // 模型量化精度（llama_model_ftype → 规范级别），用于跨框架精度对齐
+  precision::Info get_precision() const override {
+      return {precision_level_, precision_label_};
+  }
+
   // Token-level benchmark (same methodology as llama-bench)
   // Uses random tokens directly, measures prefill and decode separately
   struct TokenBenchResult {
@@ -77,6 +82,8 @@ class LlamaCppBackend : public BenchmarkBackend {
   int n_threads_ = 4;
   bool model_loaded_ = false;
   std::vector<int> tokens_;
+  std::string precision_level_;   // 规范级别 (f32/f16/q8/q4/...)
+  std::string precision_label_;   // 人类可读 (llama_ftype_name)
 };
 
 #endif  // BENCHMARK_BACKENDS_LLAMACPP_BACKEND_H_

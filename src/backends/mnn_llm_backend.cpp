@@ -1,13 +1,108 @@
 #include "mnn_llm_backend.h"
 #include "common/utils.h"
+#include "common/precision.h"
+#include "json.hpp"
 
 #ifdef BENCHMARK_MNN
 #include "llm/llm.hpp"
+#include "MNN_generated.h"       // MNN flatbuffer schema（读 llm.mnn 的量化参数）
 #include <MNN/AutoTime.hpp>
 #include <MNN/expr/ExprCreator.hpp>
 #include <chrono>
 #include <sstream>
 #include <cstdlib>
+#include <fstream>
+#include <map>
+
+// ── 精度检测 ──
+// MNN 模型的量化位权威记录在 llm.mnn 图文件的 Convolution.op.main.quanParameter.aMaxOrBits
+// （线性层/权重主体量化）。注意：llm_config.json 的 tie_embeddings[3] 反映的是嵌入层量化，
+// 与主体线性层可能不同（如官方 Qwen3-0.6B：线性层 4bit、嵌入层 8bit），不能作为整体量化依据。
+// 优先级：
+//   1. llm.mnn flatbuffer 解析 → aMaxOrBits 众数（模型实际状态，最权威）
+//   2. export_args.json 的 quant_bit（llmexport 导出参数，回退）
+//   3. config.json 的 "precision" 字段（"high"=fp16，"low"=已量化、bit 未知，最后兜底）
+
+// 解析 llm.mnn（MNN 图文件）中 Convolution 的 quanParameter.aMaxOrBits 众数。
+// 返回 0 表示解析失败。
+static int detect_mnn_linear_bits(const std::string& config_path) {
+    using json = nlohmann::json;
+    auto dir = config_path.substr(0, config_path.find_last_of('/') + 1);
+
+    // llm_model 文件名来自 config.json（默认 llm.mnn）
+    std::string mnn_name = "llm.mnn";
+    {
+        std::ifstream f(config_path);
+        if (f.good()) {
+            try { json j; f >> j; mnn_name = j.value("llm_model", "llm.mnn"); }
+            catch (...) { /* fall through */ }
+        }
+    }
+
+    FILE* f = fopen((dir + mnn_name).c_str(), "rb");
+    if (!f) return 0;
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    if (size <= 0) { fclose(f); return 0; }
+    std::vector<uint8_t> buf(static_cast<size_t>(size));
+    size_t n = fread(buf.data(), 1, buf.size(), f);
+    fclose(f);
+    if (n != buf.size()) return 0;
+
+    flatbuffers::Verifier verifier(buf.data(), buf.size());
+    if (!MNN::VerifyNetBuffer(verifier)) return 0;
+    auto netT = MNN::GetNet(buf.data())->UnPack();
+
+    std::map<int, int> counts;
+    for (auto& op : netT->oplists) {
+        if (op->type != MNN::OpType_Convolution) continue;
+        if (op->main.type != MNN::OpParameter_Convolution2D) continue;
+        auto conv = op->main.AsConvolution2D();
+        if (!conv || !conv->quanParameter) continue;
+        counts[conv->quanParameter->aMaxOrBits]++;
+    }
+    int best_bit = 0, best_cnt = 0;
+    for (auto& [b, c] : counts) {
+        if (c > best_cnt) { best_cnt = c; best_bit = b; }
+    }
+    return best_bit;
+}
+
+static precision::Info detect_mnn_precision(const std::string& config_path) {
+    using json = nlohmann::json;
+    auto dir = config_path.substr(0, config_path.find_last_of('/') + 1);
+
+    // 1. llm.mnn flatbuffer：线性层 aMaxOrBits 众数
+    int bits = detect_mnn_linear_bits(config_path);
+    if (bits > 0) return precision::from_mnn_quant_bit(bits);
+
+    // 2. export_args.json quant_bit（回退）
+    {
+        std::ifstream f(dir + "export_args.json");
+        if (f.good()) {
+            try {
+                json j; f >> j;
+                if (j.contains("quant_bit") && !j["quant_bit"].is_null()) {
+                    return precision::from_mnn_quant_bit(j["quant_bit"].get<int>());
+                }
+            } catch (...) { /* fall through */ }
+        }
+    }
+    // 3. config.json precision 字段（最后兜底）
+    {
+        std::ifstream f(config_path);
+        if (f.good()) {
+            try {
+                json j; f >> j;
+                std::string prec = j.value("precision", "low");
+                if (prec == "high") return {"f16", "fp16"};
+                if (prec == "low")  return {"other", "quantized"};
+            } catch (...) { /* fall through */ }
+        }
+    }
+    return {"", "unknown"};
+}
 
 // ── init / load ──
 
@@ -48,6 +143,13 @@ bool MnnLlmBackend::load_model(const std::string& config_path) {
 
     auto end = std::chrono::high_resolution_clock::now();
     double t = std::chrono::duration<double>(end - start).count();
+
+    // 精度检测
+    auto pinfo = detect_mnn_precision(config_path);
+    precision_level_ = pinfo.level;
+    precision_label_ = pinfo.label;
+    printf("MNN_LLM: Precision: %s (level=%s)\n",
+           precision_label_.c_str(), precision_level_.c_str());
 
     printf("MNN_LLM: loaded in %.2f s\n", t);
     model_loaded_ = true;

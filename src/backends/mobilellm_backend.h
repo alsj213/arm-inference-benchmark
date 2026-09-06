@@ -31,6 +31,11 @@ class MobileLlmBackend : public BenchmarkBackend {
   bool load_model(const std::string& model_path, int n_ctx = 320, int n_batch = 512);
   std::string generate(const std::string& prompt, int max_tokens = 128);
 
+  // 模型量化精度（GGUF general.file_type，mblm.h 未暴露 ftype，用共享解析器）
+  precision::Info get_precision() const override {
+      return {precision_level_, precision_label_};
+  }
+
   // Benchmark：与 mblm_benchmark.c measure_once 语义一致
   struct LlmBenchResult {
     double prefill_tok_per_s;       // prefill mean speed
@@ -53,6 +58,8 @@ class MobileLlmBackend : public BenchmarkBackend {
   void* ctx_ = nullptr;    // mblm_context_t*
   int n_threads_ = 4;
   bool model_loaded_ = false;
+  std::string precision_level_;   // 规范级别 (f32/f16/q8/q4/...)
+  std::string precision_label_;   // 人类可读 (Q4_K_M / Q8_0 / F16 / ...)
 };
 
 #endif  // BENCHMARK_BACKENDS_MOBILELLM_BACKEND_H_
