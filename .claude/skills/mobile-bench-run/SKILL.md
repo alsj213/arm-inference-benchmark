@@ -9,6 +9,10 @@ description: Use when running inference performance tests on Android devices —
 
 手机端推理 benchmark 完整流程：设备握手 → 版本检查 → 二进制验证 → 模型检查 → 锁频 → 执行(tee日志) → 恢复环境 → 结果解析 → 报告生成。
 
+> **定位（对齐现状）**：本仓实测重心已 **LLM 化**——LLM/VL 全流程（TTFT/精度对齐/长上下文）走 **mobile-bench-llm** skill；
+> 本 run skill 提供**通用 7 步骨架**，其 CNN 示例仅在具备 CNN 模型时使用（模型需先经 mobile-bench-model-prep 准备，
+> 见 Step 4）。LLM 二进制与模型见各步内注。
+
 配置通过项目根目录的 `.benchmarkrc.yml` 读取（设备 ID、ADB 路径等），所有路径和参数均从该配置文件中提取，无需硬编码。
 
 ## 完整流程
@@ -73,8 +77,11 @@ git log --oneline -1
 ### Step 3: 检查/编译二进制
 
 ```bash
-ls -lh build_android/src/benchmark_inference  # 验证产物
-md5sum build_android/src/benchmark_inference   # 记录 MD5
+# CNN 推理二进制（实际产物在 src/cnn/ 下）
+ls -lh build_android/src/cnn/benchmark_inference
+md5sum build_android/src/cnn/benchmark_inference
+# LLM 推理二进制（LLM/VL 流程使用）
+ls -lh build_android/src/llm/llm_benchmark
 
 # 如需重新编译，使用编译脚本
 ./scripts/build/build-android.sh
@@ -83,7 +90,11 @@ md5sum build_android/src/benchmark_inference   # 记录 MD5
 ### Step 4: 检查模型文件
 
 ```bash
-ls -lh models/classification/mobilenetv2/mobilenetv2.onnx
+# CNN 模型源在 models/source/…（本机经 models symlink → /mnt/e/wsl/home_liu/models/source）。
+# 当前仓 E 盘无已转换 classification 模型：测 CNN 前必须先经 mobile-bench-model-prep
+# 下载/转换（源 models/source/classification → 各框架产物）再推送设备。
+# LLM 模型在 models/llm/…（GGUF/MNN），设备侧 /data/local/tmp/benchmark/qwen3_models/。
+ls models/source/classification/ 2>/dev/null || echo "无 CNN 源模型——先走 mobile-bench-model-prep"
 # 缺失则执行模型准备 flow，详见 mobile-bench-model-prep skill
 ```
 
