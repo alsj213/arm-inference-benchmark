@@ -8,9 +8,28 @@ import re
 import glob
 import json
 from datetime import datetime
+import html
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from parse_log import parse_log  # noqa: E402
+
+
+def _fmt(v, nd=2):
+    """None -> 'N/A'(M2:未测量不伪装 0)"""
+    return 'N/A' if v is None else f'{float(v):.{nd}f}'
+
+
+def _cos(v):
+    return '-' if v is None else f'{float(v):.6f}'
+
+
+def _esc_md(v):
+    s = str(v) if v is not None else ''
+    return s.replace('|', '\\|').replace('\n', ' ')
+
+
+def _h(v):
+    return html.escape(str(v)) if v is not None else ''
 
 
 def _to_flat(parsed):
@@ -27,14 +46,14 @@ def _to_flat(parsed):
         'precision': parsed.get('precision'),
         'threads': parsed.get('threads'),
         'accuracy_passed': bool(parsed.get('accuracy_passed')),
-        'cosine_similarity': parsed.get('cosine_similarity') or 0.0,
-        'latency_p50': latency.get('p50') or 0.0,
-        'latency_p90': latency.get('p90') or 0.0,
-        'latency_p99': latency.get('p99') or 0.0,
-        'latency_mean': latency.get('mean') or 0.0,
-        'throughput_fps': parsed.get('throughput_fps') or 0.0,
-        'memory_kb': parsed.get('memory_kb') or 0,
-        'init_time_ms': parsed.get('init_time_ms') or 0.0,
+        'cosine_similarity': parsed.get('cosine_similarity'),
+        'latency_p50': latency.get('p50'),
+        'latency_p90': latency.get('p90'),
+        'latency_p99': latency.get('p99'),
+        'latency_mean': latency.get('mean'),
+        'throughput_fps': parsed.get('throughput_fps'),
+        'memory_kb': parsed.get('memory_kb'),
+        'init_time_ms': parsed.get('init_time_ms'),
     }
 
 
@@ -80,9 +99,9 @@ def generate_markdown_report(all_results, results_dir):
             backend_results = [r for r in all_results if r['backend'] == backend]
             for r in sorted(backend_results, key=lambda x: (x['model'] or '', x['precision'] or '', x['threads'] or 0)):
                 accuracy_str = "PASS" if r['accuracy_passed'] else "FAIL"
-                f.write(f"| {r['model']} | {r['precision']} | {r['threads']} | "
-                       f"{r['latency_p50']:.2f} | {r['latency_p99']:.2f} | "
-                       f"{r['throughput_fps']:.2f} | {accuracy_str} | {r['cosine_similarity']:.6f} |\n")
+                f.write(f"| {_esc_md(r['model'])} | {_esc_md(r['precision'])} | {r['threads']} | "
+                       f"{_fmt(r['latency_p50'])} | {_fmt(r['latency_p99'])} | "
+                       f"{_fmt(r['throughput_fps'])} | {accuracy_str} | {_cos(r['cosine_similarity'])} |\n")
 
         # Summary
         f.write("\n## Performance Summary\n\n")
@@ -92,10 +111,11 @@ def generate_markdown_report(all_results, results_dir):
             backend_results = [r for r in all_results if r['backend'] == backend]
             if not backend_results:
                 continue
-            avg_p50 = sum(r['latency_p50'] for r in backend_results) / len(backend_results)
-            avg_p99 = sum(r['latency_p99'] for r in backend_results) / len(backend_results)
-            avg_fps = sum(r['throughput_fps'] for r in backend_results) / len(backend_results)
-            f.write(f"| {backend} | {avg_p50:.2f} | {avg_p99:.2f} | {avg_fps:.2f} |\n")
+            def _avg(k):
+                vals = [r[k] for r in backend_results if r[k] is not None]
+                return sum(vals) / len(vals) if vals else None
+            avg_p50, avg_p99, avg_fps = _avg('latency_p50'), _avg('latency_p99'), _avg('throughput_fps')
+            f.write(f"| {_esc_md(backend)} | {_fmt(avg_p50)} | {_fmt(avg_p99)} | {_fmt(avg_fps)} |\n")
 
         # Accuracy
         f.write("\n## Accuracy Verification\n\n")
@@ -107,7 +127,7 @@ def generate_markdown_report(all_results, results_dir):
             for r in all_results:
                 if not r['accuracy_passed']:
                     f.write(f"- {r['backend']} {r['model']} {r['precision']} {r['threads']} threads "
-                           f"(cosine similarity: {r['cosine_similarity']:.6f})\n")
+                           f"(cosine similarity: {_cos(r['cosine_similarity'])})\n")
 
     print(f"Markdown report: {report_path}")
     return report_path
@@ -129,20 +149,21 @@ def generate_html_report(all_results, results_dir):
         for r in sorted(backend_results, key=lambda x: (x['model'] or '', x['precision'] or '', x['threads'] or 0)):
             accuracy_class = "pass" if r['accuracy_passed'] else "fail"
             rows += f"""          <tr>
-            <td>{r['model']}</td>
-            <td>{r['precision']}</td>
+            <td>{_h(r['model'])}</td>
+            <td>{_h(r['precision'])}</td>
             <td>{r['threads']}</td>
-            <td class="num">{r['latency_p50']:.2f}</td>
-            <td class="num">{r['latency_p99']:.2f}</td>
-            <td class="num">{r['throughput_fps']:.2f}</td>
+            <td class="num">{_fmt(r['latency_p50'])}</td>
+            <td class="num">{_fmt(r['latency_p99'])}</td>
+            <td class="num">{_fmt(r['throughput_fps'])}</td>
             <td class="{accuracy_class}">{'PASS' if r['accuracy_passed'] else 'FAIL'}</td>
-            <td class="num">{r['cosine_similarity']:.6f}</td>
+            <td class="num">{_cos(r['cosine_similarity'])}</td>
           </tr>\n"""
 
         # Summary stats
-        avg_p50 = sum(r['latency_p50'] for r in backend_results) / len(backend_results) if backend_results else 0
-        avg_p99 = sum(r['latency_p99'] for r in backend_results) / len(backend_results) if backend_results else 0
-        avg_fps = sum(r['throughput_fps'] for r in backend_results) / len(backend_results) if backend_results else 0
+        def _avg(k):
+            vals = [r[k] for r in backend_results if r[k] is not None]
+            return sum(vals) / len(vals) if vals else None
+        avg_p50, avg_p99, avg_fps = _avg('latency_p50'), _avg('latency_p99'), _avg('throughput_fps')
 
         backend_tables += f"""
       <h2>{backend.upper()}</h2>
@@ -164,9 +185,9 @@ def generate_html_report(all_results, results_dir):
         <tfoot>
           <tr class="summary">
             <td colspan="3"><strong>Avg</strong></td>
-            <td class="num">{avg_p50:.2f}</td>
-            <td class="num">{avg_p99:.2f}</td>
-            <td class="num">{avg_fps:.2f}</td>
+            <td class="num">{_fmt(avg_p50)}</td>
+            <td class="num">{_fmt(avg_p99)}</td>
+            <td class="num">{_fmt(avg_fps)}</td>
             <td colspan="2"></td>
           </tr>
         </tfoot>
@@ -177,11 +198,11 @@ def generate_html_report(all_results, results_dir):
     for r in all_results:
         if not r['accuracy_passed']:
             failed_rows += f"""          <tr>
-            <td>{r['backend']}</td>
-            <td>{r['model']}</td>
-            <td>{r['precision']}</td>
+            <td>{_h(r['backend'])}</td>
+            <td>{_h(r['model'])}</td>
+            <td>{_h(r['precision'])}</td>
             <td>{r['threads']} threads</td>
-            <td class="num">{r['cosine_similarity']:.6f}</td>
+            <td class="num">{_cos(r['cosine_similarity'])}</td>
           </tr>\n"""
 
     html = f"""<!DOCTYPE html>
@@ -285,6 +306,15 @@ def generate_report(results_dir):
     all_results = []
     for f in log_files:
         all_results.extend(parse_log_file(f))
+
+    # M6:过滤无 CNN 实测指标记录(LLM 形状/空),避免全零 FAIL 行
+    valid = [r for r in all_results
+             if r.get('latency_p50') is not None or r.get('latency_p99') is not None
+                or r.get('throughput_fps') is not None]
+    if len(valid) != len(all_results):
+        print(f"[warn] 跳过 {len(all_results) - len(valid)} 条无 CNN 实测指标记录"
+              f"(LLM/空日志)", file=sys.stderr)
+    all_results = valid
 
     if not all_results:
         print("Error: no valid benchmark results found in logs.", file=sys.stderr)

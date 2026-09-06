@@ -23,10 +23,6 @@ bool MobileLlmBackend::init(const BenchmarkConfig& config) {
 }
 
 void MobileLlmBackend::deinit() {
-  if (ctx_) {
-    mblm_context_free((mblm_context_t*)ctx_);
-    ctx_ = nullptr;
-  }
   if (model_) {
     mblm_model_free((mblm_model_t*)model_);
     model_ = nullptr;
@@ -73,16 +69,8 @@ bool MobileLlmBackend::load_model(const std::string& model_path,
     }
   }
 
-  // 预建一个 context（后续 benchmark 每次重复重建，避免 KV cache 累积）
-  mblm_context_params_t cp = mblm_context_params_default();
-  cp.n_ctx     = n_ctx;
-  cp.n_batch   = n_batch;
-  cp.n_threads = n_threads_;
-  ctx_ = mblm_context_create(m, cp);
-  if (!ctx_) {
-    printf("MobileLLM: context create failed\n");
-    return false;
-  }
+  // M1 修复:不再预建成员 ctx_——它从未被 benchmark()/generate() 复用却常驻一块大 arena
+  // (benchmark 每次 run_once 自建自毁;generate 走 mblm_generate 内部自建)
   return true;
 }
 

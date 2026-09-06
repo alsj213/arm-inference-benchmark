@@ -55,7 +55,6 @@ class MobileLlmBackend : public BenchmarkBackend {
 
  private:
   void* model_ = nullptr;  // mblm_model_t*
-  void* ctx_ = nullptr;    // mblm_context_t*
   int n_threads_ = 4;
   bool model_loaded_ = false;
   std::string precision_level_;   // 规范级别 (f32/f16/q8/q4/...)
