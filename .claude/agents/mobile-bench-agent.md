@@ -45,6 +45,20 @@ description: 手机端推理基准测试子 agent，交付可追溯的真实性�
 | R8 | **必须同时展示原始命令输出和处理后的表格**。不能只给表格，用户需要看到原始日志 | 无法核实 |
 | R9 | **温度 > 45°C 时不得使用数据**。如实报告温度，建议冷却后重跑 | 数据因降频失真 |
 | R10 | **二进制和模型文件的哈希/大小必须记录**。确保每次测试的产物可追踪 | 无法复现 |
+| R11 | **禁止跨会话数据复用** — 不得将上一轮会话的 benchmark 输出粘贴为新日志、不得手动构造 JSON_RESULT 行、不得用"设备之前跑过"为由跳过重跑。日志时间戳必须与当前时间匹配 | 数据伪造 |
+
+---
+
+## 方法论增强（可选，正式测量建议）
+
+需要统计可信、可复现的正式测量时，调用 **mobile-bench-methodology** skill（`.claude/skills/mobile-bench-methodology/SKILL.md`）作为本协议的环境与统计增强：
+
+- 多轮统计（≥5 轮，mean/CV/P50/P90/P99，`scripts/analyze/mobilebench/stats_summary.py`）
+- 环境控制补全（电量/充电/飞行模式/屏幕/WiFi）
+- 环境快照（`scripts/analyze/mobilebench/env_snapshot.py`，每字段带来源命令）
+- 公平对比协议（版本锁定、加速器审计）
+
+本 agent 的 7 步强制协议保持不动；methodology 是其统计可信性增强层。
 
 ---
 
@@ -99,7 +113,7 @@ echo "BIN_MD5: $MD5_BIN"
 ```bash
 NDK_PATH=$(python3 -c "import yaml; c=yaml.safe_load(open('.benchmarkrc.yml')); print(c.get('ndk',{}).get('path',''))")
 export ANDROID_NDK="$NDK_PATH"
-python3 scripts/build_android.py 2>&1
+./scripts/build/build-android.sh 2>&1
 ```
 
 ### Step 4: 模型文件检查
@@ -121,8 +135,8 @@ done
 ```bash
 NDK_PATH=$(python3 -c "import yaml; c=yaml.safe_load(open('.benchmarkrc.yml')); print(c.get('ndk',{}).get('path',''))")
 export ANDROID_NDK="$NDK_PATH"
-python3 scripts/download_models.py 2>&1
-python3 scripts/convert_models.py 2>&1
+python3 scripts/convert/download-pretrained.py 2>&1
+./scripts/convert/convert-models.sh 2>&1
 ```
 
 ### Step 5: 运行基准测试（必须 tee）
@@ -134,7 +148,7 @@ echo "LOG: $LOG_FILE"
 NDK_PATH=$(python3 -c "import yaml; c=yaml.safe_load(open('.benchmarkrc.yml')); print(c.get('ndk',{}).get('path',''))")
 export ANDROID_NDK="$NDK_PATH"
 
-python3 scripts/run_benchmark.py --backend <backend> --model <model> --threads <N> --runs <N> 2>&1 | tee "$LOG_FILE"
+./scripts/benchmark/benchctl.sh run cnn <model> -f <backend> -t <N> -r <N> 2>&1 | tee "$LOG_FILE"
 ```
 
 **验证点**: tee 完成后 `ls -lh "$LOG_FILE"` 确认日志非空。

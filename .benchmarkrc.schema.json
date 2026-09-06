@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mobile Bench Configuration",
+  "description": "Schema for .benchmarkrc.yml — mobile-bench plugin configuration file",
+  "type": "object",
+  "required": ["device", "project", "backends"],
+  "properties": {
+    "device": {
+      "type": "object",
+      "required": ["adb"],
+      "properties": {
+        "adb": {
+          "type": "string",
+          "description": "Path to ADB executable"
+        },
+        "id": {
+          "type": "string",
+          "description": "Android device serial number (optional)"
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "required": ["build_dir", "binary"],
+      "properties": {
+        "build_dir": {
+          "type": "string",
+          "description": "Build output directory (e.g., build_android)"
+        },
+        "binary": {
+          "type": "string",
+          "description": "Benchmark binary name (e.g., benchmark_inference)"
+        },
+        "models_dir": {
+          "type": "string",
+          "description": "Models directory (e.g., models)"
+        }
+      }
+    },
+    "backends": {
+      "type": "array",
+      "description": "Enabled inference backends",
+      "items": {
+        "type": "string",
+        "enum": ["mnn", "onnxruntime", "ncnn", "tflite", "tnn", "qnn", "tvm", "llamacpp", "mindspore_lite"]
+      }
+    },
+    "models": {
+      "type": "array",
+      "description": "Models available for testing",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ndk": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to Android NDK"
+        }
+      }
+    }
+  }
+}
